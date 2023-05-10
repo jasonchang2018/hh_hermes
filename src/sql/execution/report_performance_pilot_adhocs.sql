@@ -3,33 +3,65 @@ create or replace table
 as
 with proposed_debtors as
 (
-    select      proposal.debtor_idx,
-                case    when    proposal.proposed_channel = 'Voapps'
-                        then    'VoApp'
-                        when    proposal.proposed_channel = 'Texts'
-                        then    'Text Message'
-                        when    proposal.proposed_channel = 'Letters'
-                        then    'Letter'
-                        end     as proposed_channel,
+    with rails_taxseason as
+    (
+        select      proposal.debtor_idx,
+                    case    when    proposal.proposed_channel = 'Voapps'
+                            then    'VoApp'
+                            when    proposal.proposed_channel = 'Texts'
+                            then    'Text Message'
+                            when    proposal.proposed_channel = 'Letters'
+                            then    'Letter'
+                            end     as proposed_channel,
 
-                date_trunc('week', proposal.execute_time)::date     as week_proposal,
-                dateadd(week, 1, week_proposal)                     as week_send_start,
-                dateadd(week, 3, week_proposal)                     as week_send_end,
+                    date_trunc('week', proposal.execute_time)::date     as week_proposal,
+                    dateadd(week, 1, week_proposal)                     as week_send_start,
+                    dateadd(week, 3, week_proposal)                     as week_send_end,
 
-                debtor.packet_idx,
-                debtor.pl_group,
+                    debtor.packet_idx,
+                    debtor.pl_group
 
+        from        edwprodhh.jchang_tax_season_2023.master_prediction_proposal as proposal --initially using Tax Season rails until migrate to full HERMES.
+                    inner join
+                        edwprodhh.pub_jchang.master_debtor as debtor
+                        on proposal.debtor_idx = debtor.debtor_idx
+
+        where       proposal.execute_time in (
+                        '2023-04-12 10:07:14.011 -0700',
+                        '2023-04-20 06:49:50.744 -0700',
+                        '2023-04-27 06:35:52.343 -0700'
+                    )
+    )
+    , rails_hermes as
+    (
+        select      proposal.debtor_idx,
+                    proposal.proposed_channel,
+
+                    date_trunc('week', proposal.execute_time)::date     as week_proposal,
+                    dateadd(week, 1, week_proposal)                     as week_send_start,
+                    dateadd(week, 3, week_proposal)                     as week_send_end,
+
+                    debtor.packet_idx,
+                    debtor.pl_group
+
+        from        edwprodhh.hermes.master_prediction_proposal_log as proposal
+                    inner join
+                        edwprodhh.pub_jchang.master_debtor as debtor
+                        on proposal.debtor_idx = debtor.debtor_idx
+
+        where       is_proposed_contact = 1
+    )
+    , unioned as
+    (
+        select      *
+        from        rails_taxseason
+        union all
+        select      *
+        from        rails_hermes
+    )
+    select      *,
                 row_number() over (order by 1) as id_rn
-
-    from        edwprodhh.jchang_tax_season_2023.master_prediction_proposal as proposal --initially using Tax Season rails until migrate to full HERMES.
-                inner join
-                    edwprodhh.pub_jchang.master_debtor as debtor
-                    on proposal.debtor_idx = debtor.debtor_idx
-
-    where       proposal.execute_time in (
-                    '2023-04-12 10:07:14.011 -0700',
-                    '2023-04-20 06:49:50.744 -0700'
-                )
+    from        unioned
 )
 , proposed_contacts as
 (
@@ -247,33 +279,65 @@ create or replace table
 as
 with proposed_debtors as
 (
-    select      proposal.debtor_idx,
-                case    when    proposal.proposed_channel = 'Voapps'
-                        then    'VoApp'
-                        when    proposal.proposed_channel = 'Texts'
-                        then    'Text Message'
-                        when    proposal.proposed_channel = 'Letters'
-                        then    'Letter'
-                        end     as proposed_channel,
+    with rails_taxseason as
+    (
+        select      proposal.debtor_idx,
+                    case    when    proposal.proposed_channel = 'Voapps'
+                            then    'VoApp'
+                            when    proposal.proposed_channel = 'Texts'
+                            then    'Text Message'
+                            when    proposal.proposed_channel = 'Letters'
+                            then    'Letter'
+                            end     as proposed_channel,
 
-                date_trunc('week', proposal.execute_time)::date     as week_proposal,
-                dateadd(week, 1, week_proposal)                     as week_send_start,
-                dateadd(week, 3, week_proposal)                     as week_send_end,
+                    date_trunc('week', proposal.execute_time)::date     as week_proposal,
+                    dateadd(week, 1, week_proposal)                     as week_send_start,
+                    dateadd(week, 3, week_proposal)                     as week_send_end,
 
-                debtor.packet_idx,
-                debtor.pl_group,
+                    debtor.packet_idx,
+                    debtor.pl_group
 
+        from        edwprodhh.jchang_tax_season_2023.master_prediction_proposal as proposal --initially using Tax Season rails until migrate to full HERMES.
+                    inner join
+                        edwprodhh.pub_jchang.master_debtor as debtor
+                        on proposal.debtor_idx = debtor.debtor_idx
+
+        where       proposal.execute_time in (
+                        '2023-04-12 10:07:14.011 -0700',
+                        '2023-04-20 06:49:50.744 -0700',
+                        '2023-04-27 06:35:52.343 -0700'
+                    )
+    )
+    , rails_hermes as
+    (
+        select      proposal.debtor_idx,
+                    proposal.proposed_channel,
+
+                    date_trunc('week', proposal.execute_time)::date     as week_proposal,
+                    dateadd(week, 1, week_proposal)                     as week_send_start,
+                    dateadd(week, 3, week_proposal)                     as week_send_end,
+
+                    debtor.packet_idx,
+                    debtor.pl_group
+
+        from        edwprodhh.hermes.master_prediction_proposal_log as proposal
+                    inner join
+                        edwprodhh.pub_jchang.master_debtor as debtor
+                        on proposal.debtor_idx = debtor.debtor_idx
+
+        where       is_proposed_contact = 1
+    )
+    , unioned as
+    (
+        select      *
+        from        rails_taxseason
+        union all
+        select      *
+        from        rails_hermes
+    )
+    select      *,
                 row_number() over (order by 1) as id_rn
-
-    from        edwprodhh.jchang_tax_season_2023.master_prediction_proposal as proposal --initially using Tax Season rails until migrate to full HERMES.
-                inner join
-                    edwprodhh.pub_jchang.master_debtor as debtor
-                    on proposal.debtor_idx = debtor.debtor_idx
-
-    where       proposal.execute_time in (
-                    '2023-04-12 10:07:14.011 -0700',
-                    '2023-04-20 06:49:50.744 -0700'
-                )
+    from        unioned
 )
 , proposed_contacts as
 (
