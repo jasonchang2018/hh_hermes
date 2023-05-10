@@ -124,6 +124,21 @@ create table
 )
 ;
 
+
+create table
+    edwprodhh.hermes.master_prediction_execution_log
+(
+    execute_time                    TIMESTAMP_LTZ(9),
+    N_PROPOSED_LETTERS              NUMBER(18,0),
+    N_PROPOSED_TEXTS                NUMBER(18,0),
+    N_PROPOSED_VOAPPS               NUMBER(18,0),
+    N_PROPOSED_EMAILS               NUMBER(18,0),
+    N_PROPOSED_DIALER_AGENT         NUMBER(18,0),
+    N_PROPOSED_DIALER_AGENTLESS     NUMBER(18,0)
+)
+;
+
+
 create task
     edwprodhh.pub_jchang.hermes_root
     warehouse = analysis_wh

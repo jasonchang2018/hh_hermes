@@ -29,6 +29,18 @@ begin
     from        edwprodhh.hermes.master_prediction_proposal
     ;
 
+    insert into
+        edwprodhh.hermes.master_prediction_execution_log
+    select      :execute_time as execute_time,
+                count(case when proposed_channel = 'Letter'                     then 1 end) as n_proposed_letters,
+                count(case when proposed_channel = 'Text Message'               then 1 end) as n_proposed_texts,
+                count(case when proposed_channel = 'VoApp'                      then 1 end) as n_proposed_voapps,
+                count(case when proposed_channel = 'Email'                      then 1 end) as n_proposed_emails,
+                count(case when proposed_channel = 'Dialer-Agent Call'          then 1 end) as n_proposed_dialer_agent,
+                count(case when proposed_channel = 'Dialer-Agentless Call'      then 1 end) as n_proposed_dialer_agentless
+    from        edwprodhh.hermes.master_prediction_proposal
+    where       is_proposed_contact = 1
+    ;
 
 end
 ;
