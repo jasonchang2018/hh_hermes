@@ -6,10 +6,17 @@ select      client_idx,
             pl_group
 from        edwprodhh.pub_jchang.master_client
 where       pl_group in (
-                'UNIVERSAL HEALTH SERVICES - 3P',
-                'FRANCISCAN HEALTH - 3P'
-                -- 'STATE OF OK - TAX COMMISSION - 3P',
-                -- 'STATE OF VA - DOT - 3P-2'
+                'FRANCISCAN HEALTH - 3P',
+                'PRISMA HEALTH - 3P',
+                'PRISMA HEALTH - 3P-2',
+                'STATE OF KS - DOR - 3P',
+                'STATE OF OK - TAX COMMISSION - 3P',
+                'UNIVERSAL HEALTH SERVICES - 3P'
+            )
+            or client_idx in (
+                'CO-ERCTB',         --'ELIZABETH RIVER CROSSINGS - 3P'
+                'CO-VATBL',         --'STATE OF VA - DOT - 3P-2'
+                'CO-VATCBL'         --'STATE OF VA - DOT - 3P-2'
             )
 order by    2,3,1
 ;

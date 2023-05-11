@@ -24,6 +24,7 @@ select  'NW COMM HOSP - 3P'                                 as pl_group union al
 select  'NW COMM HOSP - 3P-2'                               as pl_group union all
 select  'PALOS HEALTH - 3P'                                 as pl_group union all
 select  'PRISMA HEALTH - 3P'                                as pl_group union all
+select  'PRISMA HEALTH - 3P-2'                              as pl_group union all
 select  'PRISMA HEALTH UNIVERSITY - 3P'                     as pl_group union all
 select  'PROMEDICA HS - 3P-2'                               as pl_group union all
 select  'PROVIDENCE ST JOSEPH HEALTH - 3P'                  as pl_group union all
