@@ -49,7 +49,7 @@ select      debtor.debtor_idx,
             coalesce(contact_history.prev_date_dialer_agentless,    '1970-01-01'::date) as prev_date_dialer_agentless,
             coalesce(contact_history.prev_date_outbound_manual,     '1970-01-01'::date) as prev_date_outbound_manual,
 
-            case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 10000
+            case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 4
                     and     coalesce(contact_history.prev_n_voapps,         0)                  <= 10000
                     and     coalesce(contact_history.prev_n_texts,          0)                  <= 10000
                     and     coalesce(contact_history.prev_n_inbounds,       0)                  <= 10000
@@ -62,12 +62,12 @@ select      debtor.debtor_idx,
                     end     as pass_letters_cooldown,
 
             case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_voapps,         0)                  <= 10000
+                    and     coalesce(contact_history.prev_n_voapps,         0)                  <= 19
                     and     coalesce(contact_history.prev_n_texts,          0)                  <= 10000
                     and     coalesce(contact_history.prev_n_inbounds,       0)                  <= 10000
                     and     coalesce(contact_history.prev_date_letters,     '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date()
-                    and     coalesce(contact_history.prev_date_texts,       '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_texts,       '2000-01-01'::date) <= current_date()
                     and     coalesce(contact_history.prev_date_inbounds,    '2000-01-01'::date) <= current_date()
                     then    1
                     else    0
@@ -149,7 +149,7 @@ select      debtor.debtor_idx,
             coalesce(contact_history.prev_date_dialer_agentless,    '1970-01-01'::date) as prev_date_dialer_agentless,
             coalesce(contact_history.prev_date_outbound_manual,     '1970-01-01'::date) as prev_date_outbound_manual,
 
-            case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 10000
+            case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 4
                     and     coalesce(contact_history.prev_n_voapps,         0)                  <= 10000
                     and     coalesce(contact_history.prev_n_texts,          0)                  <= 10000
                     and     coalesce(contact_history.prev_n_inbounds,       0)                  <= 10000
@@ -162,12 +162,12 @@ select      debtor.debtor_idx,
                     end     as pass_letters_cooldown,
 
             case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_voapps,         0)                  <= 10000
+                    and     coalesce(contact_history.prev_n_voapps,         0)                  <= 19
                     and     coalesce(contact_history.prev_n_texts,          0)                  <= 10000
                     and     coalesce(contact_history.prev_n_inbounds,       0)                  <= 10000
                     and     coalesce(contact_history.prev_date_letters,     '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date()
-                    and     coalesce(contact_history.prev_date_texts,       '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_texts,       '2000-01-01'::date) <= current_date()
                     and     coalesce(contact_history.prev_date_inbounds,    '2000-01-01'::date) <= current_date()
                     then    1
                     else    0
