@@ -87,7 +87,8 @@ where       (
             )
 ;
 
-
+-- alter task edwprodhh.pub_jchang.replace_master_prediction_scores set USER_TASK_TIMEOUT_MS = 28800000;
+-- show parameters for task edwprodhh.pub_jchang.replace_master_prediction_scores;
 
 create task
     edwprodhh.pub_jchang.replace_master_prediction_scores

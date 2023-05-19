@@ -293,6 +293,7 @@ create task
     edwprodhh.pub_jchang.replace_master_prediction_proposal
     warehouse = analysis_wh
     after edwprodhh.pub_jchang.replace_master_prediction_scores
+    -- schedule = 'USING CRON 0 5 * * FRI America/Chicago'
 as
 create or replace table
     edwprodhh.hermes.master_prediction_proposal
