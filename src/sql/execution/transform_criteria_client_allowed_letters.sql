@@ -105,7 +105,6 @@ select 'STATE OF CO - JUDICIAL DEPT - 3P'                       as pl_group unio
 select 'STATE OF IL - DOR - 3P'                                 as pl_group union all
 select 'STATE OF IL - DOR - 3P-2'                               as pl_group union all
 select 'STATE OF KS - DOR - 3P'                                 as pl_group union all
-select 'STATE OF LA - DOR - 3P'                                 as pl_group union all
 select 'STATE OF MD - DBM CCU - 3P'                             as pl_group union all
 select 'STATE OF OK - TAX COMMISSION - 3P'                      as pl_group union all
 select 'STATE OF PA - TURNPIKE COMMISSION - 3P'                 as pl_group union all

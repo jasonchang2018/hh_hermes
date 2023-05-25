@@ -35,7 +35,6 @@ select  'ST ELIZABETH HEALTHCARE - 3P'                      as pl_group union al
 select  'STATE OF IL - DOR - 3P'                            as pl_group union all
 select  'STATE OF IL - DOR - 3P-2'                          as pl_group union all
 select  'STATE OF KS - DOR - 3P'                            as pl_group union all
-select  'STATE OF LA - DOR - 3P'                            as pl_group union all
 select  'STATE OF OK - TAX COMMISSION - 3P'                 as pl_group union all
 select  'STATE OF VA - DOT - 3P'                            as pl_group union all
 select  'STATE OF VA - DOT - 3P-2'                          as pl_group union all
