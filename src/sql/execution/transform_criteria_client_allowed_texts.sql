@@ -14,6 +14,7 @@ select 'CITY OF OKLAHOMA CITY OK - PARKING - 3P'        as pl_group union all
 select 'CITY OF PHILADELPHIA PA - MISC - 3P'            as pl_group union all
 select 'CITY OF PHILADELPHIA PA - PARKING - 3P'         as pl_group union all
 select 'CITY OF SAN FRANCISCO CA - MTA - 3P'            as pl_group union all
+select 'CITY OF SEATTLE WA - MUNI COURT - 3P'           as pl_group union all
 select 'COLUMBIA DENTAL - 3P'                           as pl_group union all
 select 'COLUMBIA DOCTORS - 3P'                          as pl_group union all
 select 'CONSUMERS ENERGY - 3P'                          as pl_group union all

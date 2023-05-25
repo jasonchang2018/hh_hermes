@@ -33,6 +33,7 @@ select 'CITY OF PHILADELPHIA PA - WATER - 3P'                   as pl_group unio
 select 'CITY OF SAN FRANCISCO CA - EMS - 3P'                    as pl_group union all
 select 'CITY OF SAN FRANCISCO CA - HOSPITALS - 3P'              as pl_group union all
 select 'CITY OF SAN FRANCISCO CA - MTA - 3P'                    as pl_group union all
+select 'CITY OF SEATTLE WA - MUNI COURT - 3P'                   as pl_group union all
 select 'CITY OF WASHINGTON DC - CCU - 3P'                       as pl_group union all
 select 'CITY OF WASHINGTON DC - DLCP - 3P'                      as pl_group union all
 select 'CITY OF WASHINGTON DC - DMV - 3P'                       as pl_group union all
@@ -112,7 +113,6 @@ select 'STATE OF UT - OSDC - 3P'                                as pl_group unio
 select 'STATE OF UT - OSDC - 3P-2'                              as pl_group union all
 select 'STATE OF VA - DOT - 3P'                                 as pl_group union all
 select 'STATE OF VA - DOT - 3P-2'                               as pl_group union all
-select 'STATE OF VA - DOT - ACCESS - 3P'                        as pl_group union all
 select 'SWEDISH HOSPITAL - 3P'                                  as pl_group union all
 select 'TOWER HEALTH HOSP - 3P -2'                              as pl_group union all
 select 'TOWER HEALTH PHYS - 3P -2'                              as pl_group union all
