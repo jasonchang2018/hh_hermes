@@ -16,6 +16,8 @@ create table
 ;
 
 
+truncate table edwprodhh.hermes.master_config_constraints_plgroup;
+
 insert into
     edwprodhh.hermes.master_config_constraints_plgroup
 select      distinct
@@ -66,7 +68,7 @@ select      distinct
                     when    pl_group = 'EVERGY - 3P-2'	                                        then    0
                     when    pl_group = 'EVERSOURCE ENERGY - 3P'	                                then    0
                     when    pl_group = 'EXELON - 3P'	                                        then    0
-                    when    pl_group = 'FRANCISCAN HEALTH - 3P'	                                then    1920
+                    when    pl_group = 'FRANCISCAN HEALTH - 3P'	                                then    4000
                     when    pl_group = 'IU HEALTH - 3P'	                                        then    500
                     when    pl_group = 'IU SURGICAL CARE AFF - 3P'	                            then    0
                     when    pl_group = 'JUST ENERGY - 3P'	                                    then    0
@@ -179,7 +181,7 @@ select      distinct
                     when    pl_group = 'EVERSOURCE ENERGY - 3P'	                                then    0
                     when    pl_group = 'EVERSOURCE ENERGY - 3P-2'	                            then    0
                     when    pl_group = 'EXELON - 3P'	                                        then    0
-                    when    pl_group = 'FRANCISCAN HEALTH - 3P'	                                then    1000
+                    when    pl_group = 'FRANCISCAN HEALTH - 3P'	                                then    2000
                     when    pl_group = 'FRANCISCAN HEALTH PPLAN - 3P'	                        then    0
                     when    pl_group = 'HUDSON UTILITY - 3P'	                                then    0
                     when    pl_group = 'IU HEALTH - 3P'	                                        then    300
@@ -243,7 +245,7 @@ select      distinct
                     when    pl_group = 'CHOP - 3P'                                              then  200
                     when    pl_group = 'EVERGY - 3P'                                            then  0
                     when    pl_group = 'EVERGY - 3P-2'                                          then  0
-                    when    pl_group = 'FRANCISCAN HEALTH - 3P'                                 then  2000
+                    when    pl_group = 'FRANCISCAN HEALTH - 3P'                                 then  5000
                     when    pl_group = 'INTEGRIS HEALTH - 3P-2'                                 then  0
                     when    pl_group = 'IU HEALTH - 3P'                                         then  1800
                     when    pl_group = 'IU SURGICAL CARE AFF - 3P'                              then  0
