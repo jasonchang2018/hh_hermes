@@ -22,7 +22,7 @@ where       pl_group in (
                 'CITY OF LA CA - PARKING CONDUENT - 3P',
                 'CITY OF PHILADELPHIA PA - PARKING - 3P',
                 'CITY OF SEATTLE WA - MUNI COURT - 3P',
-                'ELIZABETH RIVER CROSSINGS - 3P',
+                -- 'ELIZABETH RIVER CROSSINGS - 3P',
                 'FRANCISCAN HEALTH - 3P',
                 'IU HEALTH - 3P',
                 'LOYOLA UNIV HEALTH SYSTEM - 3P',
@@ -46,7 +46,7 @@ where       pl_group in (
 
             )
             or client_idx in (
-                'CO-ERCTB',         --'ELIZABETH RIVER CROSSINGS - 3P'
+                -- 'CO-ERCTB',         --'ELIZABETH RIVER CROSSINGS - 3P'
                 'CO-VATBL',         --'STATE OF VA - DOT - 3P-2'
                 'CO-VATCBL'         --'STATE OF VA - DOT - 3P-2'
             )
