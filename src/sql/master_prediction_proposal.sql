@@ -269,15 +269,68 @@ with scores as
 )
 --  <--  FILTER ON SET PARAMETERS
 
+--  FAST TRACK  -->
+, fast_track as
+(
+    -- need to exclude debtors where a fellow packet-member is already proposed above
+    with packets_already_proposed as
+    (
+        select      debtor.packet_idx
+        from        filter_runnings_total as proposed
+                    inner join
+                        edwprodhh.pub_jchang.master_debtor as debtor
+                        on proposed.debtor_idx = debtor.debtor_idx
+    )
+    select      fasttrack.debtor_idx,
+                fasttrack.packet_idx,
+                fasttrack.proposed_channel,
+
+                debtor.client_idx,
+                debtor.pl_group
+
+    from        edwprodhh.hermes.master_prediction_fasttrack as fasttrack
+                inner join
+                    edwprodhh.pub_jchang.master_debtor as debtor
+                    on fasttrack.debtor_idx = debtor.debtor_idx
+    where       fasttrack.packet_idx not in (select packet_idx from packets_already_proposed)
+    
+
+)
+--  <--  FAST TRACK
+
+
 , calculate_filtered as
 (
-    select      pool.*,
+    select      coalesce(pool.debtor_idx,           fast_track.debtor_idx)          as debtor_idx,
+
+                coalesce(pool.client_idx,           fast_track.client_idx)          as client_idx,
+                coalesce(pool.pl_group,             fast_track.pl_group)            as pl_group,
+                coalesce(pool.proposed_channel,     fast_track.proposed_channel)    as proposed_channel,
+                pool.marginal_fee,
+                pool.marginal_cost,
+                pool.marginal_profit,
+                pool.marginal_margin,
+                pool.rank_profit,
+                pool.rank_margin,
+                pool.rank_weighted,
+
                 case    when    proposed.debtor_idx is not null
                         then    1
+                        when    fast_track.debtor_idx is not null
+                        then    1
                         else    0
-                        end     as is_proposed_contact
+                        end     as is_proposed_contact,
+                        
+                case    when    fast_track.debtor_idx is not null
+                        then    1
+                        else    0
+                        end     as is_fasttrack
 
     from        calculate_marginal_wide as pool
+                full outer join
+                    fast_track
+                    on  pool.debtor_idx         = fast_track.debtor_idx
+                    and pool.proposed_channel   = fast_track.proposed_channel
                 left join
                     filter_runnings_total as proposed
                     on  pool.debtor_idx         = proposed.debtor_idx
@@ -293,7 +346,6 @@ create task
     edwprodhh.pub_jchang.replace_master_prediction_proposal
     warehouse = analysis_wh
     after edwprodhh.pub_jchang.replace_master_prediction_scores
-    -- schedule = 'USING CRON 0 5 * * FRI America/Chicago'
 as
 create or replace table
     edwprodhh.hermes.master_prediction_proposal
@@ -566,15 +618,68 @@ with scores as
 )
 --  <--  FILTER ON SET PARAMETERS
 
+--  FAST TRACK  -->
+, fast_track as
+(
+    -- need to exclude debtors where a fellow packet-member is already proposed above
+    with packets_already_proposed as
+    (
+        select      debtor.packet_idx
+        from        filter_runnings_total as proposed
+                    inner join
+                        edwprodhh.pub_jchang.master_debtor as debtor
+                        on proposed.debtor_idx = debtor.debtor_idx
+    )
+    select      fasttrack.debtor_idx,
+                fasttrack.packet_idx,
+                fasttrack.proposed_channel,
+
+                debtor.client_idx,
+                debtor.pl_group
+
+    from        edwprodhh.hermes.master_prediction_fasttrack as fasttrack
+                inner join
+                    edwprodhh.pub_jchang.master_debtor as debtor
+                    on fasttrack.debtor_idx = debtor.debtor_idx
+    where       fasttrack.packet_idx not in (select packet_idx from packets_already_proposed)
+    
+
+)
+--  <--  FAST TRACK
+
+
 , calculate_filtered as
 (
-    select      pool.*,
+    select      coalesce(pool.debtor_idx,           fast_track.debtor_idx)          as debtor_idx,
+
+                coalesce(pool.client_idx,           fast_track.client_idx)          as client_idx,
+                coalesce(pool.pl_group,             fast_track.pl_group)            as pl_group,
+                coalesce(pool.proposed_channel,     fast_track.proposed_channel)    as proposed_channel,
+                pool.marginal_fee,
+                pool.marginal_cost,
+                pool.marginal_profit,
+                pool.marginal_margin,
+                pool.rank_profit,
+                pool.rank_margin,
+                pool.rank_weighted,
+
                 case    when    proposed.debtor_idx is not null
                         then    1
+                        when    fast_track.debtor_idx is not null
+                        then    1
                         else    0
-                        end     as is_proposed_contact
+                        end     as is_proposed_contact,
+                        
+                case    when    fast_track.debtor_idx is not null
+                        then    1
+                        else    0
+                        end     as is_fasttrack
 
     from        calculate_marginal_wide as pool
+                full outer join
+                    fast_track
+                    on  pool.debtor_idx         = fast_track.debtor_idx
+                    and pool.proposed_channel   = fast_track.proposed_channel
                 left join
                     filter_runnings_total as proposed
                     on  pool.debtor_idx         = proposed.debtor_idx

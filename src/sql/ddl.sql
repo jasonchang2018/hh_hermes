@@ -120,6 +120,7 @@ create table
     RANK_MARGIN                     NUMBER(18,0),
     RANK_WEIGHTED                   NUMBER(28,2),
     IS_PROPOSED_CONTACT             NUMBER(1,0),
+    IS_FASTTRACK                    NUMBER(1,0),
     execute_time                    TIMESTAMP_LTZ(9)
 )
 ;
