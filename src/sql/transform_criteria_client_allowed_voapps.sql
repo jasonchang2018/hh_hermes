@@ -39,8 +39,6 @@ select  'STATE OF OK - TAX COMMISSION - 3P'                 as pl_group union al
 select  'STATE OF VA - DOT - 3P'                            as pl_group union all
 select  'STATE OF VA - DOT - 3P-2'                          as pl_group union all
 select  'SWEDISH HOSPITAL - 3P'                             as pl_group union all
-select  'TOWER HEALTH HOSP - 3P -2'                         as pl_group union all
-select  'TOWER HEALTH PHYS - 3P -2'                         as pl_group union all
 select  'TPC - SHANNON - HOSP - 3P-2'                       as pl_group union all
 select  'TPC - SHANNON - PHY - 3P-2'                        as pl_group union all
 select  'TPC - UNITED REGIONAL - 3P'                        as pl_group union all
