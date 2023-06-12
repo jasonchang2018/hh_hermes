@@ -27,6 +27,9 @@ with joined as
                 address_allowed_email.pass_address_emails,
 
                 address_allowed_mail.mailing_address,
+                address_allowed_mail.mailing_city,
+                address_allowed_mail.mailing_state,
+                address_allowed_mail.mailing_zip_code,
                 address_allowed_mail.pass_address_letters,
 
                 address_allowed_phone.valid_phone_number,
@@ -209,6 +212,9 @@ with joined as
                 address_allowed_email.pass_address_emails,
 
                 address_allowed_mail.mailing_address,
+                address_allowed_mail.mailing_city,
+                address_allowed_mail.mailing_state,
+                address_allowed_mail.mailing_zip_code,
                 address_allowed_mail.pass_address_letters,
 
                 address_allowed_phone.valid_phone_number,

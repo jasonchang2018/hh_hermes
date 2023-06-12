@@ -2,10 +2,16 @@ create or replace table
     edwprodhh.hermes.transform_criteria_address_allowed_mail
 as
 select      debtor_idx,
-            address_1 as mailing_address,
+            address_1       as mailing_address,
+            city            as mailing_city,
+            state           as mailing_state,
+            zip_code        as mailing_zip_code,
 
-            case    when    address_1 is not null
-                    and     left(address_1, 3) != 'MR-'
+            case    when    city                is not null
+                    and     state               is not null
+                    and     zip_code            is not null
+                    and     address_1           is not null
+                    and     left(address_1, 3)  != 'MR-'
                     then    1
                     else    0
                     end     as pass_address_letters
@@ -24,10 +30,16 @@ create or replace table
     edwprodhh.hermes.transform_criteria_address_allowed_mail
 as
 select      debtor_idx,
-            address_1 as mailing_address,
+            address_1       as mailing_address,
+            city            as mailing_city,
+            state           as mailing_state,
+            zip_code        as mailing_zip_code,
 
-            case    when    address_1 is not null
-                    and     left(address_1, 3) != 'MR-'
+            case    when    city                is not null
+                    and     state               is not null
+                    and     zip_code            is not null
+                    and     address_1           is not null
+                    and     left(address_1, 3)  != 'MR-'
                     then    1
                     else    0
                     end     as pass_address_letters
