@@ -11,6 +11,7 @@ select  'CITY OF CLEVELAND OH - CONDUENT - 3P'          as pl_group,    'Dun'   
 select  'CITY OF LA CA - PARKING CONDUENT - 3P'         as pl_group,    'Dun'           as collection_type,     'EDN1_LA'   as letter_code,     'TXT1'          as text_code,   NULL        as voapp_code union all
 select  'CITY OF PHILADELPHIA PA - PARKING - 3P'        as pl_group,    'Dun'           as collection_type,     'EDN1-PP'   as letter_code,     'TXT-SMS1'      as text_code,   NULL        as voapp_code union all
 select  'CITY OF SEATTLE WA - MUNI COURT - 3P'          as pl_group,    'Dun'           as collection_type,     'EDN1-SMC'  as letter_code,     'TXT-SMS1'      as text_code,   NULL        as voapp_code union all
+select  'COLUMBIA DOCTORS - 3P'                         as pl_group,    'Dun'           as collection_type,     'HMHHCD'    as letter_code,     'TXTNY01'       as text_code,   NULL        as voapp_code union all
 select  'COUNTY OF LOS ANGELES CA - 3P'                 as pl_group,    'Dun'           as collection_type,     'ECCFTAP1'  as letter_code,     NULL            as text_code,   NULL        as voapp_code union all
 select  'ELIZABETH RIVER CROSSINGS - 3P'                as pl_group,    'Dun'           as collection_type,     'ERC1'      as letter_code,     'TXT-ERC'       as text_code,   NULL        as voapp_code union all
 select  'FRANCISCAN HEALTH - 3P'                        as pl_group,    'PP Offer'      as collection_type,     'HMHHP'     as letter_code,     'TXTSMSH1'      as text_code,   'USUAL'     as voapp_code union all

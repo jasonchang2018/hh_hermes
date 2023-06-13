@@ -44,7 +44,7 @@ select      distinct
                     when    pl_group = 'CITY OF SAN FRANCISCO CA - MTA - 3P'                    then    0
                     when    pl_group = 'CITY OF SEATTLE WA - MUNI COURT - 3P'                   then    220
                     when    pl_group = 'COLUMBIA DENTAL - 3P'                                   then    0
-                    when    pl_group = 'COLUMBIA DOCTORS - 3P'                                  then    0
+                    when    pl_group = 'COLUMBIA DOCTORS - 3P'                                  then    800
                     when    pl_group = 'CONSUMERS ENERGY - 3P'                                  then    0
                     when    pl_group = 'COUNTY OF CHAMPAIGN IL - 3P'                            then    0
                     when    pl_group = 'COUNTY OF DEKALB IL - 3P'                               then    0
@@ -155,7 +155,7 @@ select      distinct
                     when    pl_group = 'COC - BUILDINGS'	                                    then    0
                     when    pl_group = 'COC - WATER'	                                        then    0
                     when    pl_group = 'COLUMBIA DENTAL - 3P'	                                then    0
-                    when    pl_group = 'COLUMBIA DOCTORS - 3P'	                                then    0
+                    when    pl_group = 'COLUMBIA DOCTORS - 3P'	                                then    800
                     when    pl_group = 'CONSUMERS ENERGY - 3P'	                                then    0
                     when    pl_group = 'COUNTY OF CHAMPAIGN IL - 3P'	                        then    0
                     when    pl_group = 'COUNTY OF DEKALB IL - 3P'	                            then    0
