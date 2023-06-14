@@ -11,7 +11,9 @@ select      debtor_idx,
                     and     state               is not null
                     and     zip_code            is not null
                     and     address_1           is not null
-                    and     left(address_1, 3)  != 'MR-'
+                    and     not regexp_like(address_1, '^(MR\\-|UNK|NEED ADDR|NO ADDR|UPDATE|XX|RETURNED MAIL|UNABLE TO CONF|HOMELESS).*', 'i')
+                    and     not regexp_like(address_1, '.*(MAIL RETURN).*', 'i')
+                    and     state not in ('BC', 'ZZ')
                     then    1
                     else    0
                     end     as pass_address_letters
@@ -39,10 +41,11 @@ select      debtor_idx,
                     and     state               is not null
                     and     zip_code            is not null
                     and     address_1           is not null
-                    and     left(address_1, 3)  != 'MR-'
+                    and     not regexp_like(address_1, '^(MR\\-|UNK|NEED ADDR|NO ADDR|UPDATE|XX|RETURNED MAIL|UNABLE TO CONF|HOMELESS).*', 'i')
+                    and     not regexp_like(address_1, '.*(MAIL RETURN).*', 'i')
+                    and     state not in ('BC', 'ZZ')
                     then    1
                     else    0
                     end     as pass_address_letters
 
 from        edwprodhh.pub_jchang.master_debtor
-;
