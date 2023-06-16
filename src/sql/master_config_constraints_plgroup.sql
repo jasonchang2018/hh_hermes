@@ -119,8 +119,8 @@ select      distinct
 
             case    when    pl_group = 'ADVOCATE HC - 3P'                                       then    0
                     when    pl_group = 'ASPEN DENTAL - 3P'	                                    then    0
-                    when    pl_group = 'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P'	            then    100
-                    when    pl_group = 'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2'	            then    100
+                    when    pl_group = 'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P'	            then    0
+                    when    pl_group = 'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2'	            then    0
                     when    pl_group = 'BROWARD HEALTH - 3P'	                                then    0
                     when    pl_group = 'CARLE HEALTHCARE - 3P'	                                then    0
                     when    pl_group = 'CARLE HEALTHCARE - 3P-2'	                            then    0
@@ -136,7 +136,7 @@ select      distinct
                     when    pl_group = 'CITY OF EAST LANSING MI - 54-B DISTRICT COURT - 3P'	    then    0
                     when    pl_group = 'CITY OF LA CA - EMS - 3P'	                            then    0
                     when    pl_group = 'CITY OF LA CA - FINANCE - 3P'	                        then    0
-                    when    pl_group = 'CITY OF LA CA - PARKING CONDUENT - 3P'	                then    100
+                    when    pl_group = 'CITY OF LA CA - PARKING CONDUENT - 3P'	                then    300
                     when    pl_group = 'CITY OF LV NV - MUNI COURT - 1P'	                    then    0
                     when    pl_group = 'CITY OF LV NV - MUNI COURT - 3P'	                    then    0
                     when    pl_group = 'CITY OF MILWAUKEE WI - 3P'	                            then    0
@@ -148,7 +148,7 @@ select      distinct
                     when    pl_group = 'CITY OF PHILADELPHIA PA - WATER - 3P'	                then    0
                     when    pl_group = 'CITY OF SAN FRANCISCO CA - EMS - 3P'	                then    0
                     when    pl_group = 'CITY OF SAN FRANCISCO CA - MTA - 3P'	                then    0
-                    when    pl_group = 'CITY OF SEATTLE WA - MUNI COURT - 3P'	                then    200
+                    when    pl_group = 'CITY OF SEATTLE WA - MUNI COURT - 3P'	                then    0
                     when    pl_group = 'CITY OF WASHINGTON DC - CCU - 3P'	                    then    0
                     when    pl_group = 'CITY OF WASHINGTON DC - DMV - 3P'	                    then    700
                     when    pl_group = 'CITY OF WASHINGTON DC - DOB - 3P'	                    then    0
@@ -190,14 +190,14 @@ select      distinct
                     when    pl_group = 'IU SURGICAL CARE AFF - 3P'	                            then    0
                     when    pl_group = 'JUST ENERGY - 3P'	                                    then    0
                     when    pl_group = 'LOYOLA UNIV HEALTH SYSTEM - 3P'	                        then    0
-                    when    pl_group = 'LURIE CHILDRENS - 1P'	                                then    300
+                    when    pl_group = 'LURIE CHILDRENS - 1P'	                                then    0
                     when    pl_group = 'MCLEOD HEALTH - 3P'	                                    then    0
                     when    pl_group = 'MD ANDERSON - 3P'	                                    then    0
                     when    pl_group = 'MD ANDERSON - 3P-2'	                                    then    0
-                    when    pl_group = 'MOUNT SINAI - 3P'	                                    then    100
+                    when    pl_group = 'MOUNT SINAI - 3P'	                                    then    400
                     when    pl_group = 'NICOR - 3P'	                                            then    0
-                    when    pl_group = 'NORTHSHORE UNIV HEALTH - 3P'	                        then    100
-                    when    pl_group = 'NORTHWESTERN MEDICINE - 3P'	                            then    200
+                    when    pl_group = 'NORTHSHORE UNIV HEALTH - 3P'	                        then    0
+                    when    pl_group = 'NORTHWESTERN MEDICINE - 3P'	                            then    0
                     when    pl_group = 'NW COMM HOSP - 3P'	                                    then    0
                     when    pl_group = 'NW COMM HOSP - 3P-2'	                                then    0
                     when    pl_group = 'ONE GAS - 3P'	                                        then    0
@@ -205,8 +205,8 @@ select      distinct
                     when    pl_group = 'PRISMA HEALTH - 3P'	                                    then    400
                     when    pl_group = 'PRISMA HEALTH - 3P-2'	                                then    400
                     when    pl_group = 'PRISMA HEALTH UNIVERSITY - 3P'	                        then    0
-                    when    pl_group = 'PROMEDICA HS - 3P-2'	                                then    100
-                    when    pl_group = 'PROVIDENCE ST JOSEPH HEALTH - 3P'	                    then    300
+                    when    pl_group = 'PROMEDICA HS - 3P-2'	                                then    0
+                    when    pl_group = 'PROVIDENCE ST JOSEPH HEALTH - 3P'	                    then    0
                     when    pl_group = 'SHIRLEY RYAN ABILITY LABS - 3P'	                        then    0
                     when    pl_group = 'SILVER CROSS - 3P'	                                    then    0
                     when    pl_group = 'SILVER CROSS - PSMG - 3P'	                            then    0
@@ -216,7 +216,7 @@ select      distinct
                     when    pl_group = 'STATE OF IL - DOR - 3P-2'	                            then    0
                     when    pl_group = 'STATE OF KS - DOR - 3P'	                                then    500
                     when    pl_group = 'STATE OF MD - DBM CCU - 3P'	                            then    0
-                    when    pl_group = 'STATE OF OK - TAX COMMISSION - 3P'	                    then    400
+                    when    pl_group = 'STATE OF OK - TAX COMMISSION - 3P'	                    then    200
                     when    pl_group = 'STATE OF PA - TURNPIKE COMMISSION - 3P'	                then    1400
                     when    pl_group = 'STATE OF UT - OSDC - 3P'	                            then    0
                     when    pl_group = 'STATE OF UT - OSDC - 3P-2'	                            then    0
@@ -225,7 +225,7 @@ select      distinct
                     when    pl_group = 'SWEDISH HOSPITAL - 3P'	                                then    0
                     when    pl_group = 'TOWER HEALTH PHYS - 3P -2'	                            then    0
                     when    pl_group = 'TPC - SHANNON - HOSP - 3P-2'	                        then    0
-                    when    pl_group = 'TPC - SHANNON - PHY - 3P-2'	                            then    100
+                    when    pl_group = 'TPC - SHANNON - PHY - 3P-2'	                            then    0
                     when    pl_group = 'TPC - UNITED REGIONAL - 3P'	                            then    0
                     when    pl_group = 'U OF CHICAGO MEDICAL - 3P'	                            then    0
                     when    pl_group = 'U OF CINCINNATI HEALTH SYSTEM - 3P'	                    then    0
