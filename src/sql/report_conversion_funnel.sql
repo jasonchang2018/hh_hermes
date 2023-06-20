@@ -14,6 +14,7 @@ with perc_of_total as
                     sum(pool.pass_address_letters)                                              ::number(18,0)  as pass_address_letters,
                     sum(pool.pass_validation_requirement)                                       ::number(18,0)  as pass_validation_requirement,
                     sum(pool.pass_letters_cooldown)                                             ::number(18,0)  as pass_letters_cooldown,
+                    sum(pool.pass_letters_warmup)                                               ::number(18,0)  as pass_letters_warmup,
                     sum(pool.pass_debtor_age_packet)                                            ::number(18,0)  as pass_debtor_age_packet,
                     sum(pool.pass_packet_balance)                                               ::number(18,0)  as pass_packet_balance,
                     sum(pool.is_eligible_letters)                                               ::number(18,0)  as is_eligible_letters,
@@ -55,6 +56,7 @@ with perc_of_total as
                         pass_address_letters,
                         pass_validation_requirement,
                         pass_letters_cooldown,
+                        pass_letters_warmup,
                         pass_debtor_age_packet,
                         pass_packet_balance,
                         is_eligible_letters,
@@ -73,6 +75,7 @@ with perc_of_total as
                                 pass_address_letters,
                                 pass_validation_requirement,
                                 pass_letters_cooldown,
+                                pass_letters_warmup,
                                 pass_debtor_age_packet,
                                 pass_packet_balance,
                                 is_eligible_letters,
@@ -196,10 +199,11 @@ with perc_of_total as
                                             when    metric_name = 'PASS_ADDRESS_LETTERS'                then    4
                                             when    metric_name = 'PASS_VALIDATION_REQUIREMENT'         then    5
                                             when    metric_name = 'PASS_LETTERS_COOLDOWN'               then    6
-                                            when    metric_name = 'PASS_DEBTOR_AGE_PACKET'              then    7
-                                            when    metric_name = 'PASS_PACKET_BALANCE'                 then    8
-                                            when    metric_name = 'IS_ELIGIBLE_LETTERS'                 then    9
-                                            when    metric_name = 'IS_PROPOSED_LETTERS'                 then    10
+                                            when    metric_name = 'PASS_LETTERS_WARMUP'                 then    7
+                                            when    metric_name = 'PASS_DEBTOR_AGE_PACKET'              then    8
+                                            when    metric_name = 'PASS_PACKET_BALANCE'                 then    9
+                                            when    metric_name = 'IS_ELIGIBLE_LETTERS'                 then    10
+                                            when    metric_name = 'IS_PROPOSED_LETTERS'                 then    11
                                             end
                             when    hermes_funnel = 'VoApps'
                             then    case    when    metric_name = 'N_TOTAL'                             then    1
@@ -252,7 +256,8 @@ with perc_of_total as
                     case    when    letters_pass_debtor_status_             = 1 then    pool.pass_address_letters                                               else 0 end  as letters_pass_address_letters_,
                     case    when    letters_pass_address_letters_           = 1 then    pool.pass_validation_requirement                                        else 0 end  as letters_pass_validation_requirement_,
                     case    when    letters_pass_validation_requirement_    = 1 then    pool.pass_letters_cooldown                                              else 0 end  as letters_pass_letters_cooldown_,
-                    case    when    letters_pass_letters_cooldown_          = 1 then    pool.pass_debtor_age_packet                                             else 0 end  as letters_pass_debtor_age_packet_,
+                    case    when    letters_pass_letters_cooldown_          = 1 then    pool.pass_letters_warmup                                                else 0 end  as letters_pass_letters_warmup_,
+                    case    when    letters_pass_letters_warmup_            = 1 then    pool.pass_debtor_age_packet                                             else 0 end  as letters_pass_debtor_age_packet_,
                     case    when    letters_pass_debtor_age_packet_         = 1 then    pool.pass_packet_balance                                                else 0 end  as letters_pass_packet_balance_,
                     case    when    letters_pass_packet_balance_            = 1 then    pool.is_eligible_letters                                                else 0 end  as letters_is_eligible_letters_,
                     case    when    letters_is_eligible_letters_            = 1 then    case when proposed.proposed_channel = 'Letter' then 1 else 0 end        else 0 end  as letters_is_proposed_letters_,
@@ -298,7 +303,8 @@ with perc_of_total as
                     sum(case    when    letters_pass_debtor_status_             = 1 then    letters_pass_address_letters_           end)::number(18,0)  as letters_pass_address_letters,
                     sum(case    when    letters_pass_address_letters_           = 1 then    letters_pass_validation_requirement_    end)::number(18,0)  as letters_pass_validation_requirement,
                     sum(case    when    letters_pass_validation_requirement_    = 1 then    letters_pass_letters_cooldown_          end)::number(18,0)  as letters_pass_letters_cooldown,
-                    sum(case    when    letters_pass_letters_cooldown_          = 1 then    letters_pass_debtor_age_packet_         end)::number(18,0)  as letters_pass_debtor_age_packet,
+                    sum(case    when    letters_pass_letters_cooldown_          = 1 then    letters_pass_letters_warmup_            end)::number(18,0)  as letters_pass_letters_warmup,
+                    sum(case    when    letters_pass_letters_warmup_            = 1 then    letters_pass_debtor_age_packet_         end)::number(18,0)  as letters_pass_debtor_age_packet,
                     sum(case    when    letters_pass_debtor_age_packet_         = 1 then    letters_pass_packet_balance_            end)::number(18,0)  as letters_pass_packet_balance,
                     sum(case    when    letters_pass_packet_balance_            = 1 then    letters_is_eligible_letters_            end)::number(18,0)  as letters_is_eligible_letters,
                     sum(case    when    letters_is_eligible_letters_            = 1 then    letters_is_proposed_letters_            end)::number(18,0)  as letters_is_proposed_letters,
@@ -346,6 +352,7 @@ with perc_of_total as
                         letters_pass_address_letters            as pass_address_letters,
                         letters_pass_validation_requirement     as pass_validation_requirement,
                         letters_pass_letters_cooldown           as pass_letters_cooldown,
+                        letters_pass_letters_warmup             as pass_letters_warmup,
                         letters_pass_debtor_age_packet          as pass_debtor_age_packet,
                         letters_pass_packet_balance             as pass_packet_balance,
                         letters_is_eligible_letters             as is_eligible_letters,
@@ -364,6 +371,7 @@ with perc_of_total as
                                 pass_address_letters,
                                 pass_validation_requirement,
                                 pass_letters_cooldown,
+                                pass_letters_warmup,
                                 pass_debtor_age_packet,
                                 pass_packet_balance,
                                 is_eligible_letters,
@@ -487,10 +495,11 @@ with perc_of_total as
                                             when    metric_name = 'PASS_ADDRESS_LETTERS'                then    4
                                             when    metric_name = 'PASS_VALIDATION_REQUIREMENT'         then    5
                                             when    metric_name = 'PASS_LETTERS_COOLDOWN'               then    6
-                                            when    metric_name = 'PASS_DEBTOR_AGE_PACKET'              then    7
-                                            when    metric_name = 'PASS_PACKET_BALANCE'                 then    8
-                                            when    metric_name = 'IS_ELIGIBLE_LETTERS'                 then    9
-                                            when    metric_name = 'IS_PROPOSED_LETTERS'                 then    10
+                                            when    metric_name = 'PASS_LETTERS_WARMUP'                 then    7
+                                            when    metric_name = 'PASS_DEBTOR_AGE_PACKET'              then    8
+                                            when    metric_name = 'PASS_PACKET_BALANCE'                 then    9
+                                            when    metric_name = 'IS_ELIGIBLE_LETTERS'                 then    10
+                                            when    metric_name = 'IS_PROPOSED_LETTERS'                 then    11
                                             end
                             when    hermes_funnel = 'VoApps'
                             then    case    when    metric_name = 'N_TOTAL'                             then    1
