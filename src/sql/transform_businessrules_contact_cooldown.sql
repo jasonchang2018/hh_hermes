@@ -30,6 +30,11 @@ with contact_history as
 )
 select      debtor.debtor_idx,
 
+            least(
+                nullif(trim(dimdebtor.strat_next_strat_date),   '')::date,
+                nullif(trim(dimdebtor.ntcp_nxt_print),          '')::date
+            )                                                                           as next_date_letters,
+
             coalesce(contact_history.prev_n_contacts,               0)                  as prev_n_contacts,
             coalesce(contact_history.prev_n_letters,                0)                  as prev_n_letters,
             coalesce(contact_history.prev_n_voapps,                 0)                  as prev_n_voapps,
@@ -48,6 +53,11 @@ select      debtor.debtor_idx,
             coalesce(contact_history.prev_date_dialer_agent,        '1970-01-01'::date) as prev_date_dialer_agent,
             coalesce(contact_history.prev_date_dialer_agentless,    '1970-01-01'::date) as prev_date_dialer_agentless,
             coalesce(contact_history.prev_date_outbound_manual,     '1970-01-01'::date) as prev_date_outbound_manual,
+
+            case    when    coalesce(next_date_letters,                     '3000-01-01'::date) >  current_date() + 14
+                    then    1
+                    else    0
+                    end     as pass_letters_warmup,
 
             case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 4
                     and     coalesce(contact_history.prev_n_voapps,         0)                  <= 10000
@@ -86,6 +96,9 @@ select      debtor.debtor_idx,
                     end     as pass_texts_cooldown
 
 from        edwprodhh.pub_jchang.master_debtor as debtor
+            inner join
+                edwprodhh.dw.dimdebtor as dimdebtor
+                on debtor.debtor_idx = dimdebtor.debtor_idx
             left join
                 contact_history
                 on debtor.packet_idx = contact_history.packet_idx
@@ -130,6 +143,11 @@ with contact_history as
 )
 select      debtor.debtor_idx,
 
+            least(
+                nullif(trim(dimdebtor.strat_next_strat_date),   '')::date,
+                nullif(trim(dimdebtor.ntcp_nxt_print),          '')::date
+            )                                                                           as next_date_letters,
+
             coalesce(contact_history.prev_n_contacts,               0)                  as prev_n_contacts,
             coalesce(contact_history.prev_n_letters,                0)                  as prev_n_letters,
             coalesce(contact_history.prev_n_voapps,                 0)                  as prev_n_voapps,
@@ -148,6 +166,11 @@ select      debtor.debtor_idx,
             coalesce(contact_history.prev_date_dialer_agent,        '1970-01-01'::date) as prev_date_dialer_agent,
             coalesce(contact_history.prev_date_dialer_agentless,    '1970-01-01'::date) as prev_date_dialer_agentless,
             coalesce(contact_history.prev_date_outbound_manual,     '1970-01-01'::date) as prev_date_outbound_manual,
+
+            case    when    coalesce(next_date_letters,                     '3000-01-01'::date) >  current_date() + 14
+                    then    1
+                    else    0
+                    end     as pass_letters_warmup,
 
             case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 4
                     and     coalesce(contact_history.prev_n_voapps,         0)                  <= 10000
@@ -186,6 +209,9 @@ select      debtor.debtor_idx,
                     end     as pass_texts_cooldown
 
 from        edwprodhh.pub_jchang.master_debtor as debtor
+            inner join
+                edwprodhh.dw.dimdebtor as dimdebtor
+                on debtor.debtor_idx = dimdebtor.debtor_idx
             left join
                 contact_history
                 on debtor.packet_idx = contact_history.packet_idx
