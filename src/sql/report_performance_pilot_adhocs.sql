@@ -270,7 +270,7 @@ order by    1,2,3,4,6,5,7
 
 
 create task
-    edwprodhh.pub_jchang.replace_report_tax2023_yield_summary_tableau
+    edwprodhh.pub_jchang.replace_report_performance_pilot_adhocs_hermes
     warehouse = analysis_wh
     after edwprodhh.pub_jchang.replace_transform_payment_attribution_contact_weights
 as
