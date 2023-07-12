@@ -3,29 +3,46 @@ create or replace table
 as
 with contact_history as
 (
-    select      packet_idx,
+    with last_rpc as
+    (
+        select      packet_idx,
+                    max(callplacedtime)::date as last_rpc_date
+        from        edwprodhh.pub_jchang.master_calls
+        where       rpc = 1
+        group by    1
+    )
+    select      contacts.packet_idx,
                 
-                count(*)                                                                                                            as prev_n_contacts,
-                count(case when contact_type in ('Letter')                                      then contact_id     end)            as prev_n_letters,
-                count(case when contact_type in ('VoApp')                                       then contact_id     end)            as prev_n_voapps,
-                count(case when contact_type in ('Text Message')                                then contact_id     end)            as prev_n_texts,
-                count(case when contact_type in ('Email')                                       then contact_id     end)            as prev_n_emails,
-                count(case when contact_type in ('Inbound-Agent Call')                          then contact_id     end)            as prev_n_inbounds,
-                count(case when contact_type in ('Dialer-Agent Call')                           then contact_id     end)            as prev_n_dialer_agent,
-                count(case when contact_type in ('Dialer-Agentless Call')                       then contact_id     end)            as prev_n_dialer_agentless,
-                count(case when contact_type in ('Outbound-Manual Call')                        then contact_id     end)            as prev_n_outbound_manual,
+                count(*)                                                                                                                                as prev_n_contacts,
+                count(case when contact_type in ('Letter')                                                          then contact_id     end)            as prev_n_letters,
+                count(case when contact_type in ('VoApp')                                                           then contact_id     end)            as prev_n_voapps,
+                count(case when contact_type in ('Text Message')                                                    then contact_id     end)            as prev_n_texts,
+                count(case when contact_type in ('Email')                                                           then contact_id     end)            as prev_n_emails,
+                count(case when contact_type in ('Inbound-Agent Call')                                              then contact_id     end)            as prev_n_inbounds,
+                count(case when contact_type in ('Dialer-Agent Call')                                               then contact_id     end)            as prev_n_dialer_agent,
+                count(case when contact_type in ('Dialer-Agentless Call')                                           then contact_id     end)            as prev_n_dialer_agentless,
+                count(case when contact_type in ('Outbound-Manual Call')                                            then contact_id     end)            as prev_n_outbound_manual,
                 
-                max(                                                                                 contact_time      )::date      as prev_date_contacts,
-                max(  case when contact_type in ('Letter')                                      then contact_time   end)::date      as prev_date_letters,
-                max(  case when contact_type in ('VoApp')                                       then contact_time   end)::date      as prev_date_voapps,
-                max(  case when contact_type in ('Text Message')                                then contact_time   end)::date      as prev_date_texts,
-                max(  case when contact_type in ('Email')                                       then contact_time   end)::date      as prev_date_emails,
-                max(  case when contact_type in ('Inbound-Agent Call')                          then contact_time   end)::date      as prev_date_inbounds,
-                max(  case when contact_type in ('Dialer-Agent Call')                           then contact_time   end)::date      as prev_date_dialer_agent,
-                max(  case when contact_type in ('Dialer-Agentless Call')                       then contact_time   end)::date      as prev_date_dialer_agentless,
-                max(  case when contact_type in ('Outbound-Manual Call')                        then contact_time   end)::date      as prev_date_outbound_manual
+                count(case when contact_type in ('VoApp')                   and contact_time >= current_date() - 7  then contact_id     end)            as prev_n_voapps_7,
+                count(case when contact_type in ('Dialer-Agent Call')       and contact_time >= current_date() - 7  then contact_id     end)            as prev_n_dialer_agent_7,
+                count(case when contact_type in ('Dialer-Agentless Call')   and contact_time >= current_date() - 7  then contact_id     end)            as prev_n_dialer_agentless_7,
+                count(case when contact_type in ('Outbound-Manual Call')    and contact_time >= current_date() - 7  then contact_id     end)            as prev_n_outbound_manual_7,
+                
+                max(                                                                                                     contact_time      )::date      as prev_date_contacts,
+                max(  case when contact_type in ('Letter')                                                          then contact_time   end)::date      as prev_date_letters,
+                max(  case when contact_type in ('VoApp')                                                           then contact_time   end)::date      as prev_date_voapps,
+                max(  case when contact_type in ('Text Message')                                                    then contact_time   end)::date      as prev_date_texts,
+                max(  case when contact_type in ('Email')                                                           then contact_time   end)::date      as prev_date_emails,
+                max(  case when contact_type in ('Inbound-Agent Call')                                              then contact_time   end)::date      as prev_date_inbounds,
+                max(  case when contact_type in ('Dialer-Agent Call')                                               then contact_time   end)::date      as prev_date_dialer_agent,
+                max(  case when contact_type in ('Dialer-Agentless Call')                                           then contact_time   end)::date      as prev_date_dialer_agentless,
+                max(  case when contact_type in ('Outbound-Manual Call')                                            then contact_time   end)::date      as prev_date_outbound_manual,
+                max(last_rpc.last_rpc_date)                                                                                                 ::date      as prev_date_rpc
 
-    from        edwprodhh.pub_jchang.transform_contacts
+    from        edwprodhh.pub_jchang.transform_contacts as contacts
+                left join
+                    last_rpc
+                    on contacts.packet_idx = last_rpc.packet_idx
     group by    1
 )
 select      debtor.debtor_idx,
@@ -44,6 +61,10 @@ select      debtor.debtor_idx,
             coalesce(contact_history.prev_n_dialer_agent,           0)                  as prev_n_dialer_agent,
             coalesce(contact_history.prev_n_dialer_agentless,       0)                  as prev_n_dialer_agentless,
             coalesce(contact_history.prev_n_outbound_manual,        0)                  as prev_n_outbound_manual,
+            coalesce(prev_n_voapps_7,                               0)                  as prev_n_voapps_7,
+            coalesce(prev_n_dialer_agent_7,                         0)                  as prev_n_dialer_agent_7,
+            coalesce(prev_n_dialer_agentless_7,                     0)                  as prev_n_dialer_agentless_7,
+            coalesce(prev_n_outbound_manual_7,                      0)                  as prev_n_outbound_manual_7,
             coalesce(contact_history.prev_date_contacts,            '1970-01-01'::date) as prev_date_contacts,
             coalesce(contact_history.prev_date_letters,             '1970-01-01'::date) as prev_date_letters,
             coalesce(contact_history.prev_date_voapps,              '1970-01-01'::date) as prev_date_voapps,
@@ -53,6 +74,7 @@ select      debtor.debtor_idx,
             coalesce(contact_history.prev_date_dialer_agent,        '1970-01-01'::date) as prev_date_dialer_agent,
             coalesce(contact_history.prev_date_dialer_agentless,    '1970-01-01'::date) as prev_date_dialer_agentless,
             coalesce(contact_history.prev_date_outbound_manual,     '1970-01-01'::date) as prev_date_outbound_manual,
+            coalesce(contact_history.prev_date_rpc,                 '1970-01-01'::date) as prev_date_rpc,
 
             case    when    coalesce(next_date_letters,                     '3000-01-01'::date) >  current_date() + 14
                     then    1
@@ -93,7 +115,17 @@ select      debtor.debtor_idx,
                     and     coalesce(contact_history.prev_date_inbounds,    '2000-01-01'::date) <= current_date()
                     then    1
                     else    0
-                    end     as pass_texts_cooldown
+                    end     as pass_texts_cooldown,
+
+            case    when    coalesce(contact_history.prev_n_voapps_7,               0)              +
+                            coalesce(contact_history.prev_n_dialer_agent_7,         0)              +
+                            coalesce(contact_history.prev_n_dialer_agentless_7,     0)              +
+                            coalesce(contact_history.prev_n_outbound_manual_7,      0)                  <  7
+                    and     coalesce(contact_history.prev_date_rpc,                 '2000-01-01')       <= current_date() - 8
+                    then    1
+                    else    0
+                    end     as pass_7in7
+
 
 from        edwprodhh.pub_jchang.master_debtor as debtor
             inner join
@@ -116,29 +148,46 @@ create or replace table
 as
 with contact_history as
 (
-    select      packet_idx,
+    with last_rpc as
+    (
+        select      packet_idx,
+                    max(callplacedtime)::date as last_rpc_date
+        from        edwprodhh.pub_jchang.master_calls
+        where       rpc = 1
+        group by    1
+    )
+    select      contacts.packet_idx,
                 
-                count(*)                                                                                                            as prev_n_contacts,
-                count(case when contact_type in ('Letter')                                      then contact_id     end)            as prev_n_letters,
-                count(case when contact_type in ('VoApp')                                       then contact_id     end)            as prev_n_voapps,
-                count(case when contact_type in ('Text Message')                                then contact_id     end)            as prev_n_texts,
-                count(case when contact_type in ('Email')                                       then contact_id     end)            as prev_n_emails,
-                count(case when contact_type in ('Inbound-Agent Call')                          then contact_id     end)            as prev_n_inbounds,
-                count(case when contact_type in ('Dialer-Agent Call')                           then contact_id     end)            as prev_n_dialer_agent,
-                count(case when contact_type in ('Dialer-Agentless Call')                       then contact_id     end)            as prev_n_dialer_agentless,
-                count(case when contact_type in ('Outbound-Manual Call')                        then contact_id     end)            as prev_n_outbound_manual,
+                count(*)                                                                                                                                as prev_n_contacts,
+                count(case when contact_type in ('Letter')                                                          then contact_id     end)            as prev_n_letters,
+                count(case when contact_type in ('VoApp')                                                           then contact_id     end)            as prev_n_voapps,
+                count(case when contact_type in ('Text Message')                                                    then contact_id     end)            as prev_n_texts,
+                count(case when contact_type in ('Email')                                                           then contact_id     end)            as prev_n_emails,
+                count(case when contact_type in ('Inbound-Agent Call')                                              then contact_id     end)            as prev_n_inbounds,
+                count(case when contact_type in ('Dialer-Agent Call')                                               then contact_id     end)            as prev_n_dialer_agent,
+                count(case when contact_type in ('Dialer-Agentless Call')                                           then contact_id     end)            as prev_n_dialer_agentless,
+                count(case when contact_type in ('Outbound-Manual Call')                                            then contact_id     end)            as prev_n_outbound_manual,
                 
-                max(                                                                                 contact_time      )::date      as prev_date_contacts,
-                max(  case when contact_type in ('Letter')                                      then contact_time   end)::date      as prev_date_letters,
-                max(  case when contact_type in ('VoApp')                                       then contact_time   end)::date      as prev_date_voapps,
-                max(  case when contact_type in ('Text Message')                                then contact_time   end)::date      as prev_date_texts,
-                max(  case when contact_type in ('Email')                                       then contact_time   end)::date      as prev_date_emails,
-                max(  case when contact_type in ('Inbound-Agent Call')                          then contact_time   end)::date      as prev_date_inbounds,
-                max(  case when contact_type in ('Dialer-Agent Call')                           then contact_time   end)::date      as prev_date_dialer_agent,
-                max(  case when contact_type in ('Dialer-Agentless Call')                       then contact_time   end)::date      as prev_date_dialer_agentless,
-                max(  case when contact_type in ('Outbound-Manual Call')                        then contact_time   end)::date      as prev_date_outbound_manual
+                count(case when contact_type in ('VoApp')                   and contact_time >= current_date() - 7  then contact_id     end)            as prev_n_voapps_7,
+                count(case when contact_type in ('Dialer-Agent Call')       and contact_time >= current_date() - 7  then contact_id     end)            as prev_n_dialer_agent_7,
+                count(case when contact_type in ('Dialer-Agentless Call')   and contact_time >= current_date() - 7  then contact_id     end)            as prev_n_dialer_agentless_7,
+                count(case when contact_type in ('Outbound-Manual Call')    and contact_time >= current_date() - 7  then contact_id     end)            as prev_n_outbound_manual_7,
+                
+                max(                                                                                                     contact_time      )::date      as prev_date_contacts,
+                max(  case when contact_type in ('Letter')                                                          then contact_time   end)::date      as prev_date_letters,
+                max(  case when contact_type in ('VoApp')                                                           then contact_time   end)::date      as prev_date_voapps,
+                max(  case when contact_type in ('Text Message')                                                    then contact_time   end)::date      as prev_date_texts,
+                max(  case when contact_type in ('Email')                                                           then contact_time   end)::date      as prev_date_emails,
+                max(  case when contact_type in ('Inbound-Agent Call')                                              then contact_time   end)::date      as prev_date_inbounds,
+                max(  case when contact_type in ('Dialer-Agent Call')                                               then contact_time   end)::date      as prev_date_dialer_agent,
+                max(  case when contact_type in ('Dialer-Agentless Call')                                           then contact_time   end)::date      as prev_date_dialer_agentless,
+                max(  case when contact_type in ('Outbound-Manual Call')                                            then contact_time   end)::date      as prev_date_outbound_manual,
+                max(last_rpc.last_rpc_date)                                                                                                 ::date      as prev_date_rpc
 
-    from        edwprodhh.pub_jchang.transform_contacts
+    from        edwprodhh.pub_jchang.transform_contacts as contacts
+                left join
+                    last_rpc
+                    on contacts.packet_idx = last_rpc.packet_idx
     group by    1
 )
 select      debtor.debtor_idx,
@@ -157,6 +206,10 @@ select      debtor.debtor_idx,
             coalesce(contact_history.prev_n_dialer_agent,           0)                  as prev_n_dialer_agent,
             coalesce(contact_history.prev_n_dialer_agentless,       0)                  as prev_n_dialer_agentless,
             coalesce(contact_history.prev_n_outbound_manual,        0)                  as prev_n_outbound_manual,
+            coalesce(prev_n_voapps_7,                               0)                  as prev_n_voapps_7,
+            coalesce(prev_n_dialer_agent_7,                         0)                  as prev_n_dialer_agent_7,
+            coalesce(prev_n_dialer_agentless_7,                     0)                  as prev_n_dialer_agentless_7,
+            coalesce(prev_n_outbound_manual_7,                      0)                  as prev_n_outbound_manual_7,
             coalesce(contact_history.prev_date_contacts,            '1970-01-01'::date) as prev_date_contacts,
             coalesce(contact_history.prev_date_letters,             '1970-01-01'::date) as prev_date_letters,
             coalesce(contact_history.prev_date_voapps,              '1970-01-01'::date) as prev_date_voapps,
@@ -166,6 +219,7 @@ select      debtor.debtor_idx,
             coalesce(contact_history.prev_date_dialer_agent,        '1970-01-01'::date) as prev_date_dialer_agent,
             coalesce(contact_history.prev_date_dialer_agentless,    '1970-01-01'::date) as prev_date_dialer_agentless,
             coalesce(contact_history.prev_date_outbound_manual,     '1970-01-01'::date) as prev_date_outbound_manual,
+            coalesce(contact_history.prev_date_rpc,                 '1970-01-01'::date) as prev_date_rpc,
 
             case    when    coalesce(next_date_letters,                     '3000-01-01'::date) >  current_date() + 14
                     then    1
@@ -206,7 +260,17 @@ select      debtor.debtor_idx,
                     and     coalesce(contact_history.prev_date_inbounds,    '2000-01-01'::date) <= current_date()
                     then    1
                     else    0
-                    end     as pass_texts_cooldown
+                    end     as pass_texts_cooldown,
+
+            case    when    coalesce(contact_history.prev_n_voapps_7,               0)              +
+                            coalesce(contact_history.prev_n_dialer_agent_7,         0)              +
+                            coalesce(contact_history.prev_n_dialer_agentless_7,     0)              +
+                            coalesce(contact_history.prev_n_outbound_manual_7,      0)                  <  7
+                    and     coalesce(contact_history.prev_date_rpc,                 '2000-01-01')       <= current_date() - 8
+                    then    1
+                    else    0
+                    end     as pass_7in7
+
 
 from        edwprodhh.pub_jchang.master_debtor as debtor
             inner join

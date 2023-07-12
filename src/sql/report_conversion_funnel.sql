@@ -24,6 +24,7 @@ with perc_of_total as
                     sum(pool.pass_phone_voapps)                                                 ::number(18,0)  as pass_phone_voapps,
                     sum(pool.pass_debtor_balance)                                               ::number(18,0)  as pass_debtor_balance,
                     sum(pool.pass_voapps_cooldown)                                              ::number(18,0)  as pass_voapps_cooldown,
+                    sum(pool.pass_7in7)                                                         ::number(18,0)  as pass_7in7,
                     sum(pool.is_eligible_voapps)                                                ::number(18,0)  as is_eligible_voapps,
                     sum(case when proposed.proposed_channel = 'VoApp' then 1 else 0 end)        ::number(18,0)  as is_proposed_voapps,
                     
@@ -100,6 +101,7 @@ with perc_of_total as
                         pass_validation_requirement,
                         pass_debtor_balance,
                         pass_voapps_cooldown,
+                        pass_7in7,
                         pass_debtor_age_packet,
                         pass_packet_balance,
                         is_eligible_voapps,
@@ -119,6 +121,7 @@ with perc_of_total as
                                 pass_validation_requirement,
                                 pass_debtor_balance,
                                 pass_voapps_cooldown,
+                                pass_7in7,
                                 pass_debtor_age_packet,
                                 pass_packet_balance,
                                 is_eligible_voapps,
@@ -213,10 +216,11 @@ with perc_of_total as
                                             when    metric_name = 'PASS_VALIDATION_REQUIREMENT'         then    5
                                             when    metric_name = 'PASS_DEBTOR_BALANCE'                 then    6
                                             when    metric_name = 'PASS_VOAPPS_COOLDOWN'                then    7
-                                            when    metric_name = 'PASS_DEBTOR_AGE_PACKET'              then    8
-                                            when    metric_name = 'PASS_PACKET_BALANCE'                 then    9
-                                            when    metric_name = 'IS_ELIGIBLE_VOAPPS'                  then    10
-                                            when    metric_name = 'IS_PROPOSED_VOAPPS'                  then    11
+                                            when    metric_name = 'PASS_7IN7'                           then    8
+                                            when    metric_name = 'PASS_DEBTOR_AGE_PACKET'              then    9
+                                            when    metric_name = 'PASS_PACKET_BALANCE'                 then    10
+                                            when    metric_name = 'IS_ELIGIBLE_VOAPPS'                  then    11
+                                            when    metric_name = 'IS_PROPOSED_VOAPPS'                  then    12
                                             end
                             when    hermes_funnel = 'Texts'
                             then    case    when    metric_name = 'N_TOTAL'                             then    1
@@ -268,7 +272,8 @@ with perc_of_total as
                     case    when    voapps_pass_phone_voapps_               = 1 then    pool.pass_validation_requirement                                        else 0 end  as voapps_pass_validation_requirement_,
                     case    when    voapps_pass_validation_requirement_     = 1 then    pool.pass_debtor_balance                                                else 0 end  as voapps_pass_debtor_balance_,
                     case    when    voapps_pass_debtor_balance_             = 1 then    pool.pass_voapps_cooldown                                               else 0 end  as voapps_pass_voapps_cooldown_,
-                    case    when    voapps_pass_voapps_cooldown_            = 1 then    pool.pass_debtor_age_packet                                             else 0 end  as voapps_pass_debtor_age_packet_,
+                    case    when    voapps_pass_voapps_cooldown_            = 1 then    pool.pass_7in7                                                          else 0 end  as voapps_pass_7in7_,
+                    case    when    voapps_pass_7in7_                       = 1 then    pool.pass_debtor_age_packet                                             else 0 end  as voapps_pass_debtor_age_packet_,
                     case    when    voapps_pass_debtor_age_packet_          = 1 then    pool.pass_packet_balance                                                else 0 end  as voapps_pass_packet_balance_,
                     case    when    voapps_pass_packet_balance_             = 1 then    pool.is_eligible_voapps                                                 else 0 end  as voapps_is_eligible_voapps_,
                     case    when    voapps_is_eligible_voapps_              = 1 then    case when proposed.proposed_channel = 'VoApp' then 1 else 0 end         else 0 end  as voapps_is_proposed_voapps_,
@@ -317,7 +322,8 @@ with perc_of_total as
                     sum(case    when    voapps_pass_phone_voapps_               = 1 then    voapps_pass_validation_requirement_     end)::number(18,0)  as voapps_pass_validation_requirement,
                     sum(case    when    voapps_pass_validation_requirement_     = 1 then    voapps_pass_debtor_balance_             end)::number(18,0)  as voapps_pass_debtor_balance,
                     sum(case    when    voapps_pass_debtor_balance_             = 1 then    voapps_pass_voapps_cooldown_            end)::number(18,0)  as voapps_pass_voapps_cooldown,
-                    sum(case    when    voapps_pass_voapps_cooldown_            = 1 then    voapps_pass_debtor_age_packet_          end)::number(18,0)  as voapps_pass_debtor_age_packet,
+                    sum(case    when    voapps_pass_voapps_cooldown_            = 1 then    voapps_pass_7in7_                       end)::number(18,0)  as voapps_pass_7in7,
+                    sum(case    when    voapps_pass_7in7_                       = 1 then    voapps_pass_debtor_age_packet_          end)::number(18,0)  as voapps_pass_debtor_age_packet,
                     sum(case    when    voapps_pass_debtor_age_packet_          = 1 then    voapps_pass_packet_balance_             end)::number(18,0)  as voapps_pass_packet_balance,
                     sum(case    when    voapps_pass_packet_balance_             = 1 then    voapps_is_eligible_voapps_              end)::number(18,0)  as voapps_is_eligible_voapps,
                     sum(case    when    voapps_is_eligible_voapps_              = 1 then    voapps_is_proposed_voapps_              end)::number(18,0)  as voapps_is_proposed_voapps,
@@ -396,6 +402,7 @@ with perc_of_total as
                         voapps_pass_validation_requirement      as pass_validation_requirement,
                         voapps_pass_debtor_balance              as pass_debtor_balance,
                         voapps_pass_voapps_cooldown             as pass_voapps_cooldown,
+                        voapps_pass_7in7                        as pass_7in7,
                         voapps_pass_debtor_age_packet           as pass_debtor_age_packet,
                         voapps_pass_packet_balance              as pass_packet_balance,
                         voapps_is_eligible_voapps               as is_eligible_voapps,
@@ -415,6 +422,7 @@ with perc_of_total as
                                 pass_validation_requirement,
                                 pass_debtor_balance,
                                 pass_voapps_cooldown,
+                                pass_7in7,
                                 pass_debtor_age_packet,
                                 pass_packet_balance,
                                 is_eligible_voapps,
@@ -509,10 +517,11 @@ with perc_of_total as
                                             when    metric_name = 'PASS_VALIDATION_REQUIREMENT'         then    5
                                             when    metric_name = 'PASS_DEBTOR_BALANCE'                 then    6
                                             when    metric_name = 'PASS_VOAPPS_COOLDOWN'                then    7
-                                            when    metric_name = 'PASS_DEBTOR_AGE_PACKET'              then    8
-                                            when    metric_name = 'PASS_PACKET_BALANCE'                 then    9
-                                            when    metric_name = 'IS_ELIGIBLE_VOAPPS'                  then    10
-                                            when    metric_name = 'IS_PROPOSED_VOAPPS'                  then    11
+                                            when    metric_name = 'PASS_7IN7'                           then    8
+                                            when    metric_name = 'PASS_DEBTOR_AGE_PACKET'              then    9
+                                            when    metric_name = 'PASS_PACKET_BALANCE'                 then    10
+                                            when    metric_name = 'IS_ELIGIBLE_VOAPPS'                  then    11
+                                            when    metric_name = 'IS_PROPOSED_VOAPPS'                  then    12
                                             end
                             when    hermes_funnel = 'Texts'
                             then    case    when    metric_name = 'N_TOTAL'                             then    1
@@ -641,6 +650,7 @@ with perc_of_total as
                     sum(pool.pass_phone_voapps)                                                 ::number(18,0)  as pass_phone_voapps,
                     sum(pool.pass_debtor_balance)                                               ::number(18,0)  as pass_debtor_balance,
                     sum(pool.pass_voapps_cooldown)                                              ::number(18,0)  as pass_voapps_cooldown,
+                    sum(pool.pass_7in7)                                                         ::number(18,0)  as pass_7in7,
                     sum(pool.is_eligible_voapps)                                                ::number(18,0)  as is_eligible_voapps,
                     sum(case when proposed.proposed_channel = 'VoApp' then 1 else 0 end)        ::number(18,0)  as is_proposed_voapps,
                     
@@ -717,6 +727,7 @@ with perc_of_total as
                         pass_validation_requirement,
                         pass_debtor_balance,
                         pass_voapps_cooldown,
+                        pass_7in7,
                         pass_debtor_age_packet,
                         pass_packet_balance,
                         is_eligible_voapps,
@@ -736,6 +747,7 @@ with perc_of_total as
                                 pass_validation_requirement,
                                 pass_debtor_balance,
                                 pass_voapps_cooldown,
+                                pass_7in7,
                                 pass_debtor_age_packet,
                                 pass_packet_balance,
                                 is_eligible_voapps,
@@ -830,10 +842,11 @@ with perc_of_total as
                                             when    metric_name = 'PASS_VALIDATION_REQUIREMENT'         then    5
                                             when    metric_name = 'PASS_DEBTOR_BALANCE'                 then    6
                                             when    metric_name = 'PASS_VOAPPS_COOLDOWN'                then    7
-                                            when    metric_name = 'PASS_DEBTOR_AGE_PACKET'              then    8
-                                            when    metric_name = 'PASS_PACKET_BALANCE'                 then    9
-                                            when    metric_name = 'IS_ELIGIBLE_VOAPPS'                  then    10
-                                            when    metric_name = 'IS_PROPOSED_VOAPPS'                  then    11
+                                            when    metric_name = 'PASS_7IN7'                           then    8
+                                            when    metric_name = 'PASS_DEBTOR_AGE_PACKET'              then    9
+                                            when    metric_name = 'PASS_PACKET_BALANCE'                 then    10
+                                            when    metric_name = 'IS_ELIGIBLE_VOAPPS'                  then    11
+                                            when    metric_name = 'IS_PROPOSED_VOAPPS'                  then    12
                                             end
                             when    hermes_funnel = 'Texts'
                             then    case    when    metric_name = 'N_TOTAL'                             then    1
@@ -885,7 +898,8 @@ with perc_of_total as
                     case    when    voapps_pass_phone_voapps_               = 1 then    pool.pass_validation_requirement                                        else 0 end  as voapps_pass_validation_requirement_,
                     case    when    voapps_pass_validation_requirement_     = 1 then    pool.pass_debtor_balance                                                else 0 end  as voapps_pass_debtor_balance_,
                     case    when    voapps_pass_debtor_balance_             = 1 then    pool.pass_voapps_cooldown                                               else 0 end  as voapps_pass_voapps_cooldown_,
-                    case    when    voapps_pass_voapps_cooldown_            = 1 then    pool.pass_debtor_age_packet                                             else 0 end  as voapps_pass_debtor_age_packet_,
+                    case    when    voapps_pass_voapps_cooldown_            = 1 then    pool.pass_7in7                                                          else 0 end  as voapps_pass_7in7_,
+                    case    when    voapps_pass_7in7_                       = 1 then    pool.pass_debtor_age_packet                                             else 0 end  as voapps_pass_debtor_age_packet_,
                     case    when    voapps_pass_debtor_age_packet_          = 1 then    pool.pass_packet_balance                                                else 0 end  as voapps_pass_packet_balance_,
                     case    when    voapps_pass_packet_balance_             = 1 then    pool.is_eligible_voapps                                                 else 0 end  as voapps_is_eligible_voapps_,
                     case    when    voapps_is_eligible_voapps_              = 1 then    case when proposed.proposed_channel = 'VoApp' then 1 else 0 end         else 0 end  as voapps_is_proposed_voapps_,
@@ -934,7 +948,8 @@ with perc_of_total as
                     sum(case    when    voapps_pass_phone_voapps_               = 1 then    voapps_pass_validation_requirement_     end)::number(18,0)  as voapps_pass_validation_requirement,
                     sum(case    when    voapps_pass_validation_requirement_     = 1 then    voapps_pass_debtor_balance_             end)::number(18,0)  as voapps_pass_debtor_balance,
                     sum(case    when    voapps_pass_debtor_balance_             = 1 then    voapps_pass_voapps_cooldown_            end)::number(18,0)  as voapps_pass_voapps_cooldown,
-                    sum(case    when    voapps_pass_voapps_cooldown_            = 1 then    voapps_pass_debtor_age_packet_          end)::number(18,0)  as voapps_pass_debtor_age_packet,
+                    sum(case    when    voapps_pass_voapps_cooldown_            = 1 then    voapps_pass_7in7_                       end)::number(18,0)  as voapps_pass_7in7,
+                    sum(case    when    voapps_pass_7in7_                       = 1 then    voapps_pass_debtor_age_packet_          end)::number(18,0)  as voapps_pass_debtor_age_packet,
                     sum(case    when    voapps_pass_debtor_age_packet_          = 1 then    voapps_pass_packet_balance_             end)::number(18,0)  as voapps_pass_packet_balance,
                     sum(case    when    voapps_pass_packet_balance_             = 1 then    voapps_is_eligible_voapps_              end)::number(18,0)  as voapps_is_eligible_voapps,
                     sum(case    when    voapps_is_eligible_voapps_              = 1 then    voapps_is_proposed_voapps_              end)::number(18,0)  as voapps_is_proposed_voapps,
@@ -1013,6 +1028,7 @@ with perc_of_total as
                         voapps_pass_validation_requirement      as pass_validation_requirement,
                         voapps_pass_debtor_balance              as pass_debtor_balance,
                         voapps_pass_voapps_cooldown             as pass_voapps_cooldown,
+                        voapps_pass_7in7                        as pass_7in7,
                         voapps_pass_debtor_age_packet           as pass_debtor_age_packet,
                         voapps_pass_packet_balance              as pass_packet_balance,
                         voapps_is_eligible_voapps               as is_eligible_voapps,
@@ -1032,6 +1048,7 @@ with perc_of_total as
                                 pass_validation_requirement,
                                 pass_debtor_balance,
                                 pass_voapps_cooldown,
+                                pass_7in7,
                                 pass_debtor_age_packet,
                                 pass_packet_balance,
                                 is_eligible_voapps,
@@ -1126,10 +1143,11 @@ with perc_of_total as
                                             when    metric_name = 'PASS_VALIDATION_REQUIREMENT'         then    5
                                             when    metric_name = 'PASS_DEBTOR_BALANCE'                 then    6
                                             when    metric_name = 'PASS_VOAPPS_COOLDOWN'                then    7
-                                            when    metric_name = 'PASS_DEBTOR_AGE_PACKET'              then    8
-                                            when    metric_name = 'PASS_PACKET_BALANCE'                 then    9
-                                            when    metric_name = 'IS_ELIGIBLE_VOAPPS'                  then    10
-                                            when    metric_name = 'IS_PROPOSED_VOAPPS'                  then    11
+                                            when    metric_name = 'PASS_7IN7'                           then    8
+                                            when    metric_name = 'PASS_DEBTOR_AGE_PACKET'              then    9
+                                            when    metric_name = 'PASS_PACKET_BALANCE'                 then    10
+                                            when    metric_name = 'IS_ELIGIBLE_VOAPPS'                  then    11
+                                            when    metric_name = 'IS_PROPOSED_VOAPPS'                  then    12
                                             end
                             when    hermes_funnel = 'Texts'
                             then    case    when    metric_name = 'N_TOTAL'                             then    1

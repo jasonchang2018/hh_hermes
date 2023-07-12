@@ -54,6 +54,10 @@ with joined as
                 contact_cooldown.prev_n_dialer_agent,
                 contact_cooldown.prev_n_dialer_agentless,
                 contact_cooldown.prev_n_outbound_manual,
+                contact_cooldown.prev_n_voapps_7,
+                contact_cooldown.prev_n_dialer_agent_7,
+                contact_cooldown.prev_n_dialer_agentless_7,
+                contact_cooldown.prev_n_outbound_manual_7,
                 contact_cooldown.prev_date_contacts,
                 contact_cooldown.prev_date_letters,
                 contact_cooldown.prev_date_voapps,
@@ -63,10 +67,12 @@ with joined as
                 contact_cooldown.prev_date_dialer_agent,
                 contact_cooldown.prev_date_dialer_agentless,
                 contact_cooldown.prev_date_outbound_manual,
+                contact_cooldown.prev_date_rpc,
                 contact_cooldown.pass_letters_warmup,
                 contact_cooldown.pass_letters_cooldown,
                 contact_cooldown.pass_voapps_cooldown,
                 contact_cooldown.pass_texts_cooldown,
+                contact_cooldown.pass_7in7,
                 
                 debtor_balance.assigned,
                 debtor_balance.balance_dimdebtor,
@@ -154,6 +160,7 @@ select      *,
                     and     pass_packet_balance                     =   1
                     and     pass_debtor_age_packet                  =   1
                     and     pass_voapps_cooldown                    =   1
+                    and     pass_7in7                               =   1
                     then    1
                     else    0
                     end     as is_eligible_voapps,
@@ -242,6 +249,10 @@ with joined as
                 contact_cooldown.prev_n_dialer_agent,
                 contact_cooldown.prev_n_dialer_agentless,
                 contact_cooldown.prev_n_outbound_manual,
+                contact_cooldown.prev_n_voapps_7,
+                contact_cooldown.prev_n_dialer_agent_7,
+                contact_cooldown.prev_n_dialer_agentless_7,
+                contact_cooldown.prev_n_outbound_manual_7,
                 contact_cooldown.prev_date_contacts,
                 contact_cooldown.prev_date_letters,
                 contact_cooldown.prev_date_voapps,
@@ -251,10 +262,12 @@ with joined as
                 contact_cooldown.prev_date_dialer_agent,
                 contact_cooldown.prev_date_dialer_agentless,
                 contact_cooldown.prev_date_outbound_manual,
+                contact_cooldown.prev_date_rpc,
                 contact_cooldown.pass_letters_warmup,
                 contact_cooldown.pass_letters_cooldown,
                 contact_cooldown.pass_voapps_cooldown,
                 contact_cooldown.pass_texts_cooldown,
+                contact_cooldown.pass_7in7,
                 
                 debtor_balance.assigned,
                 debtor_balance.balance_dimdebtor,
@@ -342,6 +355,7 @@ select      *,
                     and     pass_packet_balance                     =   1
                     and     pass_debtor_age_packet                  =   1
                     and     pass_voapps_cooldown                    =   1
+                    and     pass_7in7                               =   1
                     then    1
                     else    0
                     end     as is_eligible_voapps,
