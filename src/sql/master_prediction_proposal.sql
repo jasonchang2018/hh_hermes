@@ -29,6 +29,12 @@ with scores as
                 )   as unpvt
 
     where       score_value is not null
+                and proposed_channel in (
+                    'Letter',
+                    'Text Message',
+                    'VoApp',
+                    'Email'
+                )
 )
 , calculate_marginal_wide as
 (
@@ -235,6 +241,36 @@ with scores as
     from        with_flags
     where       is_eligible_cost_client
 )
+, filter_runnings_channels_global as
+(
+    with with_flags as
+    (
+        select      *,
+                    sum(marginal_cost) over (partition by proposed_channel order by rank_weighted asc)     as running_cost_channel_global,
+                    case    when    proposed_channel = 'Letter'         then  running_cost_channel_global <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_LETTERS')
+                            when    proposed_channel = 'Text Message'   then  running_cost_channel_global <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_TEXTS')
+                            when    proposed_channel = 'VoApp'          then  running_cost_channel_global <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_VOAPPS')
+                            when    proposed_channel = 'Email'          then  running_cost_channel_global <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_EMAILS')
+                            else    FALSE
+                            end     as is_eligible_cost_channel_global
+
+        from        filter_runnings_client
+    )
+    select      debtor_idx,
+                client_idx,
+                pl_group,
+                proposed_channel,
+                marginal_fee,
+                marginal_cost,
+                marginal_profit,
+                marginal_margin,
+                rank_profit,
+                rank_margin,
+                rank_weighted
+
+    from        with_flags
+    where       is_eligible_cost_channel_global
+)
 , filter_runnings_total as
 (
     with with_flags as
@@ -249,7 +285,7 @@ with scores as
                     running_cost            <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_TOTAL')           as is_eligible_cost,
                     running_margin          >= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MIN_MARGIN_RUNNING_TOTAL')         as is_eligible_margin
 
-        from        filter_runnings_client
+        from        filter_runnings_channels_global
     )
     select      debtor_idx,
                 client_idx,
@@ -293,8 +329,6 @@ with scores as
                     edwprodhh.pub_jchang.master_debtor as debtor
                     on fasttrack.debtor_idx = debtor.debtor_idx
     where       fasttrack.packet_idx not in (select packet_idx from packets_already_proposed)
-    
-
 )
 --  <--  FAST TRACK
 
@@ -378,6 +412,12 @@ with scores as
                 )   as unpvt
 
     where       score_value is not null
+                and proposed_channel in (
+                    'Letter',
+                    'Text Message',
+                    'VoApp',
+                    'Email'
+                )
 )
 , calculate_marginal_wide as
 (
@@ -584,6 +624,36 @@ with scores as
     from        with_flags
     where       is_eligible_cost_client
 )
+, filter_runnings_channels_global as
+(
+    with with_flags as
+    (
+        select      *,
+                    sum(marginal_cost) over (partition by proposed_channel order by rank_weighted asc)     as running_cost_channel_global,
+                    case    when    proposed_channel = 'Letter'         then  running_cost_channel_global <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_LETTERS')
+                            when    proposed_channel = 'Text Message'   then  running_cost_channel_global <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_TEXTS')
+                            when    proposed_channel = 'VoApp'          then  running_cost_channel_global <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_VOAPPS')
+                            when    proposed_channel = 'Email'          then  running_cost_channel_global <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_EMAILS')
+                            else    FALSE
+                            end     as is_eligible_cost_channel_global
+
+        from        filter_runnings_client
+    )
+    select      debtor_idx,
+                client_idx,
+                pl_group,
+                proposed_channel,
+                marginal_fee,
+                marginal_cost,
+                marginal_profit,
+                marginal_margin,
+                rank_profit,
+                rank_margin,
+                rank_weighted
+
+    from        with_flags
+    where       is_eligible_cost_channel_global
+)
 , filter_runnings_total as
 (
     with with_flags as
@@ -598,7 +668,7 @@ with scores as
                     running_cost            <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_TOTAL')           as is_eligible_cost,
                     running_margin          >= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MIN_MARGIN_RUNNING_TOTAL')         as is_eligible_margin
 
-        from        filter_runnings_client
+        from        filter_runnings_channels_global
     )
     select      debtor_idx,
                 client_idx,
@@ -642,8 +712,6 @@ with scores as
                     edwprodhh.pub_jchang.master_debtor as debtor
                     on fasttrack.debtor_idx = debtor.debtor_idx
     where       fasttrack.packet_idx not in (select packet_idx from packets_already_proposed)
-    
-
 )
 --  <--  FAST TRACK
 
