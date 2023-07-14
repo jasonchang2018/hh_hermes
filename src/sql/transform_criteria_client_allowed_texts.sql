@@ -1,6 +1,7 @@
 create or replace view
     edwprodhh.hermes.transform_criteria_client_allowed_texts
 as
+select 'BROWARD HEALTH - 3P'                            as pl_group union all
 select 'CARLE HEALTHCARE - 3P'                          as pl_group union all
 select 'CARLE HEALTHCARE - 3P-2'                        as pl_group union all
 select 'CITY OF CLEVELAND OH - CONDUENT - 3P'           as pl_group union all
