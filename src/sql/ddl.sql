@@ -132,6 +132,7 @@ create table
     RANK_WEIGHTED                   NUMBER(28,2),
     IS_PROPOSED_CONTACT             NUMBER(1,0),
     IS_FASTTRACK                    NUMBER(1,0),
+    UPLOAD_DATE                     DATE,
     execute_time                    TIMESTAMP_LTZ(9)
 )
 ;

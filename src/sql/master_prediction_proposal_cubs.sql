@@ -11,6 +11,7 @@ from        edwprodhh.hermes.master_prediction_proposal as proposal
                 on proposal.debtor_idx = debtor.debtor_idx
                 
 where       proposal.is_proposed_contact = 1
+            and proposal.upload_date = current_date()
 ;
 
 

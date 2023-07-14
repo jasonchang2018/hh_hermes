@@ -303,6 +303,53 @@ with scores as
     where       is_eligible_cost
                 and is_eligible_margin
 )
+, calculate_upload_date as
+(
+    --  SCORE AND PROPOSE WEEKLY, SPACE OUT (FOR NOW, JUST TEXTS) VIA THROTTLED UPLOADS DAILY
+    with percentiles as
+    (
+        select      debtor_idx,
+                    edwprodhh.pub_jchang.divide(
+                        row_number() over (partition by proposed_channel order by rank_weighted asc),
+                        count(*) over (partition by proposed_channel)
+                    )   as ntile
+        from        filter_runnings_total
+    )
+    --  ASSUMES RUN ON THURSDAY EVENING -> UPLOAD FRIDAY THRU NEXT THURSDAY
+    --  HOWEVER, UNSURE WHETHER CURRENT_DATE() WILL BE THURSDAY OR FRIDAY, SO CAUTIOUSLY TRUNCATE TO WEEK FOR CALCULATION
+    select      filter_runnings_total.*,
+                case    when    proposed_channel = 'Letter'
+                        then    date_trunc('week', current_date()) + 4
+                        when    proposed_channel = 'Text Message'
+                        then    case    when    percentiles.ntile >= 0
+                                        and     percentiles.ntile <= 0.20
+                                        then    date_trunc('week', current_date()) + 4
+                                        when    percentiles.ntile >  0.20
+                                        and     percentiles.ntile <= 0.40
+                                        then    date_trunc('week', current_date()) + 7
+                                        when    percentiles.ntile >  0.40
+                                        and     percentiles.ntile <= 0.60
+                                        then    date_trunc('week', current_date()) + 8
+                                        when    percentiles.ntile >  0.60
+                                        and     percentiles.ntile <= 0.80
+                                        then    date_trunc('week', current_date()) + 9
+                                        when    percentiles.ntile >  0.80
+                                        and     percentiles.ntile <= 1.00
+                                        then    date_trunc('week', current_date()) + 10
+                                        else    date_trunc('week', current_date()) + 10
+                                        end
+                        when    proposed_channel = 'VoApp'
+                        then    date_trunc('week', current_date()) + 4
+                        when    proposed_channel = 'Email'
+                        then    date_trunc('week', current_date()) + 4
+                        else    date_trunc('week', current_date()) + 4
+                        end     as upload_date
+
+    from        filter_runnings_total
+                inner join
+                    percentiles
+                    on filter_runnings_total.debtor_idx = percentiles.debtor_idx
+)
 --  <--  FILTER ON SET PARAMETERS
 
 --  FAST TRACK  -->
@@ -312,7 +359,7 @@ with scores as
     with packets_already_proposed as
     (
         select      debtor.packet_idx
-        from        filter_runnings_total as proposed
+        from        calculate_upload_date as proposed
                     inner join
                         edwprodhh.pub_jchang.master_debtor as debtor
                         on proposed.debtor_idx = debtor.debtor_idx
@@ -358,7 +405,9 @@ with scores as
                 case    when    fast_track.debtor_idx is not null
                         then    1
                         else    0
-                        end     as is_fasttrack
+                        end     as is_fasttrack,
+
+                proposed.upload_date
 
     from        calculate_marginal_wide as pool
                 full outer join
@@ -366,7 +415,7 @@ with scores as
                     on  pool.debtor_idx         = fast_track.debtor_idx
                     and pool.proposed_channel   = fast_track.proposed_channel
                 left join
-                    filter_runnings_total as proposed
+                    calculate_upload_date as proposed
                     on  pool.debtor_idx         = proposed.debtor_idx
                     and pool.proposed_channel   = proposed.proposed_channel
 )
@@ -686,6 +735,53 @@ with scores as
     where       is_eligible_cost
                 and is_eligible_margin
 )
+, calculate_upload_date as
+(
+    --  SCORE AND PROPOSE WEEKLY, SPACE OUT (FOR NOW, JUST TEXTS) VIA THROTTLED UPLOADS DAILY
+    with percentiles as
+    (
+        select      debtor_idx,
+                    edwprodhh.pub_jchang.divide(
+                        row_number() over (partition by proposed_channel order by rank_weighted asc),
+                        count(*) over (partition by proposed_channel)
+                    )   as ntile
+        from        filter_runnings_total
+    )
+    --  ASSUMES RUN ON THURSDAY EVENING -> UPLOAD FRIDAY THRU NEXT THURSDAY
+    --  HOWEVER, UNSURE WHETHER CURRENT_DATE() WILL BE THURSDAY OR FRIDAY, SO CAUTIOUSLY TRUNCATE TO WEEK FOR CALCULATION
+    select      filter_runnings_total.*,
+                case    when    proposed_channel = 'Letter'
+                        then    date_trunc('week', current_date()) + 4
+                        when    proposed_channel = 'Text Message'
+                        then    case    when    percentiles.ntile >= 0
+                                        and     percentiles.ntile <= 0.20
+                                        then    date_trunc('week', current_date()) + 4
+                                        when    percentiles.ntile >  0.20
+                                        and     percentiles.ntile <= 0.40
+                                        then    date_trunc('week', current_date()) + 7
+                                        when    percentiles.ntile >  0.40
+                                        and     percentiles.ntile <= 0.60
+                                        then    date_trunc('week', current_date()) + 8
+                                        when    percentiles.ntile >  0.60
+                                        and     percentiles.ntile <= 0.80
+                                        then    date_trunc('week', current_date()) + 9
+                                        when    percentiles.ntile >  0.80
+                                        and     percentiles.ntile <= 1.00
+                                        then    date_trunc('week', current_date()) + 10
+                                        else    date_trunc('week', current_date()) + 10
+                                        end
+                        when    proposed_channel = 'VoApp'
+                        then    date_trunc('week', current_date()) + 4
+                        when    proposed_channel = 'Email'
+                        then    date_trunc('week', current_date()) + 4
+                        else    date_trunc('week', current_date()) + 4
+                        end     as upload_date
+
+    from        filter_runnings_total
+                inner join
+                    percentiles
+                    on filter_runnings_total.debtor_idx = percentiles.debtor_idx
+)
 --  <--  FILTER ON SET PARAMETERS
 
 --  FAST TRACK  -->
@@ -695,7 +791,7 @@ with scores as
     with packets_already_proposed as
     (
         select      debtor.packet_idx
-        from        filter_runnings_total as proposed
+        from        calculate_upload_date as proposed
                     inner join
                         edwprodhh.pub_jchang.master_debtor as debtor
                         on proposed.debtor_idx = debtor.debtor_idx
@@ -741,7 +837,9 @@ with scores as
                 case    when    fast_track.debtor_idx is not null
                         then    1
                         else    0
-                        end     as is_fasttrack
+                        end     as is_fasttrack,
+
+                proposed.upload_date
 
     from        calculate_marginal_wide as pool
                 full outer join
@@ -749,7 +847,7 @@ with scores as
                     on  pool.debtor_idx         = fast_track.debtor_idx
                     and pool.proposed_channel   = fast_track.proposed_channel
                 left join
-                    filter_runnings_total as proposed
+                    calculate_upload_date as proposed
                     on  pool.debtor_idx         = proposed.debtor_idx
                     and pool.proposed_channel   = proposed.proposed_channel
 )
