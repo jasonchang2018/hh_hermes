@@ -4,15 +4,9 @@ as
 with phone_numbers as
 (
     select      debtor_idx,
-                nullif(trim(regexp_replace(phone, '[\\-\\+\\.\\(\\)]')), '') as phone_
+                edwprodhh.pub_jchang.contact_address_format_phone(phone) as phone_
     from        edwprodhh.dw.dimdebtor
-    where       phone_ is not null
-                and regexp_like(phone_, '^\\!?[0-9]+$')         --  Keep only phones that are numbers and can optionally start with a `!`.
-                and not regexp_like(phone_, '^\\!.*$')          --  Exclude where first character is a `!`, which signifies Do Not Call (DNC).
-                and length(phone_) = 10                         --  Must be 10 digits long
-                and not regexp_like(phone_, '^[01].*$')         --  First digit of area code cannot be 0 or 1, which is a standard.
-                and not regexp_like(phone_, '^.9.*$')           --  Second digit of area code cannot be 9, which is a standard.
-                and not regexp_like(phone_, '^.{3}1.*$')        --  4th digit overall (1st of the 2nd group of 3, called the exchange) cannot be 1
+    where       edwprodhh.pub_jchang.contact_address_valid_phone(phone_) = 1
 )
 select      phone_debtor.debtor_idx,
             phone_debtor.packet_idx,
@@ -96,15 +90,9 @@ as
 with phone_numbers as
 (
     select      debtor_idx,
-                nullif(trim(regexp_replace(phone, '[\\-\\+\\.\\(\\)]')), '') as phone_
+                edwprodhh.pub_jchang.contact_address_format_phone(phone) as phone_
     from        edwprodhh.dw.dimdebtor
-    where       phone_ is not null
-                and regexp_like(phone_, '^\\!?[0-9]+$')         --  Keep only phones that are numbers and can optionally start with a `!`.
-                and not regexp_like(phone_, '^\\!.*$')          --  Exclude where first character is a `!`, which signifies Do Not Call (DNC).
-                and length(phone_) = 10                         --  Must be 10 digits long
-                and not regexp_like(phone_, '^[01].*$')         --  First digit of area code cannot be 0 or 1, which is a standard.
-                and not regexp_like(phone_, '^.9.*$')           --  Second digit of area code cannot be 9, which is a standard.
-                and not regexp_like(phone_, '^.{3}1.*$')        --  4th digit overall (1st of the 2nd group of 3, called the exchange) cannot be 1
+    where       edwprodhh.pub_jchang.contact_address_valid_phone(phone_) = 1
 )
 select      phone_debtor.debtor_idx,
             phone_debtor.packet_idx,
