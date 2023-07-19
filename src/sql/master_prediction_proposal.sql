@@ -315,34 +315,34 @@ with scores as
                     )   as ntile
         from        filter_runnings_total
     )
-    --  ASSUMES RUN ON THURSDAY EVENING -> UPLOAD FRIDAY THRU NEXT THURSDAY
+    --  ASSUMES RUN ON THURSDAY EVENING -> UPLOAD MONDAY THRU NEXT FRIDAY
     --  HOWEVER, UNSURE WHETHER CURRENT_DATE() WILL BE THURSDAY OR FRIDAY, SO CAUTIOUSLY TRUNCATE TO WEEK FOR CALCULATION
     select      filter_runnings_total.*,
                 case    when    proposed_channel = 'Letter'
-                        then    date_trunc('week', current_date()) + 4
+                        then    date_trunc('week', current_date()) + 7
                         when    proposed_channel = 'Text Message'
                         then    case    when    percentiles.ntile >= 0
                                         and     percentiles.ntile <= 0.20
-                                        then    date_trunc('week', current_date()) + 4
+                                        then    date_trunc('week', current_date()) + 7
                                         when    percentiles.ntile >  0.20
                                         and     percentiles.ntile <= 0.40
-                                        then    date_trunc('week', current_date()) + 7
+                                        then    date_trunc('week', current_date()) + 8
                                         when    percentiles.ntile >  0.40
                                         and     percentiles.ntile <= 0.60
-                                        then    date_trunc('week', current_date()) + 8
+                                        then    date_trunc('week', current_date()) + 9
                                         when    percentiles.ntile >  0.60
                                         and     percentiles.ntile <= 0.80
-                                        then    date_trunc('week', current_date()) + 9
+                                        then    date_trunc('week', current_date()) + 10
                                         when    percentiles.ntile >  0.80
                                         and     percentiles.ntile <= 1.00
-                                        then    date_trunc('week', current_date()) + 10
-                                        else    date_trunc('week', current_date()) + 10
+                                        then    date_trunc('week', current_date()) + 11
+                                        else    date_trunc('week', current_date()) + 11
                                         end
                         when    proposed_channel = 'VoApp'
-                        then    date_trunc('week', current_date()) + 4
+                        then    date_trunc('week', current_date()) + 7
                         when    proposed_channel = 'Email'
-                        then    date_trunc('week', current_date()) + 4
-                        else    date_trunc('week', current_date()) + 4
+                        then    date_trunc('week', current_date()) + 7
+                        else    date_trunc('week', current_date()) + 7
                         end     as upload_date
 
     from        filter_runnings_total
@@ -747,34 +747,34 @@ with scores as
                     )   as ntile
         from        filter_runnings_total
     )
-    --  ASSUMES RUN ON THURSDAY EVENING -> UPLOAD FRIDAY THRU NEXT THURSDAY
+    --  ASSUMES RUN ON THURSDAY EVENING -> UPLOAD MONDAY THRU NEXT FRIDAY
     --  HOWEVER, UNSURE WHETHER CURRENT_DATE() WILL BE THURSDAY OR FRIDAY, SO CAUTIOUSLY TRUNCATE TO WEEK FOR CALCULATION
     select      filter_runnings_total.*,
                 case    when    proposed_channel = 'Letter'
-                        then    date_trunc('week', current_date()) + 4
+                        then    date_trunc('week', current_date()) + 7
                         when    proposed_channel = 'Text Message'
                         then    case    when    percentiles.ntile >= 0
                                         and     percentiles.ntile <= 0.20
-                                        then    date_trunc('week', current_date()) + 4
+                                        then    date_trunc('week', current_date()) + 7
                                         when    percentiles.ntile >  0.20
                                         and     percentiles.ntile <= 0.40
-                                        then    date_trunc('week', current_date()) + 7
+                                        then    date_trunc('week', current_date()) + 8
                                         when    percentiles.ntile >  0.40
                                         and     percentiles.ntile <= 0.60
-                                        then    date_trunc('week', current_date()) + 8
+                                        then    date_trunc('week', current_date()) + 9
                                         when    percentiles.ntile >  0.60
                                         and     percentiles.ntile <= 0.80
-                                        then    date_trunc('week', current_date()) + 9
+                                        then    date_trunc('week', current_date()) + 10
                                         when    percentiles.ntile >  0.80
                                         and     percentiles.ntile <= 1.00
-                                        then    date_trunc('week', current_date()) + 10
-                                        else    date_trunc('week', current_date()) + 10
+                                        then    date_trunc('week', current_date()) + 11
+                                        else    date_trunc('week', current_date()) + 11
                                         end
                         when    proposed_channel = 'VoApp'
-                        then    date_trunc('week', current_date()) + 4
+                        then    date_trunc('week', current_date()) + 7
                         when    proposed_channel = 'Email'
-                        then    date_trunc('week', current_date()) + 4
-                        else    date_trunc('week', current_date()) + 4
+                        then    date_trunc('week', current_date()) + 7
+                        else    date_trunc('week', current_date()) + 7
                         end     as upload_date
 
     from        filter_runnings_total
