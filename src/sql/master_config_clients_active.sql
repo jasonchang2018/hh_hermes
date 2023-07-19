@@ -50,7 +50,7 @@ where       pl_group in (
                 'CITY OF PHILADELPHIA PA - PARKING - 3P',
                 'CITY OF SEATTLE WA - MUNI COURT - 3P',
                 'COLUMBIA DOCTORS - 3P',
-                -- 'ELIZABETH RIVER CROSSINGS - 3P',            --setting off for now to speed up scoring since no letters nor texts spend allocated right now.
+                'ELIZABETH RIVER CROSSINGS - 3P',
                 'EVERGY - 3P',
                 'EVERGY - 3P-2',
                 'FRANCISCAN HEALTH - 3P',
