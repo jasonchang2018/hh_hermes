@@ -87,6 +87,8 @@ with joined as
                 debtor_income.median_household_income,
                 debtor_income.pass_debtor_income,
                 
+                debtor_lastpayment.packet_has_previous_payment,
+                debtor_lastpayment.debtor_is_first_in_packet,
                 debtor_lastpayment.last_payment_date,
                 debtor_lastpayment.pass_contraints_packet_last_payment,
 
@@ -101,7 +103,14 @@ with joined as
                 debtor_maturity.pass_debtor_age_packet,
 
                 debtor_taxyear.tax_year,
-                debtor_taxyear.pass_debtor_tax_year
+                debtor_taxyear.pass_debtor_tax_year,
+
+                debtor_debttype.is_debttype_gov_parking,
+                debtor_debttype.is_debttype_gov_toll,
+                debtor_debttype.is_debttype_hc_ai,
+                debtor_debttype.is_debttype_hc_sp,
+
+                debtor_scorehist.pass_debtor_first_score_dialer_agent
                 
                 
 
@@ -125,6 +134,8 @@ with joined as
                 inner join edwprodhh.hermes.transform_businessrules_debtor_maturity         as debtor_maturity              on debtor.debtor_idx = debtor_maturity.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_debtor_taxyear          as debtor_taxyear               on debtor.debtor_idx = debtor_taxyear.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_debtor_payplan          as debtor_payplan               on debtor.debtor_idx = debtor_payplan.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_score_history    as debtor_scorehist             on debtor.debtor_idx = debtor_scorehist.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_debttype         as debtor_debttype              on debtor.debtor_idx = debtor_debttype.debtor_idx
 )
 select      *,
 
@@ -167,7 +178,17 @@ select      *,
                     
 
             NULL as is_eligible_emails,
-            NULL as is_eligible_dialer_agent,
+            
+            case    when    pass_client_allowed_calls               =   1
+                    and     pass_debtor_status                      =   1
+                    and     pass_phone_calls                        =   1
+                    and     pass_7in7                               =   1
+                    and     pass_debtor_first_score_dialer_agent    =   1
+                    then    1
+                    else    0
+                    end     as is_eligible_dialer_agent,
+
+
             NULL as is_eligible_dialer_agentless
 
 from        joined
@@ -181,12 +202,15 @@ alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprod
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_lastpayment;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_income;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_experian;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_debttype;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_score_history;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_criteria_validation_requirement;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_criteria_debtor_status;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_criteria_client_allowed_contacts;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_phone;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_mail;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_email;
+
 
 
 create task
@@ -282,6 +306,8 @@ with joined as
                 debtor_income.median_household_income,
                 debtor_income.pass_debtor_income,
                 
+                debtor_lastpayment.packet_has_previous_payment,
+                debtor_lastpayment.debtor_is_first_in_packet,
                 debtor_lastpayment.last_payment_date,
                 debtor_lastpayment.pass_contraints_packet_last_payment,
 
@@ -296,7 +322,14 @@ with joined as
                 debtor_maturity.pass_debtor_age_packet,
 
                 debtor_taxyear.tax_year,
-                debtor_taxyear.pass_debtor_tax_year
+                debtor_taxyear.pass_debtor_tax_year,
+
+                debtor_debttype.is_debttype_gov_parking,
+                debtor_debttype.is_debttype_gov_toll,
+                debtor_debttype.is_debttype_hc_ai,
+                debtor_debttype.is_debttype_hc_sp,
+
+                debtor_scorehist.pass_debtor_first_score_dialer_agent
                 
                 
 
@@ -320,6 +353,8 @@ with joined as
                 inner join edwprodhh.hermes.transform_businessrules_debtor_maturity         as debtor_maturity              on debtor.debtor_idx = debtor_maturity.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_debtor_taxyear          as debtor_taxyear               on debtor.debtor_idx = debtor_taxyear.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_debtor_payplan          as debtor_payplan               on debtor.debtor_idx = debtor_payplan.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_score_history    as debtor_scorehist             on debtor.debtor_idx = debtor_scorehist.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_debttype         as debtor_debttype              on debtor.debtor_idx = debtor_debttype.debtor_idx
 )
 select      *,
 
@@ -362,7 +397,17 @@ select      *,
                     
 
             NULL as is_eligible_emails,
-            NULL as is_eligible_dialer_agent,
+            
+            case    when    pass_client_allowed_calls               =   1
+                    and     pass_debtor_status                      =   1
+                    and     pass_phone_calls                        =   1
+                    and     pass_7in7                               =   1
+                    and     pass_debtor_first_score_dialer_agent    =   1
+                    then    1
+                    else    0
+                    end     as is_eligible_dialer_agent,
+
+
             NULL as is_eligible_dialer_agentless
 
 from        joined

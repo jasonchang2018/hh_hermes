@@ -29,6 +29,14 @@ begin
     from        edwprodhh.hermes.master_prediction_proposal
     ;
 
+
+    insert into
+        edwprodhh.hermes.master_prediction_dialer_rank_global_log
+    select      *,
+                :execute_time as execute_time
+    from        edwprodhh.hermes.master_prediction_dialer_rank_global
+    ;
+
     insert into
         edwprodhh.hermes.master_prediction_execution_log
     select      :execute_time as execute_time,

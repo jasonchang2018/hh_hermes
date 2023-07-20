@@ -13,6 +13,16 @@ with last_payment as
 select      debtor.debtor_idx,
             last_payment.last_payment_date,
 
+            case    when    last_payment.packet_idx is not null
+                    then    1
+                    else    0
+                    end     as packet_has_previous_payment,
+            case    when    count(*) over (partition by debtor.packet_idx order by debtor.batch_date asc) = 1
+                    then    1
+                    else    0
+                    end     as debtor_is_first_in_packet,
+
+
             case    when    debtor.pl_group in (
                                         'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2', 'CHILDRENS HOSP OF ATLANTA - 3P',
                                         'FRANCISCAN HEALTH - 3P', 'PROMEDICA HS - 3P-2', 'COUNTY OF LAKE IL - 3P',
@@ -66,6 +76,16 @@ with last_payment as
 )
 select      debtor.debtor_idx,
             last_payment.last_payment_date,
+
+            case    when    last_payment.packet_idx is not null
+                    then    1
+                    else    0
+                    end     as packet_has_previous_payment,
+            case    when    count(*) over (partition by debtor.packet_idx order by debtor.batch_date asc) = 1
+                    then    1
+                    else    0
+                    end     as debtor_is_first_in_packet,
+
 
             case    when    debtor.pl_group in (
                                         'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2', 'CHILDRENS HOSP OF ATLANTA - 3P',

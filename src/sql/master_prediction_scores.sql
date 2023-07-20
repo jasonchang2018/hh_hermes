@@ -81,9 +81,10 @@ select      debtor_idx,
 
 from        (select * from edwprodhh.hermes.master_prediction_pool order by random()) as pool_with_rand
 where       (
-                is_eligible_letters     =   1   or
-                is_eligible_texts       =   1   or
-                is_eligible_voapps      =   1
+                is_eligible_letters         =   1   or
+                is_eligible_texts           =   1   or
+                is_eligible_voapps          =   1   or
+                is_eligible_dialer_agent    =   1
             )
 ;
 
@@ -178,8 +179,41 @@ select      debtor_idx,
 
 from        (select * from edwprodhh.hermes.master_prediction_pool order by random()) as pool_with_rand
 where       (
-                is_eligible_letters     =   1   or
-                is_eligible_texts       =   1   or
-                is_eligible_voapps      =   1
+                is_eligible_letters         =   1   or
+                is_eligible_texts           =   1   or
+                is_eligible_voapps          =   1   or
+                is_eligible_dialer_agent    =   1
             )
+;
+
+-- alter task edwprodhh.pub_jchang.insert_master_prediction_scores_dialeragent set USER_TASK_TIMEOUT_MS = 57600000;
+-- show parameters for task edwprodhh.pub_jchang.insert_master_prediction_scores_dialeragent;
+
+create task
+    edwprodhh.pub_jchang.insert_master_prediction_scores_dialeragent
+    warehouse = analysis_wh
+    after edwprodhh.pub_jchang.replace_master_prediction_scores
+as
+update      edwprodhh.hermes.master_prediction_scores as target
+set         target.score_dialer_agent =     case    when    source.is_eligible_dialer_agent = 1
+                                                    then    EDWPRODHH.HERMES.PROD_PREDICT_V1_DEBTOR(
+                                                                [
+                                                                    source.assigned,                       -- assigned_amt
+                                                                    source.age_placement,                  -- debt_age
+                                                                    source.experian_score,                 -- experian_score
+                                                                    source.median_household_income,        -- median_household_income
+                                                                    source.packet_has_previous_payment,    -- has_previous_payment
+                                                                    source.debtor_is_first_in_packet,      -- is_only_debtor_in_packet
+                                                                    source.is_debttype_gov_parking,        -- parking
+                                                                    source.is_debttype_gov_toll,           -- toll
+                                                                    source.is_debttype_hc_ai,              -- ai
+                                                                    source.is_debttype_hc_sp,              -- sp
+                                                                    source.pass_address_emails             -- has_email
+                                                                ]
+                                                            )
+                                                    else    null
+                                                    end     ::float
+from        (select * from edwprodhh.hermes.master_prediction_pool order by random()) as source
+where       target.debtor_idx = source.debtor_idx
+            and source.is_eligible_dialer_agent = 1
 ;

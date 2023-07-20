@@ -22,9 +22,9 @@ create table
     EMAIL_ADDRESS                               VARCHAR(50),
     PASS_ADDRESS_EMAILS                         NUMBER(1,0),
     MAILING_ADDRESS                             VARCHAR(100),
-    MAILING_CITY	                            VARCHAR(50),
-    MAILING_STATE	                            VARCHAR(20),
-    MAILING_ZIP_CODE	                        VARCHAR(16777216),
+    MAILING_CITY                                VARCHAR(50),
+    MAILING_STATE                               VARCHAR(20),
+    MAILING_ZIP_CODE                            VARCHAR(16777216),
     PASS_ADDRESS_LETTERS                        NUMBER(1,0),
     VALID_PHONE_NUMBER                          VARCHAR(16777216),
     CELL_CODE_DEBTOR                            VARCHAR(150),
@@ -76,6 +76,8 @@ create table
     PASS_DEBTOR_EXPERIAN                        NUMBER(1,0),
     MEDIAN_HOUSEHOLD_INCOME                     FLOAT,
     PASS_DEBTOR_INCOME                          NUMBER(1,0),
+    PACKET_HAS_PREVIOUS_PAYMENT                 NUMBER(1,0),
+    DEBTOR_IS_FIRST_IN_PACKET                   NUMBER(1,0),
     LAST_PAYMENT_DATE                           DATE,
     PASS_CONTRAINTS_PACKET_LAST_PAYMENT         NUMBER(1,0),
     DESK_TEAM_NAME                              VARCHAR(50),
@@ -88,12 +90,17 @@ create table
     PASS_DEBTOR_AGE_PACKET                      NUMBER(1,0),
     TAX_YEAR                                    NUMBER(4,0),
     PASS_DEBTOR_TAX_YEAR                        NUMBER(1,0),
+    IS_DEBTTYPE_GOV_PARKING                     NUMBER(1,0),
+    IS_DEBTTYPE_GOV_TOLL                        NUMBER(1,0),
+    IS_DEBTTYPE_HC_AI                           NUMBER(1,0),
+    IS_DEBTTYPE_HC_SP                           NUMBER(1,0),
+    PASS_DEBTOR_FIRST_SCORE_DIALER_AGENT        NUMBER(1,0),
     IS_ELIGIBLE_LETTERS                         NUMBER(1,0),
     IS_ELIGIBLE_TEXTS                           NUMBER(1,0),
     IS_ELIGIBLE_VOAPPS                          NUMBER(1,0),
-    IS_ELIGIBLE_EMAILS                          NUMBER(1,0),
+    IS_ELIGIBLE_EMAILS                          VARCHAR(16777216),
     IS_ELIGIBLE_DIALER_AGENT                    NUMBER(1,0),
-    IS_ELIGIBLE_DIALER_AGENTLESS                NUMBER(1,0),
+    IS_ELIGIBLE_DIALER_AGENTLESS                VARCHAR(16777216),
     execute_time                                TIMESTAMP_LTZ(9)
 )
 ;
@@ -134,6 +141,20 @@ create table
     IS_FASTTRACK                    NUMBER(1,0),
     UPLOAD_DATE                     DATE,
     execute_time                    TIMESTAMP_LTZ(9)
+)
+;
+
+
+create table
+    edwprodhh.hermes.master_prediction_dialer_rank_global_log
+(
+    DEBTOR_IDX                      VARCHAR(50),
+    CLIENT_IDX                      VARCHAR(16),
+    PL_GROUP                        VARCHAR(16777216),
+    PROPOSED_CHANNEL                VARCHAR(16777216),
+    MARGINAL_FEE                    FLOAT,
+    RANK_GLOBAL                     NUMBER(18,0),
+    EXECUTE_TIME                    TIMESTAMP_LTZ(9)
 )
 ;
 
