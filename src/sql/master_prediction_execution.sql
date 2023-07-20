@@ -53,12 +53,14 @@ begin
 end
 ;
 
+alter task edwprodhh.pub_jchang.sp_master_prediction_log add after edwprodhh.pub_jchang.replace_master_prediction_proposal;
+alter task edwprodhh.pub_jchang.sp_master_prediction_log add after edwprodhh.pub_jchang.replace_master_prediction_dialer_rank_global;
+
 
 
 create task
     edwprodhh.pub_jchang.sp_master_prediction_log
     warehouse = analysis_wh
-    after edwprodhh.pub_jchang.replace_master_prediction_proposal
 as
 call    edwprodhh.hermes.master_prediction_log(current_timestamp())
 ;
