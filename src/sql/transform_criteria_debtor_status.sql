@@ -13,10 +13,20 @@ select      debtor_idx,
                                     end
 
                     when    logon = 'CO'
-                    then    case    when    status in  ('ACT', 'PPD')
-                                    -- when    status in  ('ACT', 'PPD', 'LNA', 'LAE')
-                                    then    1
-                                    else    0
+                    -- then    case    when    status in  ('ACT', 'PPD')
+                    --                 -- when    status in  ('ACT', 'PPD', 'LNA', 'LAE')
+                    --                 then    1
+                    --                 else    0
+                    --                 end
+                    then    case    when    pl_group = 'ELIZABETH RIVER CROSSINGS - 3P'
+                                    then    case    when    status in  ('ACT', 'PPD', 'NLT')
+                                                    then    1
+                                                    else    0
+                                                    end
+                                    else    case    when    status in  ('ACT', 'PPD')
+                                                    then    1
+                                                    else    0
+                                                    end
                                     end
 
                     else    case    when    status in  ('ACT', 'PPD')
@@ -51,10 +61,20 @@ select      debtor_idx,
                                     end
 
                     when    logon = 'CO'
-                    then    case    when    status in  ('ACT', 'PPD')
-                                    -- when    status in  ('ACT', 'PPD', 'LNA', 'LAE')
-                                    then    1
-                                    else    0
+                    -- then    case    when    status in  ('ACT', 'PPD')
+                    --                 -- when    status in  ('ACT', 'PPD', 'LNA', 'LAE')
+                    --                 then    1
+                    --                 else    0
+                    --                 end
+                    then    case    when    pl_group = 'ELIZABETH RIVER CROSSINGS - 3P'
+                                    then    case    when    status in  ('ACT', 'PPD', 'NLT')
+                                                    then    1
+                                                    else    0
+                                                    end
+                                    else    case    when    status in  ('ACT', 'PPD')
+                                                    then    1
+                                                    else    0
+                                                    end
                                     end
 
                     else    case    when    status in  ('ACT', 'PPD')
