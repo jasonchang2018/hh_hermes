@@ -32,7 +32,8 @@ with joined as
                 address_allowed_mail.mailing_zip_code,
                 address_allowed_mail.pass_address_letters,
 
-                address_allowed_phone.valid_phone_number,
+                address_allowed_phone.valid_phone_number_voapps,
+                address_allowed_phone.valid_phone_number_texts_dialer,
                 address_allowed_phone.cell_code_debtor,
                 address_allowed_phone.cell_code_packet_agg,
                 address_allowed_phone.cell_code_packet_factorized,
@@ -251,7 +252,8 @@ with joined as
                 address_allowed_mail.mailing_zip_code,
                 address_allowed_mail.pass_address_letters,
 
-                address_allowed_phone.valid_phone_number,
+                address_allowed_phone.valid_phone_number_voapps,
+                address_allowed_phone.valid_phone_number_texts_dialer,
                 address_allowed_phone.cell_code_debtor,
                 address_allowed_phone.cell_code_packet_agg,
                 address_allowed_phone.cell_code_packet_factorized,
