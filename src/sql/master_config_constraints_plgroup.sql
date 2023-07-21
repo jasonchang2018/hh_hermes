@@ -7,10 +7,15 @@ create table
     max_cost_running_texts          number(18,2),
     max_cost_running_voapps         number(18,2),
     max_cost_running_emails         number(18,2),
+    min_activity_running_client     number(18,2),
+    min_activity_running_letters    number(18,2),
+    min_activity_running_texts      number(18,2),
+    min_activity_running_voapps     number(18,2),
+    min_activity_running_emails     number(18,2),
     min_margin_running_client       number(18,2),
     min_margin_running_letters      number(18,2),
-    min_margin_running_voapps       number(18,2),
     min_margin_running_texts        number(18,2),
+    min_margin_running_voapps       number(18,2),
     min_margin_running_emails       number(18,2)
 )
 ;
@@ -514,12 +519,25 @@ select      distinct
                     else    0
                     end     as  max_cost_running_voapps,
 
-            0  as  max_cost_running_emails,
+
+            0   as  max_cost_running_emails,
+
+
+            0   as  min_activity_running_client,
+            0   as  min_activity_running_letters,
+            case    when    pl_group = 'ELIZABETH RIVER CROSSINGS - 3P'                         then    35000
+                    else    0
+                    end     as  min_activity_running_texts,
+            0   as  min_activity_running_voapps,
+            0   as  min_activity_running_emails,
+
+
             -1  as  min_margin_running_client,
             -1  as  min_margin_running_letters,
-            -1  as  min_margin_running_voapps,
             -1  as  min_margin_running_texts,
+            -1  as  min_margin_running_voapps,
             -1  as  min_margin_running_emails
+
 from        edwprodhh.hermes.master_config_clients_active
 order by    1
 ;
