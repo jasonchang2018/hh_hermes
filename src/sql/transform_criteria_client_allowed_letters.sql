@@ -66,7 +66,7 @@ select 'COUNTY OF WILL IL - 3P'                                 as pl_group unio
 select 'COUNTY OF WINNEBAGO IL - 3P'                            as pl_group union all
 select 'DTE - 3P'                                               as pl_group union all
 select 'DTE - EOP - 1P'                                         as pl_group union all
-select 'ELIZABETH RIVER CROSSINGS - 3P'                         as pl_group union all
+-- select 'ELIZABETH RIVER CROSSINGS - 3P'                         as pl_group union all
 select 'EVERGY - 3P'                                            as pl_group union all
 select 'EVERGY - 3P-2'                                          as pl_group union all
 select 'EVERSOURCE ENERGY - 3P'                                 as pl_group union all
