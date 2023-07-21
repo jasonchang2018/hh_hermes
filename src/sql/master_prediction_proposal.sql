@@ -329,8 +329,8 @@ with scores as
     (
         select      debtor_idx,
                     edwprodhh.pub_jchang.divide(
-                        row_number() over (partition by proposed_channel order by rank_weighted asc),
-                        count(*) over (partition by proposed_channel)
+                        row_number() over (partition by proposed_channel, pl_group order by rank_weighted asc),
+                        count(*) over (partition by proposed_channel, pl_group)
                     )   as ntile
         from        filter_runnings_total
     )
@@ -780,8 +780,8 @@ with scores as
     (
         select      debtor_idx,
                     edwprodhh.pub_jchang.divide(
-                        row_number() over (partition by proposed_channel order by rank_weighted asc),
-                        count(*) over (partition by proposed_channel)
+                        row_number() over (partition by proposed_channel, pl_group order by rank_weighted asc),
+                        count(*) over (partition by proposed_channel, pl_group)
                     )   as ntile
         from        filter_runnings_total
     )
