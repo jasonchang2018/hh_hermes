@@ -1,17 +1,25 @@
 create or replace view
     edwprodhh.hermes.master_prediction_proposal_cubs
 as
-select      debtor.logon, --needs to be separated
+with proposal as
+(
+    select      debtor_idx,
+                case    when    proposed_channel = 'Text Message'
+                        then    'Texts'
+                        else    proposed_channel
+                        end     as proposed_channel
+    from        edwprodhh.hermes.master_prediction_proposal_log
+    where       is_proposed_contact = 1
+                and upload_date = current_date()
+    qualify     execute_time = max(execute_time) over ()
+)
+select      debtor.logon,               --needs to be separated
             debtor.debtornumber,
-            proposal.proposed_channel --does not need to be separated
-
-from        edwprodhh.hermes.master_prediction_proposal as proposal
+            proposal.proposed_channel   --does not need to be separated
+from        proposal
             inner join
                 edwprodhh.pub_jchang.master_debtor as debtor
                 on proposal.debtor_idx = debtor.debtor_idx
-                
-where       proposal.is_proposed_contact = 1
-            and proposal.upload_date = current_date()
 ;
 
 
