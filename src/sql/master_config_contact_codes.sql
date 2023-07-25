@@ -14,6 +14,7 @@ select  'CITY OF CLEVELAND OH - CONDUENT - 3P'              as pl_group,    'Dun
 select  'CITY OF LA CA - PARKING CONDUENT - 3P'             as pl_group,    'Dun'               as collection_type,     'EDN1_LA'   as letter_code,     'TXT1'      as text_code,   NULL        as voapp_code union all
 select  'CITY OF PHILADELPHIA PA - PARKING - 3P'            as pl_group,    'Dun'               as collection_type,     'EDN1-PP'   as letter_code,     'TXT-SMS1'  as text_code,   NULL        as voapp_code union all
 select  'CITY OF SEATTLE WA - MUNI COURT - 3P'              as pl_group,    'Dun'               as collection_type,     'EDN1-SMC'  as letter_code,     'TXT-SMS1'  as text_code,   NULL        as voapp_code union all
+select  'COLUMBIA DENTAL - 3P'                              as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXTNY01'   as text_code,   NULL        as voapp_code union all
 select  'COLUMBIA DOCTORS - 3P'                             as pl_group,    'Dun'               as collection_type,     'HMHHCD'    as letter_code,     'TXTNY01'   as text_code,   NULL        as voapp_code union all
 select  'COUNTY OF LOS ANGELES CA - 3P'                     as pl_group,    'Dun'               as collection_type,     'ECCFTAP1'  as letter_code,     NULL        as text_code,   NULL        as voapp_code union all
 select  'ELIZABETH RIVER CROSSINGS - 3P'                    as pl_group,    'Dun'               as collection_type,     'ERC1'      as letter_code,     'TXT-ERC'   as text_code,   NULL        as voapp_code union all
@@ -23,7 +24,7 @@ select  'FRANCISCAN HEALTH - 3P'                            as pl_group,    'PP 
 select  'IU HEALTH - 3P'                                    as pl_group,    'Dun'               as collection_type,     'AVC2P'     as letter_code,      NULL       as text_code,   'USUAL'     as voapp_code union all
 select  'IU SURGICAL CARE AFF - 3P'                         as pl_group,    'PP/SIF Offer'      as collection_type,     'HMHHSP'    as letter_code,     NULL        as text_code,   'USUAL'     as voapp_code union all
 select  'LOYOLA UNIV HEALTH SYSTEM - 3P'                    as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,      NULL       as text_code,   'USUAL'     as voapp_code union all
-select  'MCLEOD HEALTH - 3P'                                as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,      NULL       as text_code,   'USUAL'     as voapp_code union all
+select  'MCLEOD HEALTH - 3P'                                as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,     'TXTSMSH1'  as text_code,   'USUAL'     as voapp_code union all
 select  'MOUNT SINAI - 3P'                                  as pl_group,    'Dun'               as collection_type,     'HMHHN'     as letter_code,     'TXTNY01'   as text_code,   NULL        as voapp_code union all
 select  'NORTHSHORE UNIV HEALTH - 3P'                       as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,     'TXTSMSH1'  as text_code,   'USUAL'     as voapp_code union all
 select  'NORTHWESTERN MEDICINE - 3P'                        as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,     'TXTSMSH1'  as text_code,   'USUAL'     as voapp_code union all
@@ -31,7 +32,7 @@ select  'NW COMM HOSP - 3P'                                 as pl_group,    'PP 
 select  'NW COMM HOSP - 3P-2'                               as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,     'TXTSMSH1'  as text_code,   'USUAL'     as voapp_code union all
 select  'PALOS HEALTH - 3P'                                 as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,     'TXTSMSH1'  as text_code,   'USUAL'     as voapp_code union all
 select  'PRISMA HEALTH - 3P'                                as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,     'TXTSMSH1'  as text_code,   'USUAL'     as voapp_code union all
-select  'PRISMA HEALTH - 3P-2'                              as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,     'TXT1-IC'   as text_code,   'USUAL'     as voapp_code union all
+select  'PRISMA HEALTH - 3P-2'                              as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,     'TXTSMSH1'  as text_code,   'USUAL'     as voapp_code union all
 select  'PRISMA HEALTH UNIVERSITY - 3P'                     as pl_group,    'Dun'               as collection_type,     'AVC2P'     as letter_code,     'TXTSMSH1'  as text_code,   'USUAL'     as voapp_code union all
 select  'PROMEDICA HS - 3P-2'                               as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,      NULL       as text_code,   'USUAL'     as voapp_code union all
 select  'PROVIDENCE ST JOSEPH HEALTH - 3P'                  as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,     'TXTSMSH1'  as text_code,   'USUAL'     as voapp_code union all
@@ -50,9 +51,10 @@ select  'SWEDISH HOSPITAL - 3P'                             as pl_group,    'PP/
 select  'TPC - SHANNON - HOSP - 3P-2'                       as pl_group,    'PP/SIF Offer'      as collection_type,     'HMHHSP'    as letter_code,     NULL        as text_code,   'USUAL'     as voapp_code union all
 select  'TPC - SHANNON - PHY - 3P-2'                        as pl_group,    'PP/SIF Offer'      as collection_type,     'HMHHSP'    as letter_code,      NULL       as text_code,   'USUAL'     as voapp_code union all
 select  'TPC - UNITED REGIONAL - 3P'                        as pl_group,    'Dun'               as collection_type,     'HMHH'      as letter_code,     NULL        as text_code,   'USUAL'     as voapp_code union all
-select  'U OF CHICAGO MEDICAL - 3P'                         as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,      NULL       as text_code,   'USUAL'     as voapp_code union all
+select  'U OF CHICAGO MEDICAL - 3P'                         as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,     'TXTSMSH1'  as text_code,   'USUAL'     as voapp_code union all
 select  'U OF CINCINNATI HEALTH SYSTEM - 3P'                as pl_group,    'Dun'               as collection_type,     'HMHHPUC'   as letter_code,     'TXT1'      as text_code,   'USUAL'     as voapp_code union all
 select  'U OF IL AT CHICAGO - 3P'                           as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,      NULL       as text_code,   'USUAL'     as voapp_code union all
 select  'UNITED REGIONAL - 3P-2'                            as pl_group,    'Dun'               as collection_type,     'AVC2P'     as letter_code,     NULL        as text_code,   'USUAL'     as voapp_code union all
-select  'UNIVERSAL HEALTH SERVICES - 3P'                    as pl_group,    'Dun'               as collection_type,     'HMHHU'     as letter_code,     'TXTUHS01'  as text_code,   'USUAL'     as voapp_code
+select  'UNIVERSAL HEALTH SERVICES - 3P'                    as pl_group,    'Dun'               as collection_type,     'HMHHU'     as letter_code,     'TXTSIF01'  as text_code,   'USUAL'     as voapp_code union all
+select  'WEILL CORNELL PHY - 3P'                            as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXTNY01'   as text_code,   NULL        as voapp_code
 ;
