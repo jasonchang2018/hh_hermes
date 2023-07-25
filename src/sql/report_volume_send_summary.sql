@@ -2,7 +2,7 @@ create or replace table
     edwprodhh.hermes.report_volume_send_summary
 as
 select      'def' as tableau_relation,
-            proposed.execute_time::date as proposal_date,
+            proposed.upload_date,
 
             proposed.pl_group,
             client.industry,
@@ -22,6 +22,7 @@ from        edwprodhh.hermes.master_prediction_proposal_log as proposed
                 on debtor.client_idx = client.client_idx
 
 where       proposed.is_proposed_contact = 1
+            and proposed.upload_date < current_date()
 group by    1,2,3,4,5,6
 order by    4,3,2 desc
 ;
@@ -37,7 +38,7 @@ create or replace table
     edwprodhh.hermes.report_volume_send_summary
 as
 select      'def' as tableau_relation,
-            proposed.execute_time::date as proposal_date,
+            proposed.upload_date,
 
             proposed.pl_group,
             client.industry,
@@ -57,6 +58,7 @@ from        edwprodhh.hermes.master_prediction_proposal_log as proposed
                 on debtor.client_idx = client.client_idx
 
 where       proposed.is_proposed_contact = 1
+            and proposed.upload_date < current_date()
 group by    1,2,3,4,5,6
 order by    4,3,2 desc
 ;
