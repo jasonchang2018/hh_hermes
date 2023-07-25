@@ -178,7 +178,7 @@ create or replace table edwprodhh.pub_mbutler.master_dialer_model_debtor as (
 -- debtor_long, 
 -- client_lat, 
 -- client_long, 
-                dol_commission_attr
+                dol_commission_attr as commission
                 
     from edwprodhh.pub_mbutler.temporary_dialer_model_debtor
     where dol_commission_attr = 0 and percent_ <= .10
@@ -252,7 +252,7 @@ create or replace table edwprodhh.pub_mbutler.master_dialer_model_holdout as (
 -- client_lat, 
 -- client_long, 
                 equabli_score, 
-                dol_commission_attr
+                dol_commission_attr as commission
                 
     from edwprodhh.pub_mbutler.temporary_dialer_model_debtor
     where dol_commission_attr = 0 and percent_ >= .95  
@@ -261,4 +261,3 @@ create or replace table edwprodhh.pub_mbutler.master_dialer_model_holdout as (
 
 
 ; 
-

@@ -3,90 +3,68 @@ create or replace table edwprodhh.pub_mbutler.temp_debtor_metrics as (
     
     
 with debtor_metrics as (
-    
     select
-            
-            debtor_idx,
-            packet_idx,
-            batch_date,
-            industry,
-            assigned,
-            min(batch_date) over (partition by packet_idx) as min_batch_date,
-            count(*) over (partition by packet_idx) as packet_size_final,
-            count(*) over (partition by packet_idx order by batch_date asc) as packet_size_running,
-            commission
-    
+        debtor_idx,
+        packet_idx,
+        batch_date,
+        industry,
+        assigned,
+        min(batch_date) over (partition by packet_idx) as min_batch_date,
+        count(*) over (partition by packet_idx) as packet_size_final,
+        count(*) over (partition by packet_idx order by batch_date asc) as packet_size_running,
+        commission
     from edwprodhh.pub_jchang.master_debtor
+),call_codes as (
 
-)
-,call_codes as (
+select debtor_idx, 
+        
+        case when cell = 'A' then 1 else 0 end as is_phone_code_A,
+        case when cell = 'B' then 1 else 0 end as is_phone_code_B,
+        case when cell = 'C' then 1 else 0 end as is_phone_code_C,
+        case when cell = 'L' then 1 else 0 end as is_phone_code_L,
+        case when cell = 'M' then 1 else 0 end as is_phone_code_M,
+        case when cell = 'N' then 1 else 0 end as is_phone_code_N,
+        case when cell = 'T' then 1 else 0 end as is_phone_code_T,
+        case when cell = 'X' then 1 else 0 end as is_phone_code_X,
+        case when cell = 'Z' then 1 else 0 end as is_phone_code_Z
 
-    select debtor_idx, 
-            
-            case when cell = 'A' then 1 else 0 end as is_phone_code_A,
-            case when cell = 'B' then 1 else 0 end as is_phone_code_B,
-            case when cell = 'C' then 1 else 0 end as is_phone_code_C,
-            case when cell = 'L' then 1 else 0 end as is_phone_code_L,
-            case when cell = 'M' then 1 else 0 end as is_phone_code_M,
-            case when cell = 'N' then 1 else 0 end as is_phone_code_N,
-            case when cell = 'T' then 1 else 0 end as is_phone_code_T,
-            case when cell = 'X' then 1 else 0 end as is_phone_code_X,
-            case when cell = 'Z' then 1 else 0 end as is_phone_code_Z
 
-    from edwprodhh.pub_jchang.master_phone_number_code_debtor
+
+
+from edwprodhh.pub_jchang.master_phone_number_code_debtor
+
 
 ) 
 ,has_previous_payment as (
-    
-    select 
-    
-            distinct debtor_metrics.debtor_idx
-    
+    select distinct debtor_metrics.debtor_idx
     from debtor_metrics
     inner join edwprodhh.pub_jchang.master_transactions as trans
     on debtor_metrics.packet_idx = trans.packet_idx
     and trans.is_payment = 1
     and trans.post_date < debtor_metrics.batch_date
+),
+only_debtor_in_packet as (
+select      debtor_idx
 
-)
-, only_debtor_in_packet as (
-    
-    select 
-            
-            packet_idx, 
-            count(distinct debtor_idx) as distinct_debtor_count
-    
-    from debtor_metrics
-    group by packet_idx
-    having count(distinct debtor_idx) = 1
+    from        debtor_metrics
 
+    where       packet_size_running = 1
 )
 , prev_payments as ( 
-    
-    select
-        
-            debtor_metrics.debtor_idx,
-            case when has_previous_payment.debtor_idx is not null then 1 else 0 end as has_previous_payment,
-            case when only_debtor_in_packet.packet_idx is not null then 1 else 0 end as is_only_debtor_in_packet
-        
-    from debtor_metrics
-    left join has_previous_payment on debtor_metrics.debtor_idx = has_previous_payment.debtor_idx
-    left join only_debtor_in_packet on debtor_metrics.packet_idx = only_debtor_in_packet.packet_idx
+select
+    debtor_metrics.debtor_idx,
+    case when has_previous_payment.debtor_idx is not null then 1 else 0 end as has_previous_payment,
+    case when only_debtor_in_packet.debtor_idx is not null then 1 else 0 end as is_only_debtor_in_packet
+from debtor_metrics
+left join has_previous_payment on debtor_metrics.debtor_idx = has_previous_payment.debtor_idx
+left join only_debtor_in_packet on debtor_metrics.debtor_idx = only_debtor_in_packet.debtor_idx
 
-) 
-, client_zip as  ( 
-    
-    select 
-            
-            client_idx, 
-            avg(longitude) as client_longitude, 
-            avg(latitude) as client_latitude 
-    
+) , client_zip as  ( 
+    select client_idx, avg(longitude) as client_longitude, avg(latitude) as client_latitude 
     from edwprodhh.dw.dimclient as dc 
     inner join edwprodhh.pub_mbutler.zip_long_lat as zll 
     on zll.zip_code = dc.zip
     group by client_idx
-
 )
     select 
         
@@ -117,6 +95,11 @@ with debtor_metrics as (
             is_phone_code_X, 
             is_phone_code_Z
 
+            
+            
+            
+        
+    
     from edwprodhh.pub_jchang.master_debtor as md 
     inner join edwprodhh.pub_mbutler.master_zip_code_stats as zcs 
     on zcs.zip_code = md.zip_code
@@ -131,3 +114,4 @@ with debtor_metrics as (
     
 
 ) 
+; 
