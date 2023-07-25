@@ -90,6 +90,7 @@ with scores as
 , filter_running_cost_channels as
 (   
     -- THERE NEED TO BE AS MANY ITERATIONS HERE AS THERE ARE POTENTIAL & SCORED CONTACT CHANNEL OPTIONS.
+    -- THIS EXISTS BECAUSE ONCE A PACKET IS SELECTED FOR ONE CONTACT CHANNEL, WE DON'T WANT TO COUNT IT FOR OTHER CONTACT CHANNEL(S).
     with iteration_1 as
     (
         select      *
@@ -213,59 +214,44 @@ with scores as
                 rank_weighted
     from        unioned
 )
-, filter_running_cost_client as
+, calculate_running_cost_activity_client as
 (
-    with with_flags as
-    (
-        select      filter_running_cost_channels.*,
-                    sum(marginal_cost) over (partition by filter_running_cost_channels.pl_group order by rank_weighted asc)     as running_cost_client,
-                    running_cost_client <= constraints_plgroup.max_cost_running_client                                      as is_eligible_cost_client
+    select      filter_running_cost_channels.*,
 
-        from        filter_running_cost_channels
-                    left join
-                        edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
-                        on filter_running_cost_channels.pl_group = constraints_plgroup.pl_group
-    )
-    select      debtor_idx,
-                client_idx,
-                pl_group,
-                proposed_channel,
-                marginal_fee,
-                marginal_cost,
-                marginal_profit,
-                marginal_margin,
-                rank_profit,
-                rank_margin,
-                rank_weighted
+                sum(marginal_cost) over (partition by filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                         as running_cost_client,
+                case    when    running_cost_client <= constraints_plgroup.max_cost_running_client
+                        then    1
+                        else    0
+                        end                                                                                                                                                                     as is_below_cost_client,
+                
 
-    from        with_flags
-    where       is_eligible_cost_client
-)
-
-, calculate_running_activity_client as
-(
-    select      filter_running_cost_client.*,
-
-                count(*) over (partition by proposed_channel, filter_running_cost_client.pl_group order by rank_weighted asc)     as running_count_channel_client,
+                count(*) over (partition by proposed_channel, filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                as running_count_channel_client,
 
                 case    when    proposed_channel = 'Letter'         then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_letters    then 1 else 0 end
                         when    proposed_channel = 'Text Message'   then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_texts      then 1 else 0 end
                         when    proposed_channel = 'VoApp'          then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_voapps     then 1 else 0 end
                         when    proposed_channel = 'Email'          then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_emails     then 1 else 0 end
-                        else    FALSE
-                        end     as has_not_reached_min_activity_channel_client
+                        else    0
+                        end                                                                                                                                                                     as has_not_reached_min_activity_channel_client
 
-    from        filter_running_cost_client
+    from        filter_running_cost_channels
                 left join
                     edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
-                    on filter_running_cost_client.pl_group = constraints_plgroup.pl_group
+                    on filter_running_cost_channels.pl_group = constraints_plgroup.pl_group
+                        
 )
 , filter_running_cost_channels_global as
 (
     with with_flags as
     (
         select      *,
-                    sum(marginal_cost) over (partition by proposed_channel order by has_not_reached_min_activity_channel_client desc, rank_weighted asc)     as running_cost_channel_global,
+                    sum(marginal_cost) over (
+                        partition by    proposed_channel
+                        order by        is_below_cost_client                            desc,
+                                        has_not_reached_min_activity_channel_client     desc,
+                                        rank_weighted                                   asc
+                    )               as running_cost_channel_global,
+
                     case    when    proposed_channel = 'Letter'         then  running_cost_channel_global <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_LETTERS')
                             when    proposed_channel = 'Text Message'   then  running_cost_channel_global <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_TEXTS')
                             when    proposed_channel = 'VoApp'          then  running_cost_channel_global <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_VOAPPS')
@@ -273,7 +259,7 @@ with scores as
                             else    FALSE
                             end     as is_eligible_cost_channel_global
 
-        from        calculate_running_activity_client
+        from        calculate_running_cost_activity_client
     )
     select      debtor_idx,
                 client_idx,
@@ -541,6 +527,7 @@ with scores as
 , filter_running_cost_channels as
 (   
     -- THERE NEED TO BE AS MANY ITERATIONS HERE AS THERE ARE POTENTIAL & SCORED CONTACT CHANNEL OPTIONS.
+    -- THIS EXISTS BECAUSE ONCE A PACKET IS SELECTED FOR ONE CONTACT CHANNEL, WE DON'T WANT TO COUNT IT FOR OTHER CONTACT CHANNEL(S).
     with iteration_1 as
     (
         select      *
@@ -664,59 +651,44 @@ with scores as
                 rank_weighted
     from        unioned
 )
-, filter_running_cost_client as
+, calculate_running_cost_activity_client as
 (
-    with with_flags as
-    (
-        select      filter_running_cost_channels.*,
-                    sum(marginal_cost) over (partition by filter_running_cost_channels.pl_group order by rank_weighted asc)     as running_cost_client,
-                    running_cost_client <= constraints_plgroup.max_cost_running_client                                      as is_eligible_cost_client
+    select      filter_running_cost_channels.*,
 
-        from        filter_running_cost_channels
-                    left join
-                        edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
-                        on filter_running_cost_channels.pl_group = constraints_plgroup.pl_group
-    )
-    select      debtor_idx,
-                client_idx,
-                pl_group,
-                proposed_channel,
-                marginal_fee,
-                marginal_cost,
-                marginal_profit,
-                marginal_margin,
-                rank_profit,
-                rank_margin,
-                rank_weighted
+                sum(marginal_cost) over (partition by filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                         as running_cost_client,
+                case    when    running_cost_client <= constraints_plgroup.max_cost_running_client
+                        then    1
+                        else    0
+                        end                                                                                                                                                                     as is_below_cost_client,
+                
 
-    from        with_flags
-    where       is_eligible_cost_client
-)
-
-, calculate_running_activity_client as
-(
-    select      filter_running_cost_client.*,
-
-                count(*) over (partition by proposed_channel, filter_running_cost_client.pl_group order by rank_weighted asc)     as running_count_channel_client,
+                count(*) over (partition by proposed_channel, filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                as running_count_channel_client,
 
                 case    when    proposed_channel = 'Letter'         then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_letters    then 1 else 0 end
                         when    proposed_channel = 'Text Message'   then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_texts      then 1 else 0 end
                         when    proposed_channel = 'VoApp'          then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_voapps     then 1 else 0 end
                         when    proposed_channel = 'Email'          then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_emails     then 1 else 0 end
-                        else    FALSE
-                        end     as has_not_reached_min_activity_channel_client
+                        else    0
+                        end                                                                                                                                                                     as has_not_reached_min_activity_channel_client
 
-    from        filter_running_cost_client
+    from        filter_running_cost_channels
                 left join
                     edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
-                    on filter_running_cost_client.pl_group = constraints_plgroup.pl_group
+                    on filter_running_cost_channels.pl_group = constraints_plgroup.pl_group
+                        
 )
 , filter_running_cost_channels_global as
 (
     with with_flags as
     (
         select      *,
-                    sum(marginal_cost) over (partition by proposed_channel order by has_not_reached_min_activity_channel_client desc, rank_weighted asc)     as running_cost_channel_global,
+                    sum(marginal_cost) over (
+                        partition by    proposed_channel
+                        order by        is_below_cost_client                            desc,
+                                        has_not_reached_min_activity_channel_client     desc,
+                                        rank_weighted                                   asc
+                    )               as running_cost_channel_global,
+
                     case    when    proposed_channel = 'Letter'         then  running_cost_channel_global <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_LETTERS')
                             when    proposed_channel = 'Text Message'   then  running_cost_channel_global <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_TEXTS')
                             when    proposed_channel = 'VoApp'          then  running_cost_channel_global <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_VOAPPS')
@@ -724,7 +696,7 @@ with scores as
                             else    FALSE
                             end     as is_eligible_cost_channel_global
 
-        from        calculate_running_activity_client
+        from        calculate_running_cost_activity_client
     )
     select      debtor_idx,
                 client_idx,
