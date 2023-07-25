@@ -87,7 +87,7 @@ with scores as
     from        filter_best_contact_options_per_packet
 )
 
-, filter_runnings_channels as
+, filter_running_cost_channels as
 (   
     -- THERE NEED TO BE AS MANY ITERATIONS HERE AS THERE ARE POTENTIAL & SCORED CONTACT CHANNEL OPTIONS.
     with iteration_1 as
@@ -213,18 +213,18 @@ with scores as
                 rank_weighted
     from        unioned
 )
-, filter_runnings_client as
+, filter_running_cost_client as
 (
     with with_flags as
     (
-        select      filter_runnings_channels.*,
-                    sum(marginal_cost) over (partition by filter_runnings_channels.pl_group order by rank_weighted asc)     as running_cost_client,
+        select      filter_running_cost_channels.*,
+                    sum(marginal_cost) over (partition by filter_running_cost_channels.pl_group order by rank_weighted asc)     as running_cost_client,
                     running_cost_client <= constraints_plgroup.max_cost_running_client                                      as is_eligible_cost_client
 
-        from        filter_runnings_channels
+        from        filter_running_cost_channels
                     left join
                         edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
-                        on filter_runnings_channels.pl_group = constraints_plgroup.pl_group
+                        on filter_running_cost_channels.pl_group = constraints_plgroup.pl_group
     )
     select      debtor_idx,
                 client_idx,
@@ -242,11 +242,11 @@ with scores as
     where       is_eligible_cost_client
 )
 
-, calculate_running_min_activity_client as
+, calculate_running_activity_client as
 (
-    select      filter_runnings_client.*,
+    select      filter_running_cost_client.*,
 
-                count(*) over (partition by proposed_channel, filter_runnings_client.pl_group order by rank_weighted asc)     as running_count_channel_client,
+                count(*) over (partition by proposed_channel, filter_running_cost_client.pl_group order by rank_weighted asc)     as running_count_channel_client,
 
                 case    when    proposed_channel = 'Letter'         then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_letters    then 1 else 0 end
                         when    proposed_channel = 'Text Message'   then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_texts      then 1 else 0 end
@@ -255,12 +255,12 @@ with scores as
                         else    FALSE
                         end     as has_not_reached_min_activity_channel_client
 
-    from        filter_runnings_client
+    from        filter_running_cost_client
                 left join
                     edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
-                    on filter_runnings_client.pl_group = constraints_plgroup.pl_group
+                    on filter_running_cost_client.pl_group = constraints_plgroup.pl_group
 )
-, filter_runnings_channels_global as
+, filter_running_cost_channels_global as
 (
     with with_flags as
     (
@@ -273,7 +273,7 @@ with scores as
                             else    FALSE
                             end     as is_eligible_cost_channel_global
 
-        from        calculate_running_min_activity_client
+        from        calculate_running_activity_client
     )
     select      debtor_idx,
                 client_idx,
@@ -290,7 +290,7 @@ with scores as
     from        with_flags
     where       is_eligible_cost_channel_global
 )
-, filter_runnings_total as
+, filter_cost_global as
 (
     with with_flags as
     (
@@ -304,7 +304,7 @@ with scores as
                     running_cost            <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_TOTAL')           as is_eligible_cost,
                     running_margin          >= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MIN_MARGIN_RUNNING_TOTAL')         as is_eligible_margin
 
-        from        filter_runnings_channels_global
+        from        filter_running_cost_channels_global
     )
     select      debtor_idx,
                 client_idx,
@@ -332,11 +332,11 @@ with scores as
                         row_number() over (partition by proposed_channel, pl_group order by rank_weighted asc),
                         count(*) over (partition by proposed_channel, pl_group)
                     )   as ntile
-        from        filter_runnings_total
+        from        filter_cost_global
     )
     --  ASSUMES RUN ON FRIDAY EVENING -> UPLOAD MONDAY THRU NEXT FRIDAY
     --  HOWEVER, UNSURE WHETHER CURRENT_DATE() WILL BE FRIDAY OR SATURDAY, SO CAUTIOUSLY TRUNCATE TO WEEK FOR CALCULATION
-    select      filter_runnings_total.*,
+    select      filter_cost_global.*,
                 case    when    proposed_channel = 'Letter'
                         then    date_trunc('week', current_date()) + 7
                         when    proposed_channel = 'Text Message'
@@ -364,10 +364,10 @@ with scores as
                         else    date_trunc('week', current_date()) + 7
                         end     as upload_date
 
-    from        filter_runnings_total
+    from        filter_cost_global
                 inner join
                     percentiles
-                    on filter_runnings_total.debtor_idx = percentiles.debtor_idx
+                    on filter_cost_global.debtor_idx = percentiles.debtor_idx
 )
 --  <--  FILTER ON SET PARAMETERS
 
@@ -538,7 +538,7 @@ with scores as
     from        filter_best_contact_options_per_packet
 )
 
-, filter_runnings_channels as
+, filter_running_cost_channels as
 (   
     -- THERE NEED TO BE AS MANY ITERATIONS HERE AS THERE ARE POTENTIAL & SCORED CONTACT CHANNEL OPTIONS.
     with iteration_1 as
@@ -664,18 +664,18 @@ with scores as
                 rank_weighted
     from        unioned
 )
-, filter_runnings_client as
+, filter_running_cost_client as
 (
     with with_flags as
     (
-        select      filter_runnings_channels.*,
-                    sum(marginal_cost) over (partition by filter_runnings_channels.pl_group order by rank_weighted asc)     as running_cost_client,
+        select      filter_running_cost_channels.*,
+                    sum(marginal_cost) over (partition by filter_running_cost_channels.pl_group order by rank_weighted asc)     as running_cost_client,
                     running_cost_client <= constraints_plgroup.max_cost_running_client                                      as is_eligible_cost_client
 
-        from        filter_runnings_channels
+        from        filter_running_cost_channels
                     left join
                         edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
-                        on filter_runnings_channels.pl_group = constraints_plgroup.pl_group
+                        on filter_running_cost_channels.pl_group = constraints_plgroup.pl_group
     )
     select      debtor_idx,
                 client_idx,
@@ -693,11 +693,11 @@ with scores as
     where       is_eligible_cost_client
 )
 
-, calculate_running_min_activity_client as
+, calculate_running_activity_client as
 (
-    select      filter_runnings_client.*,
+    select      filter_running_cost_client.*,
 
-                count(*) over (partition by proposed_channel, filter_runnings_client.pl_group order by rank_weighted asc)     as running_count_channel_client,
+                count(*) over (partition by proposed_channel, filter_running_cost_client.pl_group order by rank_weighted asc)     as running_count_channel_client,
 
                 case    when    proposed_channel = 'Letter'         then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_letters    then 1 else 0 end
                         when    proposed_channel = 'Text Message'   then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_texts      then 1 else 0 end
@@ -706,12 +706,12 @@ with scores as
                         else    FALSE
                         end     as has_not_reached_min_activity_channel_client
 
-    from        filter_runnings_client
+    from        filter_running_cost_client
                 left join
                     edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
-                    on filter_runnings_client.pl_group = constraints_plgroup.pl_group
+                    on filter_running_cost_client.pl_group = constraints_plgroup.pl_group
 )
-, filter_runnings_channels_global as
+, filter_running_cost_channels_global as
 (
     with with_flags as
     (
@@ -724,7 +724,7 @@ with scores as
                             else    FALSE
                             end     as is_eligible_cost_channel_global
 
-        from        calculate_running_min_activity_client
+        from        calculate_running_activity_client
     )
     select      debtor_idx,
                 client_idx,
@@ -741,7 +741,7 @@ with scores as
     from        with_flags
     where       is_eligible_cost_channel_global
 )
-, filter_runnings_total as
+, filter_cost_global as
 (
     with with_flags as
     (
@@ -755,7 +755,7 @@ with scores as
                     running_cost            <= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MAX_COST_RUNNING_TOTAL')           as is_eligible_cost,
                     running_margin          >= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MIN_MARGIN_RUNNING_TOTAL')         as is_eligible_margin
 
-        from        filter_runnings_channels_global
+        from        filter_running_cost_channels_global
     )
     select      debtor_idx,
                 client_idx,
@@ -783,11 +783,11 @@ with scores as
                         row_number() over (partition by proposed_channel, pl_group order by rank_weighted asc),
                         count(*) over (partition by proposed_channel, pl_group)
                     )   as ntile
-        from        filter_runnings_total
+        from        filter_cost_global
     )
     --  ASSUMES RUN ON FRIDAY EVENING -> UPLOAD MONDAY THRU NEXT FRIDAY
     --  HOWEVER, UNSURE WHETHER CURRENT_DATE() WILL BE FRIDAY OR SATURDAY, SO CAUTIOUSLY TRUNCATE TO WEEK FOR CALCULATION
-    select      filter_runnings_total.*,
+    select      filter_cost_global.*,
                 case    when    proposed_channel = 'Letter'
                         then    date_trunc('week', current_date()) + 7
                         when    proposed_channel = 'Text Message'
@@ -815,10 +815,10 @@ with scores as
                         else    date_trunc('week', current_date()) + 7
                         end     as upload_date
 
-    from        filter_runnings_total
+    from        filter_cost_global
                 inner join
                     percentiles
-                    on filter_runnings_total.debtor_idx = percentiles.debtor_idx
+                    on filter_cost_global.debtor_idx = percentiles.debtor_idx
 )
 --  <--  FILTER ON SET PARAMETERS
 
