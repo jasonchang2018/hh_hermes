@@ -22,7 +22,7 @@ from        edwprodhh.hermes.master_prediction_proposal_log as proposed
                 on debtor.client_idx = client.client_idx
 
 where       proposed.is_proposed_contact = 1
-            and proposed.upload_date < current_date()
+            -- and proposed.upload_date < current_date()
 group by    1,2,3,4,5,6
 order by    4,3,2 desc
 ;
@@ -58,7 +58,7 @@ from        edwprodhh.hermes.master_prediction_proposal_log as proposed
                 on debtor.client_idx = client.client_idx
 
 where       proposed.is_proposed_contact = 1
-            and proposed.upload_date < current_date()
+            -- and proposed.upload_date < current_date()
 group by    1,2,3,4,5,6
 order by    4,3,2 desc
 ;
