@@ -180,7 +180,7 @@ select      *,
 
             NULL as is_eligible_emails,
             
-            case    when    pass_client_allowed_calls               =   1
+            case    when    pass_client_allowed_calls               in  (0,1)
                     and     pass_debtor_status                      =   1
                     and     pass_phone_calls                        =   1
                     and     pass_7in7                               =   1
@@ -400,7 +400,7 @@ select      *,
 
             NULL as is_eligible_emails,
             
-            case    when    pass_client_allowed_calls               =   1
+            case    when    pass_client_allowed_calls               in  (0,1)
                     and     pass_debtor_status                      =   1
                     and     pass_phone_calls                        =   1
                     and     pass_7in7                               =   1
