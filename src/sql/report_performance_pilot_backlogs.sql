@@ -201,7 +201,7 @@ with proposed_debtors as
                     group by    1,2,3,4,5,6,7
                 )   as summarized
 )
-select      'z' as tableau_relation,
+select      'zyx' as tableau_relation,
             
             coalesce(contact_agg.pl_group,          payment_agg.pl_group)           as pl_group,
             coalesce(contact_agg.industry,          payment_agg.industry)           as industry,
@@ -444,7 +444,7 @@ with proposed_debtors as
                     group by    1,2,3,4,5,6,7
                 )   as summarized
 )
-select      'z' as tableau_relation,
+select      'zyx' as tableau_relation,
             
             coalesce(contact_agg.pl_group,          payment_agg.pl_group)           as pl_group,
             coalesce(contact_agg.industry,          payment_agg.industry)           as industry,
