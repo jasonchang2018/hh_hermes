@@ -327,18 +327,18 @@ with scores as
                         then    date_trunc('week', current_date()) + 7
                         when    proposed_channel = 'Text Message'
                         then    case    when    percentiles.ntile >= 0
-                                        and     percentiles.ntile <= 0.15
+                                        and     percentiles.ntile <= 0.20
                                         then    date_trunc('week', current_date()) + 7
-                                        when    percentiles.ntile >  0.15
-                                        and     percentiles.ntile <= 0.36
+                                        when    percentiles.ntile >  0.20
+                                        and     percentiles.ntile <= 0.40
                                         then    date_trunc('week', current_date()) + 8
-                                        when    percentiles.ntile >  0.36
-                                        and     percentiles.ntile <= 0.57
+                                        when    percentiles.ntile >  0.40
+                                        and     percentiles.ntile <= 0.60
                                         then    date_trunc('week', current_date()) + 9
-                                        when    percentiles.ntile >  0.57
-                                        and     percentiles.ntile <= 0.78
+                                        when    percentiles.ntile >  0.60
+                                        and     percentiles.ntile <= 0.80
                                         then    date_trunc('week', current_date()) + 10
-                                        when    percentiles.ntile >  0.78
+                                        when    percentiles.ntile >  0.80
                                         and     percentiles.ntile <= 1.00
                                         then    date_trunc('week', current_date()) + 11
                                         else    date_trunc('week', current_date()) + 11
@@ -764,18 +764,18 @@ with scores as
                         then    date_trunc('week', current_date()) + 7
                         when    proposed_channel = 'Text Message'
                         then    case    when    percentiles.ntile >= 0
-                                        and     percentiles.ntile <= 0.15
+                                        and     percentiles.ntile <= 0.20
                                         then    date_trunc('week', current_date()) + 7
-                                        when    percentiles.ntile >  0.15
-                                        and     percentiles.ntile <= 0.36
+                                        when    percentiles.ntile >  0.20
+                                        and     percentiles.ntile <= 0.40
                                         then    date_trunc('week', current_date()) + 8
-                                        when    percentiles.ntile >  0.36
-                                        and     percentiles.ntile <= 0.57
+                                        when    percentiles.ntile >  0.40
+                                        and     percentiles.ntile <= 0.60
                                         then    date_trunc('week', current_date()) + 9
-                                        when    percentiles.ntile >  0.57
-                                        and     percentiles.ntile <= 0.78
+                                        when    percentiles.ntile >  0.60
+                                        and     percentiles.ntile <= 0.80
                                         then    date_trunc('week', current_date()) + 10
-                                        when    percentiles.ntile >  0.78
+                                        when    percentiles.ntile >  0.80
                                         and     percentiles.ntile <= 1.00
                                         then    date_trunc('week', current_date()) + 11
                                         else    date_trunc('week', current_date()) + 11
