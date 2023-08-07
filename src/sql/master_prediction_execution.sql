@@ -37,6 +37,23 @@ begin
     from        edwprodhh.hermes.master_prediction_dialer_rank_global
     ;
 
+
+    insert into
+        edwprodhh.hermes.master_prediction_scores_transformation_log
+    select      *,
+                :execute_time as execute_time
+    from        edwprodhh.hermes.master_prediction_scores_transformation
+    ;
+
+
+    insert into
+        edwprodhh.hermes.master_prediction_scores_transformation_cubs_log
+    select      *,
+                :execute_time as execute_time
+    from        edwprodhh.hermes.master_prediction_scores_transformation_cubs
+    ;
+
+
     insert into
         edwprodhh.hermes.master_prediction_execution_log
     select      :execute_time as execute_time,
@@ -55,6 +72,7 @@ end
 
 alter task edwprodhh.pub_jchang.sp_master_prediction_log add after edwprodhh.pub_jchang.replace_master_prediction_proposal;
 alter task edwprodhh.pub_jchang.sp_master_prediction_log add after edwprodhh.pub_jchang.replace_master_prediction_dialer_rank_global;
+alter task edwprodhh.pub_jchang.sp_master_prediction_log add after edwprodhh.pub_jchang.replace_master_prediction_scores_transformation;
 
 
 

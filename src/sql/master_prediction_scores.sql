@@ -76,7 +76,8 @@ select      debtor_idx,
 
             NULL::float                 as score_emails,
             NULL::float                 as score_dialer_agent,
-            NULL::float                 as score_dialer_agentless
+            NULL::float                 as score_dialer_agentless,
+            NULL::float                 as score_debtor
 
 
 from        (select * from edwprodhh.hermes.master_prediction_pool order by random()) as pool_with_rand
@@ -84,7 +85,8 @@ where       (
                 is_eligible_letters         =   1   or
                 is_eligible_texts           =   1   or
                 is_eligible_voapps          =   1   or
-                is_eligible_dialer_agent    =   1
+                is_eligible_dialer_agent    =   1   or
+                is_eligible_debtor          =   1
             )
 ;
 
@@ -174,7 +176,8 @@ select      debtor_idx,
 
             NULL::float                 as score_emails,
             NULL::float                 as score_dialer_agent,
-            NULL::float                 as score_dialer_agentless
+            NULL::float                 as score_dialer_agentless,
+            NULL::float                 as score_debtor
 
 
 from        (select * from edwprodhh.hermes.master_prediction_pool order by random()) as pool_with_rand
@@ -182,20 +185,25 @@ where       (
                 is_eligible_letters         =   1   or
                 is_eligible_texts           =   1   or
                 is_eligible_voapps          =   1   or
-                is_eligible_dialer_agent    =   1
+                is_eligible_dialer_agent    =   1   or
+                is_eligible_debtor          =   1
             )
 ;
 
--- alter task edwprodhh.pub_jchang.insert_master_prediction_scores_dialeragent set USER_TASK_TIMEOUT_MS = 57600000;
--- show parameters for task edwprodhh.pub_jchang.insert_master_prediction_scores_dialeragent;
+
+
+
+
+-- alter task edwprodhh.pub_jchang.insert_master_prediction_scores_debtor set USER_TASK_TIMEOUT_MS = 57600000;
+-- show parameters for task edwprodhh.pub_jchang.insert_master_prediction_scores_debtor;
 
 create task
-    edwprodhh.pub_jchang.insert_master_prediction_scores_dialeragent
+    edwprodhh.pub_jchang.insert_master_prediction_scores_debtor
     warehouse = analysis_wh
     after edwprodhh.pub_jchang.replace_master_prediction_scores
 as
 update      edwprodhh.hermes.master_prediction_scores as target
-set         target.score_dialer_agent =     case    when    source.is_eligible_dialer_agent = 1
+set         target.score_debtor =           case    when    source.is_eligible_debtor = 1
                                                     then    EDWPRODHH.HERMES.PROD_PREDICT_V1_DEBTOR(
                                                                 [
                                                                     source.assigned,                       -- assigned_amt
@@ -214,6 +222,25 @@ set         target.score_dialer_agent =     case    when    source.is_eligible_d
                                                     else    null
                                                     end     ::float
 from        (select * from edwprodhh.hermes.master_prediction_pool order by random()) as source
+where       target.debtor_idx = source.debtor_idx
+            and source.is_eligible_debtor = 1
+;
+
+
+
+
+
+-- alter task edwprodhh.pub_jchang.insert_master_prediction_scores_dialeragent set USER_TASK_TIMEOUT_MS = 57600000;
+-- show parameters for task edwprodhh.pub_jchang.insert_master_prediction_scores_dialeragent;
+
+create task
+    edwprodhh.pub_jchang.insert_master_prediction_scores_dialeragent
+    warehouse = analysis_wh
+    after edwprodhh.pub_jchang.insert_master_prediction_scores_debtor
+as
+update      edwprodhh.hermes.master_prediction_scores as target
+set         target.score_dialer_agent = target.score_debtor
+from        edwprodhh.hermes.master_prediction_pool as source
 where       target.debtor_idx = source.debtor_idx
             and source.is_eligible_dialer_agent = 1
 ;

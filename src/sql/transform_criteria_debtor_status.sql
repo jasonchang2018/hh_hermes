@@ -3,45 +3,26 @@ create or replace table
 as
 select      debtor_idx,
             status,
+            cancel_dt,
+            balance_dimdebtor,
 
+            case    when    status in  ('ACT','NLT','PPD','PPA','AEX','LNA','LEG')
+                    then    1
+                    else    0
+                    end     as pass_debtor_status,
 
-            case    when    logon = 'HH'
-                    then    case    when    status in  ('ACT', 'PPD')
-                                    -- when    status in  ('ACT', 'PPD', 'SKP', 'LNA')
-                                    then    1
-                                    else    0
-                                    end
-
-                    when    logon = 'CO'
-                    -- then    case    when    status in  ('ACT', 'PPD')
-                    --                 -- when    status in  ('ACT', 'PPD', 'LNA', 'LAE')
-                    --                 then    1
-                    --                 else    0
-                    --                 end
-                    then    case    when    pl_group = 'ELIZABETH RIVER CROSSINGS - 3P'
-                                    then    case    when    status in  ('ACT', 'PPD', 'NLT')
-                                                    then    1
-                                                    else    0
-                                                    end
-                                    else    case    when    status in  ('ACT', 'PPD')
-                                                    then    1
-                                                    else    0
-                                                    end
-                                    end
-
-                    else    case    when    status in  ('ACT', 'PPD')
-                                    then    1
-                                    else    0
-                                    end
-
-                    end     as pass_debtor_status
+            case    when    cancel_dt   is null
+                    and     balance_dimdebtor > 0
+                    then    1
+                    else    0
+                    end     as pass_debtor_active
 
 from        edwprodhh.pub_jchang.master_debtor
 ;
 
 
 
-create task
+create or replace task
     edwprodhh.pub_jchang.replace_transform_criteria_debtor_status
     warehouse = analysis_wh
     after edwprodhh.pub_jchang.hermes_root
@@ -51,38 +32,19 @@ create or replace table
 as
 select      debtor_idx,
             status,
+            cancel_dt,
+            balance_dimdebtor,
 
+            case    when    status in  ('ACT','NLT','PPD','PPA','AEX','LNA','LEG')
+                    then    1
+                    else    0
+                    end     as pass_debtor_status,
 
-            case    when    logon = 'HH'
-                    then    case    when    status in  ('ACT', 'PPD')
-                                    -- when    status in  ('ACT', 'PPD', 'SKP', 'LNA')
-                                    then    1
-                                    else    0
-                                    end
-
-                    when    logon = 'CO'
-                    -- then    case    when    status in  ('ACT', 'PPD')
-                    --                 -- when    status in  ('ACT', 'PPD', 'LNA', 'LAE')
-                    --                 then    1
-                    --                 else    0
-                    --                 end
-                    then    case    when    pl_group = 'ELIZABETH RIVER CROSSINGS - 3P'
-                                    then    case    when    status in  ('ACT', 'PPD', 'NLT')
-                                                    then    1
-                                                    else    0
-                                                    end
-                                    else    case    when    status in  ('ACT', 'PPD')
-                                                    then    1
-                                                    else    0
-                                                    end
-                                    end
-
-                    else    case    when    status in  ('ACT', 'PPD')
-                                    then    1
-                                    else    0
-                                    end
-
-                    end     as pass_debtor_status
+            case    when    cancel_dt   is null
+                    and     balance_dimdebtor > 0
+                    then    1
+                    else    0
+                    end     as pass_debtor_active
 
 from        edwprodhh.pub_jchang.master_debtor
 ;

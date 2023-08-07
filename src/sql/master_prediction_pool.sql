@@ -7,8 +7,12 @@ with joined as
                 debtor.client_idx,
                 debtor.pl_group,
 
+                client_active.pass_client_active_hermes_contacts,
+
                 debtor_status.status,
+                debtor_status.cancel_dt,
                 debtor_status.pass_debtor_status,
+                debtor_status.pass_debtor_active,
 
                 client_allowed_contacts.pass_client_allowed_letters,
                 client_allowed_contacts.pass_client_allowed_texts,
@@ -117,10 +121,7 @@ with joined as
 
     from        edwprodhh.pub_jchang.master_debtor as debtor
 
-                inner join
-                    edwprodhh.hermes.master_config_clients_active as active_clients
-                    on debtor.client_idx = active_clients.client_idx
-
+                inner join edwprodhh.hermes.transform_criteria_debtor_client_active         as client_active                on debtor.debtor_idx = client_active.debtor_idx
                 inner join edwprodhh.hermes.transform_criteria_debtor_status                as debtor_status                on debtor.debtor_idx = debtor_status.debtor_idx
                 inner join edwprodhh.hermes.transform_criteria_client_allowed_contacts      as client_allowed_contacts      on debtor.debtor_idx = client_allowed_contacts.debtor_idx
                 inner join edwprodhh.hermes.transform_criteria_validation_requirement       as validation_requirement       on debtor.debtor_idx = validation_requirement.debtor_idx
@@ -140,7 +141,8 @@ with joined as
 )
 select      *,
 
-            case    when    pass_client_allowed_letters             =   1
+            case    when    pass_client_active_hermes_contacts      =   1
+                    and     pass_client_allowed_letters             =   1
                     and     pass_validation_requirement             =   1
                     and     pass_debtor_status                      =   1
                     and     pass_address_letters                    =   1
@@ -152,7 +154,8 @@ select      *,
                     else    0
                     end     as is_eligible_letters,
 
-            case    when    pass_client_allowed_texts               =   1
+            case    when    pass_client_active_hermes_contacts      =   1
+                    and     pass_client_allowed_texts               =   1
                     and     pass_validation_requirement             =   1
                     and     pass_debtor_status                      =   1
                     and     pass_phone_texts                        =   1
@@ -164,7 +167,8 @@ select      *,
                     else    0
                     end     as is_eligible_texts,
 
-            case    when    pass_client_allowed_voapps              =   1
+            case    when    pass_client_active_hermes_contacts      =   1
+                    and     pass_client_allowed_voapps              =   1
                     and     pass_validation_requirement             =   1
                     and     pass_debtor_status                      =   1
                     and     pass_phone_voapps                       =   1
@@ -184,33 +188,40 @@ select      *,
                     and     pass_debtor_status                      =   1
                     and     pass_phone_calls                        =   1
                     and     pass_7in7                               =   1
-                    and     pass_debtor_first_score_dialer_agent    =   1
+                    -- and     pass_debtor_first_score_dialer_agent    =   1
                     then    1
                     else    0
                     end     as is_eligible_dialer_agent,
 
 
-            NULL as is_eligible_dialer_agentless
+            NULL as is_eligible_dialer_agentless,
+
+            case    when    pass_debtor_status                      =   1
+                    and     pass_debtor_active                      =   1
+                    then    1
+                    else    0
+                    end     as is_eligible_debtor
 
 from        joined
 ;
 
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_contact_cooldown;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_balance;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_taxyear;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_payplan;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_maturity;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_lastpayment;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_income;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_experian;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_debttype;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_score_history;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_criteria_validation_requirement;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_criteria_debtor_status;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_criteria_client_allowed_contacts;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_phone;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_mail;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_email;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_contact_cooldown;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_balance;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_taxyear;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_payplan;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_maturity;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_lastpayment;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_income;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_experian;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_debttype;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_score_history;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_validation_requirement;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_debtor_status;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_debtor_client_active;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_client_allowed_contacts;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_phone;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_mail;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_email;
 
 
 
@@ -227,8 +238,12 @@ with joined as
                 debtor.client_idx,
                 debtor.pl_group,
 
+                client_active.pass_client_active_hermes_contacts,
+
                 debtor_status.status,
+                debtor_status.cancel_dt,
                 debtor_status.pass_debtor_status,
+                debtor_status.pass_debtor_active,
 
                 client_allowed_contacts.pass_client_allowed_letters,
                 client_allowed_contacts.pass_client_allowed_texts,
@@ -337,10 +352,7 @@ with joined as
 
     from        edwprodhh.pub_jchang.master_debtor as debtor
 
-                inner join
-                    edwprodhh.hermes.master_config_clients_active as active_clients
-                    on debtor.client_idx = active_clients.client_idx
-
+                inner join edwprodhh.hermes.transform_criteria_debtor_client_active         as client_active                on debtor.debtor_idx = client_active.debtor_idx
                 inner join edwprodhh.hermes.transform_criteria_debtor_status                as debtor_status                on debtor.debtor_idx = debtor_status.debtor_idx
                 inner join edwprodhh.hermes.transform_criteria_client_allowed_contacts      as client_allowed_contacts      on debtor.debtor_idx = client_allowed_contacts.debtor_idx
                 inner join edwprodhh.hermes.transform_criteria_validation_requirement       as validation_requirement       on debtor.debtor_idx = validation_requirement.debtor_idx
@@ -360,7 +372,8 @@ with joined as
 )
 select      *,
 
-            case    when    pass_client_allowed_letters             =   1
+            case    when    pass_client_active_hermes_contacts      =   1
+                    and     pass_client_allowed_letters             =   1
                     and     pass_validation_requirement             =   1
                     and     pass_debtor_status                      =   1
                     and     pass_address_letters                    =   1
@@ -372,7 +385,8 @@ select      *,
                     else    0
                     end     as is_eligible_letters,
 
-            case    when    pass_client_allowed_texts               =   1
+            case    when    pass_client_active_hermes_contacts      =   1
+                    and     pass_client_allowed_texts               =   1
                     and     pass_validation_requirement             =   1
                     and     pass_debtor_status                      =   1
                     and     pass_phone_texts                        =   1
@@ -384,7 +398,8 @@ select      *,
                     else    0
                     end     as is_eligible_texts,
 
-            case    when    pass_client_allowed_voapps              =   1
+            case    when    pass_client_active_hermes_contacts      =   1
+                    and     pass_client_allowed_voapps              =   1
                     and     pass_validation_requirement             =   1
                     and     pass_debtor_status                      =   1
                     and     pass_phone_voapps                       =   1
@@ -404,13 +419,19 @@ select      *,
                     and     pass_debtor_status                      =   1
                     and     pass_phone_calls                        =   1
                     and     pass_7in7                               =   1
-                    and     pass_debtor_first_score_dialer_agent    =   1
+                    -- and     pass_debtor_first_score_dialer_agent    =   1
                     then    1
                     else    0
                     end     as is_eligible_dialer_agent,
 
 
-            NULL as is_eligible_dialer_agentless
+            NULL as is_eligible_dialer_agentless,
+
+            case    when    pass_debtor_status                      =   1
+                    and     pass_debtor_active                      =   1
+                    then    1
+                    else    0
+                    end     as is_eligible_debtor
 
 from        joined
 ;
