@@ -6,14 +6,23 @@ with dialergrp_lookup as
     select      *
     from        edwprodhh.equabli.dialergrp_master_lookup_eqbscore
 )
-select      debtor.logon,
+select      
+            --  In existing files for both NORMAL and VALIDATION EQB Score
+            debtor.logon,
             dimdebtor.packet,
             debtor.debtornumber,
             debtor.pl_group,
             scores.decile_global    as local,
             scores.decile_local     as global,
-            'TEST' as equibli_treatment_group,
-            dialergrp_lookup.dialergrp as dialergrp
+
+            --  In existing files for only NORMAL EQB Score
+            'TEST' as equabli_treatment_group,
+            dialergrp_lookup.dialergrp as dialergrp,
+
+            --  In existing files for only VALIDATION EQB Score
+            'TEST' as equabli_validation_treatment_group,
+            debtor.batch_date::date + 10 as equabli_validation_expiration_date
+
 from        edwprodhh.hermes.master_prediction_scores_transformation as scores
             inner join
                 edwprodhh.pub_jchang.master_debtor as debtor
@@ -30,42 +39,14 @@ from        edwprodhh.hermes.master_prediction_scores_transformation as scores
 
 
 
-create or replace view
-    edwprodhh.hermes.master_prediction_scores_transformation_cubs_hh
-as
-select      *
-from        edwprodhh.hermes.master_prediction_scores_transformation_cubs
-where       logon = 'HH'
-;
+create or replace view edwprodhh.hermes.master_prediction_scores_transformation_cubs_debtor_hh      as select logon, packet, debtornumber, pl_group, local, global, equabli_treatment_group, dialergrp                                      from edwprodhh.hermes.master_prediction_scores_transformation_cubs where logon = 'HH';
+create or replace view edwprodhh.hermes.master_prediction_scores_transformation_cubs_debtor_co      as select logon, packet, debtornumber, pl_group, local, global, equabli_treatment_group, dialergrp                                      from edwprodhh.hermes.master_prediction_scores_transformation_cubs where logon = 'CO';
+create or replace view edwprodhh.hermes.master_prediction_scores_transformation_cubs_debtor_dc      as select logon, packet, debtornumber, pl_group, local, global, equabli_treatment_group, dialergrp                                      from edwprodhh.hermes.master_prediction_scores_transformation_cubs where logon = 'DC';
+create or replace view edwprodhh.hermes.master_prediction_scores_transformation_cubs_debtor_chi     as select logon, packet, debtornumber, pl_group, local, global, equabli_treatment_group, dialergrp                                      from edwprodhh.hermes.master_prediction_scores_transformation_cubs where logon = 'CHI';
+create or replace view edwprodhh.hermes.master_prediction_scores_transformation_cubs_debtor_pre     as select logon, packet, debtornumber, pl_group, local, global, equabli_treatment_group, dialergrp                                      from edwprodhh.hermes.master_prediction_scores_transformation_cubs where logon = 'PRE';
 
-create or replace view
-    edwprodhh.hermes.master_prediction_scores_transformation_cubs_co
-as
-select      *
-from        edwprodhh.hermes.master_prediction_scores_transformation_cubs
-where       logon = 'CO'
-;
-
-create or replace view
-    edwprodhh.hermes.master_prediction_scores_transformation_cubs_dc
-as
-select      *
-from        edwprodhh.hermes.master_prediction_scores_transformation_cubs
-where       logon = 'DC'
-;
-
-create or replace view
-    edwprodhh.hermes.master_prediction_scores_transformation_cubs_chi
-as
-select      *
-from        edwprodhh.hermes.master_prediction_scores_transformation_cubs
-where       logon = 'CHI'
-;
-
-create or replace view
-    edwprodhh.hermes.master_prediction_scores_transformation_cubs_pre
-as
-select      *
-from        edwprodhh.hermes.master_prediction_scores_transformation_cubs
-where       logon = 'PRE'
-;
+create or replace view edwprodhh.hermes.master_prediction_scores_transformation_cubs_debtorval_hh   as select logon, packet, debtornumber, pl_group, local, global, equabli_validation_treatment_group, equabli_validation_expiration_date  from edwprodhh.hermes.master_prediction_scores_transformation_cubs where logon = 'HH';
+-- create or replace view edwprodhh.hermes.master_prediction_scores_transformation_cubs_debtorval_co   as select logon, packet, debtornumber, pl_group, local, global, equabli_validation_treatment_group, equabli_validation_expiration_date  from edwprodhh.hermes.master_prediction_scores_transformation_cubs where logon = 'CO';
+-- create or replace view edwprodhh.hermes.master_prediction_scores_transformation_cubs_debtorval_dc   as select logon, packet, debtornumber, pl_group, local, global, equabli_validation_treatment_group, equabli_validation_expiration_date  from edwprodhh.hermes.master_prediction_scores_transformation_cubs where logon = 'DC';
+-- create or replace view edwprodhh.hermes.master_prediction_scores_transformation_cubs_debtorval_chi  as select logon, packet, debtornumber, pl_group, local, global, equabli_validation_treatment_group, equabli_validation_expiration_date  from edwprodhh.hermes.master_prediction_scores_transformation_cubs where logon = 'CHI';
+-- create or replace view edwprodhh.hermes.master_prediction_scores_transformation_cubs_debtorval_pre  as select logon, packet, debtornumber, pl_group, local, global, equabli_validation_treatment_group, equabli_validation_expiration_date  from edwprodhh.hermes.master_prediction_scores_transformation_cubs where logon = 'PRE';

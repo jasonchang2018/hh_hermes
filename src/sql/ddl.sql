@@ -173,15 +173,17 @@ create table
 create table
     edwprodhh.hermes.master_prediction_scores_transformation_cubs_log
 (
-    LOGON                       VARCHAR(5),
-    PACKET	                    VARCHAR(20),
-    DEBTORNUMBER	            VARCHAR(50),
-    PL_GROUP	                VARCHAR(16777216),
-    LOCAL	                    FLOAT,
-    GLOBAL	                    FLOAT,
-    EQUIBLI_TREATMENT_GROUP	    VARCHAR(4),
-    DIALERGRP	                VARCHAR(16777216),
-    EXECUTE_TIME                TIMESTAMP_LTZ(9)
+    LOGON                               VARCHAR(5),
+    PACKET	                            VARCHAR(20),
+    DEBTORNUMBER	                    VARCHAR(50),
+    PL_GROUP	                        VARCHAR(16777216),
+    LOCAL	                            FLOAT,
+    GLOBAL	                            FLOAT,
+    EQUABLI_TREATMENT_GROUP	            VARCHAR(4),
+    DIALERGRP	                        VARCHAR(16777216),
+    EQUABLI_VALIDATION_TREATMENT_GROUP	VARCHAR(4),
+    EQUABLI_VALIDATION_EXPIRATION_DATE	DATE,
+    EXECUTE_TIME                        TIMESTAMP_LTZ(9)
 )
 ;
 
