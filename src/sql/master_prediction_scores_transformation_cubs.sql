@@ -1,11 +1,11 @@
 create or replace view
     edwprodhh.hermes.master_prediction_scores_transformation_cubs
 as
-with dialergrp_lookup as
-(
-    select      *
-    from        edwprodhh.equabli.dialergrp_master_lookup_eqbscore
-)
+-- with dialergrp_lookup as
+-- (
+--     select      *
+--     from        edwprodhh.equabli.dialergrp_master_lookup_eqbscore
+-- )
 select      
             --  In existing files for both NORMAL and VALIDATION EQB Score
             debtor.logon,
@@ -17,7 +17,18 @@ select
 
             --  In existing files for only NORMAL EQB Score
             'TEST' as equabli_treatment_group,
-            dialergrp_lookup.dialergrp as dialergrp,
+            -- dialergrp_lookup.dialergrp as dialergrp,
+            case    when    scores.decile_local in (8,9,10)
+                    then    'GRP4'
+                    when    scores.decile_local in (5,6,7)
+                    then    'GRP3'
+                    when    scores.decile_local in (3,4)
+                    then    'GRP2'
+                    when    scores.decile_local in (1,2)
+                    then    'GRP1'
+                    else    'GRP1'
+                    end     as dialergrp,
+
 
             --  In existing files for only VALIDATION EQB Score
             'TEST' as equabli_validation_treatment_group,
@@ -30,10 +41,10 @@ from        edwprodhh.hermes.master_prediction_scores_transformation as scores
             inner join
                 edwprodhh.dw.dimdebtor as dimdebtor
                 on debtor.debtor_idx = dimdebtor.debtor_idx
-            left join
-                dialergrp_lookup
-                on scores.pl_group      = dialergrp_lookup.pl_group
-                and scores.decile_local = dialergrp_lookup.eqbscore
+            -- left join
+            --     dialergrp_lookup
+            --     on scores.pl_group      = dialergrp_lookup.pl_group
+            --     and scores.decile_local = dialergrp_lookup.eqbscore
 ;
 
 
