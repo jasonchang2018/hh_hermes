@@ -45,6 +45,7 @@ select 'EVERSOURCE ENERGY - 3P'                         as pl_group union all
 select 'EXELON - 3P'                                    as pl_group union all
 select 'FRANCISCAN HEALTH - 3P'                         as pl_group union all
 select 'JUST ENERGY - 3P'                               as pl_group union all
+select 'MCLEOD HEALTH - 3P'                             as pl_group union all
 select 'MOUNT SINAI - 3P'                               as pl_group union all
 select 'NORTHSHORE UNIV HEALTH - 3P'                    as pl_group union all
 select 'NORTHWESTERN MEDICINE - 3P'                     as pl_group union all
@@ -65,6 +66,8 @@ select 'STATE OF OK - TAX COMMISSION - 3P'              as pl_group union all
 select 'STATE OF PA - TURNPIKE COMMISSION - 3P'         as pl_group union all
 select 'STATE OF UT - OSDC - 3P'                        as pl_group union all
 select 'STATE OF UT - OSDC - 3P-2'                      as pl_group union all
+select 'U OF CHICAGO MEDICAL - 3P'                      as pl_group union all
+select 'U OF CINCINNATI HEALTH SYSTEM - 3P'             as pl_group union all
 select 'UNIVERSAL HEALTH SERVICES - 3P'                 as pl_group union all
 select 'WEILL CORNELL PHY - 3P'                         as pl_group
 ;
