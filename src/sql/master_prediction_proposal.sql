@@ -59,7 +59,71 @@ with scores as
                     edwprodhh.hermes.master_config_channel_costs as channel_costs
                     on scores.proposed_channel = channel_costs.contact_channel
 )
+        --  ENSURING CONTACTS IN LOWER BUCKETS -->
 
+        ,deciles as 
+        ( 
+            select      debtor_idx,
+                        rank_weighted, 
+                        
+                        ntile(10) over (order by rank_weighted)                                                                             as decile 
+            
+            from        calculate_marginal_wide 
+
+        ) 
+        , boundary_value as 
+        ( 
+            select      max(rank_weighted)                                                                                                as max_value_8
+
+            from        deciles 
+            where       decile = 8 
+
+        ) , decileweights as
+        (
+            select      decile, 
+                        decile / 28.0 as weight_fraction,
+                        count(*) as decile_count,
+                        ceil(0.07 * count(*) * (decile / 28.0)) as rows_to_take  
+            
+            from        deciles
+            where       decile between 1 and 7
+            group by    decile
+
+        )
+        ,  random_selection as 
+        (
+            select      deciles.*,
+                        (select max_value_8 from boundary_value) - 1                                                                       as adjusted_rank_weighted, 
+                        row_number() over (partition by deciles.decile order by random()) as rn
+            
+            from        deciles 
+                        inner join decileweights on deciles.decile = decileweights.decile
+            where       d.decile between 1 and 7
+            qualify     row_number() over (partition by d.decile order by random()) <= dw.rows_to_take  
+
+        )
+        , calculate_marginal_wide2 as 
+        (
+            select      calculate_marginal_wide.debtor_idx,
+                        calculate_marginal_wide.client_idx,
+                        calculate_marginal_wide.pl_group,
+                        calculate_marginal_wide.proposed_channel,
+                        calculate_marginal_wide.marginal_fee,
+                        calculate_marginal_wide.marginal_cost,
+                        calculate_marginal_wide.marginal_profit,
+                        calculate_marginal_wide.marginal_margin,
+                        calculate_marginal_wide.rank_profit,
+                        calculate_marginal_wide.rank_margin,
+                        case 
+                                when random_selection.debtor_idx is not null then random_selection.adjusted_rank_weighted
+                                else calculate_marginal_wide.rank_weighted 
+                        end                                                                                                                                 as adjusted_rank_weighted
+
+                    from calculate_marginal_wide
+                        left join random_selection on random_selection.debtor_idx = calculate_marginal_wide.debtor_idx 
+                    order by adjusted_rank_weighted
+
+        ) 
 --  FILTER ON SET PARAMETERS  -->
 , filter_marginals as
 (
