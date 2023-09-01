@@ -12,8 +12,8 @@ select
             dimdebtor.packet,
             debtor.debtornumber,
             debtor.pl_group,
-            scores.decile_global    as local,
-            scores.decile_local     as global,
+            scores.decile_local     as local,
+            scores.decile_global    as global,
 
             --  In existing files for only NORMAL EQB Score
             'TEST' as equabli_treatment_group,
