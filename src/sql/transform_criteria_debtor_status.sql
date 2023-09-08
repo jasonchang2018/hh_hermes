@@ -6,7 +6,7 @@ select      debtor_idx,
             cancel_dt,
             balance_dimdebtor,
 
-            case    when    status in  ('ACT','NLT','PPD','PPA','AEX','LNA','LEG')
+            case    when    status in  ('ACT','AEX','INC','LEG','LNA','NLT','PAA','PDC','PPA','PPD','PTP','RSD')
                     then    1
                     else    0
                     end     as pass_debtor_status,
@@ -35,7 +35,7 @@ select      debtor_idx,
             cancel_dt,
             balance_dimdebtor,
 
-            case    when    status in  ('ACT','NLT','PPD','PPA','AEX','LNA','LEG')
+            case    when    status in  ('ACT','AEX','INC','LEG','LNA','NLT','PAA','PDC','PPA','PPD','PTP','RSD')
                     then    1
                     else    0
                     end     as pass_debtor_status,
