@@ -16,6 +16,21 @@ select 'CITY OF PHILADELPHIA PA - MISC - 3P'            as pl_group union all
 select 'CITY OF PHILADELPHIA PA - PARKING - 3P'         as pl_group union all
 select 'CITY OF SAN FRANCISCO CA - MTA - 3P'            as pl_group union all
 select 'CITY OF SEATTLE WA - MUNI COURT - 3P'           as pl_group union all
+select 'CITY OF WASHINGTON DC - ABRA - 3P'              as pl_group union all
+select 'CITY OF WASHINGTON DC - BEGA - 3P'              as pl_group union all
+select 'CITY OF WASHINGTON DC - CCU - 3P'               as pl_group union all
+select 'CITY OF WASHINGTON DC - DHCD - 3P'              as pl_group union all
+select 'CITY OF WASHINGTON DC - DLCP - 3P'              as pl_group union all
+select 'CITY OF WASHINGTON DC - DMV - 3P'               as pl_group union all
+select 'CITY OF WASHINGTON DC - DOB - 3P'               as pl_group union all
+select 'CITY OF WASHINGTON DC - DOC - 3P'               as pl_group union all
+select 'CITY OF WASHINGTON DC - DOEE - 3P'              as pl_group union all
+select 'CITY OF WASHINGTON DC - FEMS - 3P'              as pl_group union all
+select 'CITY OF WASHINGTON DC - MPD - 3P'               as pl_group union all
+select 'CITY OF WASHINGTON DC - OAG - 3P'               as pl_group union all
+select 'CITY OF WASHINGTON DC - OLG - 3P'               as pl_group union all
+select 'CITY OF WASHINGTON DC - OP - 3P'                as pl_group union all
+select 'CITY OF WASHINGTON DC - OSSE - 3P'              as pl_group union all
 select 'COLUMBIA DENTAL - 3P'                           as pl_group union all
 select 'COLUMBIA DOCTORS - 3P'                          as pl_group union all
 select 'CONSUMERS ENERGY - 3P'                          as pl_group union all

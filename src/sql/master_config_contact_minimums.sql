@@ -12,7 +12,19 @@ create or replace table
 insert into
     edwprodhh.hermes.master_config_contact_minimums
 values
-    ('STATE OF PA - TURNPIKE COMMISSION - 3P', 'Text Message', 2, 10),
-    ('STATE OF PA - TURNPIKE COMMISSION - 3P', 'Text Message', 10, 300),
-    ('STATE OF PA - TURNPIKE COMMISSION - 3P', 'Text Message', 20, 1000)
+    ('CITY OF WASHINGTON DC - ABRA - 3P',       'Text Message', 2, 10),
+    ('CITY OF WASHINGTON DC - BEGA - 3P',       'Text Message', 2, 10),
+    ('CITY OF WASHINGTON DC - CCU - 3P',        'Text Message', 2, 10),
+    ('CITY OF WASHINGTON DC - DHCD - 3P',       'Text Message', 2, 10),
+    ('CITY OF WASHINGTON DC - DLCP - 3P',       'Text Message', 2, 10),
+    ('CITY OF WASHINGTON DC - DMV - 3P',        'Text Message', 2, 10),
+    ('CITY OF WASHINGTON DC - DOB - 3P',        'Text Message', 2, 10),
+    ('CITY OF WASHINGTON DC - DOC - 3P',        'Text Message', 2, 10),
+    ('CITY OF WASHINGTON DC - DOEE - 3P',       'Text Message', 2, 10),
+    ('CITY OF WASHINGTON DC - FEMS - 3P',       'Text Message', 2, 10),
+    ('CITY OF WASHINGTON DC - MPD - 3P',        'Text Message', 2, 10),
+    ('CITY OF WASHINGTON DC - OAG - 3P',        'Text Message', 2, 10),
+    ('CITY OF WASHINGTON DC - OLG - 3P',        'Text Message', 2, 10),
+    ('CITY OF WASHINGTON DC - OP - 3P',         'Text Message', 2, 10),
+    ('CITY OF WASHINGTON DC - OSSE - 3P',       'Text Message', 2, 10)
 ;

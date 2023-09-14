@@ -1,5 +1,5 @@
 create or replace view
-    edwprodhh.hermes.master_config_contact_codes
+    edwprodhh.hermes.master_config_contact_codes_plgroup
 as
 select  'ADVOCATE HC - 3P'                                  as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,     NULL        as text_code,   'USUAL'     as voapp_code union all
 select  'ASPEN DENTAL - 3P'                                 as pl_group,    'PP Offer'          as collection_type,     'HMHHP'     as letter_code,     NULL        as text_code,   'USUAL'     as voapp_code union all
@@ -14,6 +14,21 @@ select  'CITY OF CLEVELAND OH - CONDUENT - 3P'              as pl_group,    'Dun
 select  'CITY OF LA CA - PARKING CONDUENT - 3P'             as pl_group,    'Dun'               as collection_type,     'EDN1_LA'   as letter_code,     'TXT1'      as text_code,   NULL        as voapp_code union all
 select  'CITY OF PHILADELPHIA PA - PARKING - 3P'            as pl_group,    'Dun'               as collection_type,     'EDN1-PP'   as letter_code,     'TXT-SMS1'  as text_code,   NULL        as voapp_code union all
 select  'CITY OF SEATTLE WA - MUNI COURT - 3P'              as pl_group,    'Dun'               as collection_type,     'EDN1-SMC'  as letter_code,     'TXT-SMS2'  as text_code,   NULL        as voapp_code union all
+select  'CITY OF WASHINGTON DC - ABRA - 3P'                 as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXT-SMS'   as text_code,   NULL        as voapp_code union all
+select  'CITY OF WASHINGTON DC - BEGA - 3P'                 as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXT-SMS'   as text_code,   NULL        as voapp_code union all
+-- select  'CITY OF WASHINGTON DC - CCU - 3P'                  as pl_group,    NULL                as collection_type,     NULL        as letter_code,     NULL        as text_code,   NULL        as voapp_code union all
+select  'CITY OF WASHINGTON DC - DHCD - 3P'                 as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXT-SMS'   as text_code,   NULL        as voapp_code union all
+select  'CITY OF WASHINGTON DC - DLCP - 3P'                 as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXT-SMS'   as text_code,   NULL        as voapp_code union all
+select  'CITY OF WASHINGTON DC - DMV - 3P'                  as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXT-SMS'   as text_code,   NULL        as voapp_code union all
+select  'CITY OF WASHINGTON DC - DOB - 3P'                  as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXT-SMS'   as text_code,   NULL        as voapp_code union all
+select  'CITY OF WASHINGTON DC - DOC - 3P'                  as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXT-SMS'   as text_code,   NULL        as voapp_code union all
+select  'CITY OF WASHINGTON DC - DOEE - 3P'                 as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXT-SMS'   as text_code,   NULL        as voapp_code union all
+select  'CITY OF WASHINGTON DC - FEMS - 3P'                 as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXT1-SMS'  as text_code,   NULL        as voapp_code union all
+select  'CITY OF WASHINGTON DC - MPD - 3P'                  as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXT-SMS'   as text_code,   NULL        as voapp_code union all
+select  'CITY OF WASHINGTON DC - OAG - 3P'                  as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXT-SMS'   as text_code,   NULL        as voapp_code union all
+select  'CITY OF WASHINGTON DC - OLG - 3P'                  as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXT-SMS'   as text_code,   NULL        as voapp_code union all
+select  'CITY OF WASHINGTON DC - OP - 3P'                   as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXT-SMS'   as text_code,   NULL        as voapp_code union all
+select  'CITY OF WASHINGTON DC - OSSE - 3P'                 as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXT-SMS'   as text_code,   NULL        as voapp_code union all
 select  'COLUMBIA DENTAL - 3P'                              as pl_group,    NULL                as collection_type,     NULL        as letter_code,     'TXTNY01'   as text_code,   NULL        as voapp_code union all
 select  'COLUMBIA DOCTORS - 3P'                             as pl_group,    'Dun'               as collection_type,     'HMHHCD'    as letter_code,     'TXTNY01'   as text_code,   NULL        as voapp_code union all
 select  'COUNTY OF LOS ANGELES CA - 3P'                     as pl_group,    'Dun'               as collection_type,     'ECCFTAP1'  as letter_code,     NULL        as text_code,   NULL        as voapp_code union all
