@@ -78,6 +78,21 @@ with joined as
                 contact_cooldown.pass_voapps_cooldown,
                 contact_cooldown.pass_texts_cooldown,
                 contact_cooldown.pass_7in7,
+
+                contact_minimums.batch_date,
+                contact_minimums.days_since_placement,
+                contact_minimums.prev_n_letters_since_placement,
+                contact_minimums.prev_n_texts_since_placement,
+                contact_minimums.prev_n_voapps_since_placement,
+                contact_minimums.prev_n_emails_since_placement,
+                contact_minimums.prev_n_dialer_agent_since_placement,
+                contact_minimums.prev_n_dialer_agentless_since_placement,
+                contact_minimums.is_priority_minimum_letters,
+                contact_minimums.is_priority_minimum_texts,
+                contact_minimums.is_priority_minimum_voapps,
+                contact_minimums.is_priority_minimum_emails,
+                contact_minimums.is_priority_minimum_dialeragent,
+                contact_minimums.is_priority_minimum_dialeragentless,
                 
                 debtor_balance.assigned,
                 debtor_balance.balance_dimdebtor,
@@ -121,23 +136,24 @@ with joined as
 
     from        edwprodhh.pub_jchang.master_debtor as debtor
 
-                inner join edwprodhh.hermes.transform_criteria_debtor_client_active         as client_active                on debtor.debtor_idx = client_active.debtor_idx
-                inner join edwprodhh.hermes.transform_criteria_debtor_status                as debtor_status                on debtor.debtor_idx = debtor_status.debtor_idx
-                inner join edwprodhh.hermes.transform_criteria_client_allowed_contacts      as client_allowed_contacts      on debtor.debtor_idx = client_allowed_contacts.debtor_idx
-                inner join edwprodhh.hermes.transform_criteria_validation_requirement       as validation_requirement       on debtor.debtor_idx = validation_requirement.debtor_idx
-                inner join edwprodhh.hermes.transform_criteria_address_allowed_email        as address_allowed_email        on debtor.debtor_idx = address_allowed_email.debtor_idx
-                inner join edwprodhh.hermes.transform_criteria_address_allowed_mail         as address_allowed_mail         on debtor.debtor_idx = address_allowed_mail.debtor_idx
-                inner join edwprodhh.hermes.transform_criteria_address_allowed_phone        as address_allowed_phone        on debtor.debtor_idx = address_allowed_phone.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_contact_cooldown        as contact_cooldown             on debtor.debtor_idx = contact_cooldown.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_balance          as debtor_balance               on debtor.debtor_idx = debtor_balance.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_experian         as debtor_experian              on debtor.debtor_idx = debtor_experian.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_income           as debtor_income                on debtor.debtor_idx = debtor_income.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_lastpayment      as debtor_lastpayment           on debtor.debtor_idx = debtor_lastpayment.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_maturity         as debtor_maturity              on debtor.debtor_idx = debtor_maturity.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_taxyear          as debtor_taxyear               on debtor.debtor_idx = debtor_taxyear.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_payplan          as debtor_payplan               on debtor.debtor_idx = debtor_payplan.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_score_history    as debtor_scorehist             on debtor.debtor_idx = debtor_scorehist.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_debttype         as debtor_debttype              on debtor.debtor_idx = debtor_debttype.debtor_idx
+                inner join edwprodhh.hermes.transform_criteria_debtor_client_active             as client_active                on debtor.debtor_idx = client_active.debtor_idx
+                inner join edwprodhh.hermes.transform_criteria_debtor_status                    as debtor_status                on debtor.debtor_idx = debtor_status.debtor_idx
+                inner join edwprodhh.hermes.transform_criteria_client_allowed_contacts          as client_allowed_contacts      on debtor.debtor_idx = client_allowed_contacts.debtor_idx
+                inner join edwprodhh.hermes.transform_criteria_validation_requirement           as validation_requirement       on debtor.debtor_idx = validation_requirement.debtor_idx
+                inner join edwprodhh.hermes.transform_criteria_address_allowed_email            as address_allowed_email        on debtor.debtor_idx = address_allowed_email.debtor_idx
+                inner join edwprodhh.hermes.transform_criteria_address_allowed_mail             as address_allowed_mail         on debtor.debtor_idx = address_allowed_mail.debtor_idx
+                inner join edwprodhh.hermes.transform_criteria_address_allowed_phone            as address_allowed_phone        on debtor.debtor_idx = address_allowed_phone.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_contact_cooldown            as contact_cooldown             on debtor.debtor_idx = contact_cooldown.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_contact_priority_minimums   as contact_minimums             on debtor.debtor_idx = contact_minimums.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_balance              as debtor_balance               on debtor.debtor_idx = debtor_balance.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_experian             as debtor_experian              on debtor.debtor_idx = debtor_experian.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_income               as debtor_income                on debtor.debtor_idx = debtor_income.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_lastpayment          as debtor_lastpayment           on debtor.debtor_idx = debtor_lastpayment.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_maturity             as debtor_maturity              on debtor.debtor_idx = debtor_maturity.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_taxyear              as debtor_taxyear               on debtor.debtor_idx = debtor_taxyear.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_payplan              as debtor_payplan               on debtor.debtor_idx = debtor_payplan.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_score_history        as debtor_scorehist             on debtor.debtor_idx = debtor_scorehist.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_debttype             as debtor_debttype              on debtor.debtor_idx = debtor_debttype.debtor_idx
 )
 select      *,
 
@@ -210,6 +226,7 @@ from        joined
 ;
 
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_contact_cooldown;
+alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_contact_priority_minimums;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_balance;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_taxyear;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_payplan;
@@ -313,6 +330,21 @@ with joined as
                 contact_cooldown.pass_voapps_cooldown,
                 contact_cooldown.pass_texts_cooldown,
                 contact_cooldown.pass_7in7,
+
+                contact_minimums.batch_date,
+                contact_minimums.days_since_placement,
+                contact_minimums.prev_n_letters_since_placement,
+                contact_minimums.prev_n_texts_since_placement,
+                contact_minimums.prev_n_voapps_since_placement,
+                contact_minimums.prev_n_emails_since_placement,
+                contact_minimums.prev_n_dialer_agent_since_placement,
+                contact_minimums.prev_n_dialer_agentless_since_placement,
+                contact_minimums.is_priority_minimum_letters,
+                contact_minimums.is_priority_minimum_texts,
+                contact_minimums.is_priority_minimum_voapps,
+                contact_minimums.is_priority_minimum_emails,
+                contact_minimums.is_priority_minimum_dialeragent,
+                contact_minimums.is_priority_minimum_dialeragentless,
                 
                 debtor_balance.assigned,
                 debtor_balance.balance_dimdebtor,
@@ -356,23 +388,24 @@ with joined as
 
     from        edwprodhh.pub_jchang.master_debtor as debtor
 
-                inner join edwprodhh.hermes.transform_criteria_debtor_client_active         as client_active                on debtor.debtor_idx = client_active.debtor_idx
-                inner join edwprodhh.hermes.transform_criteria_debtor_status                as debtor_status                on debtor.debtor_idx = debtor_status.debtor_idx
-                inner join edwprodhh.hermes.transform_criteria_client_allowed_contacts      as client_allowed_contacts      on debtor.debtor_idx = client_allowed_contacts.debtor_idx
-                inner join edwprodhh.hermes.transform_criteria_validation_requirement       as validation_requirement       on debtor.debtor_idx = validation_requirement.debtor_idx
-                inner join edwprodhh.hermes.transform_criteria_address_allowed_email        as address_allowed_email        on debtor.debtor_idx = address_allowed_email.debtor_idx
-                inner join edwprodhh.hermes.transform_criteria_address_allowed_mail         as address_allowed_mail         on debtor.debtor_idx = address_allowed_mail.debtor_idx
-                inner join edwprodhh.hermes.transform_criteria_address_allowed_phone        as address_allowed_phone        on debtor.debtor_idx = address_allowed_phone.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_contact_cooldown        as contact_cooldown             on debtor.debtor_idx = contact_cooldown.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_balance          as debtor_balance               on debtor.debtor_idx = debtor_balance.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_experian         as debtor_experian              on debtor.debtor_idx = debtor_experian.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_income           as debtor_income                on debtor.debtor_idx = debtor_income.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_lastpayment      as debtor_lastpayment           on debtor.debtor_idx = debtor_lastpayment.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_maturity         as debtor_maturity              on debtor.debtor_idx = debtor_maturity.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_taxyear          as debtor_taxyear               on debtor.debtor_idx = debtor_taxyear.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_payplan          as debtor_payplan               on debtor.debtor_idx = debtor_payplan.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_score_history    as debtor_scorehist             on debtor.debtor_idx = debtor_scorehist.debtor_idx
-                inner join edwprodhh.hermes.transform_businessrules_debtor_debttype         as debtor_debttype              on debtor.debtor_idx = debtor_debttype.debtor_idx
+                inner join edwprodhh.hermes.transform_criteria_debtor_client_active             as client_active                on debtor.debtor_idx = client_active.debtor_idx
+                inner join edwprodhh.hermes.transform_criteria_debtor_status                    as debtor_status                on debtor.debtor_idx = debtor_status.debtor_idx
+                inner join edwprodhh.hermes.transform_criteria_client_allowed_contacts          as client_allowed_contacts      on debtor.debtor_idx = client_allowed_contacts.debtor_idx
+                inner join edwprodhh.hermes.transform_criteria_validation_requirement           as validation_requirement       on debtor.debtor_idx = validation_requirement.debtor_idx
+                inner join edwprodhh.hermes.transform_criteria_address_allowed_email            as address_allowed_email        on debtor.debtor_idx = address_allowed_email.debtor_idx
+                inner join edwprodhh.hermes.transform_criteria_address_allowed_mail             as address_allowed_mail         on debtor.debtor_idx = address_allowed_mail.debtor_idx
+                inner join edwprodhh.hermes.transform_criteria_address_allowed_phone            as address_allowed_phone        on debtor.debtor_idx = address_allowed_phone.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_contact_cooldown            as contact_cooldown             on debtor.debtor_idx = contact_cooldown.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_contact_priority_minimums   as contact_minimums             on debtor.debtor_idx = contact_minimums.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_balance              as debtor_balance               on debtor.debtor_idx = debtor_balance.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_experian             as debtor_experian              on debtor.debtor_idx = debtor_experian.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_income               as debtor_income                on debtor.debtor_idx = debtor_income.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_lastpayment          as debtor_lastpayment           on debtor.debtor_idx = debtor_lastpayment.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_maturity             as debtor_maturity              on debtor.debtor_idx = debtor_maturity.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_taxyear              as debtor_taxyear               on debtor.debtor_idx = debtor_taxyear.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_payplan              as debtor_payplan               on debtor.debtor_idx = debtor_payplan.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_score_history        as debtor_scorehist             on debtor.debtor_idx = debtor_scorehist.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_debtor_debttype             as debtor_debttype              on debtor.debtor_idx = debtor_debttype.debtor_idx
 )
 select      *,
 
