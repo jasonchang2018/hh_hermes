@@ -70,6 +70,7 @@ create table
     PASS_VOAPPS_COOLDOWN	                    NUMBER(1,0),
     PASS_TEXTS_COOLDOWN	                        NUMBER(1,0),
     PASS_7IN7	                                NUMBER(1,0),
+    BATCH_DATE                                  DATE,
     DAYS_SINCE_PLACEMENT                        NUMBER(9,0),
     PREV_N_LETTERS_SINCE_PLACEMENT	            NUMBER(18,0),
     PREV_N_TEXTS_SINCE_PLACEMENT	            NUMBER(18,0),
