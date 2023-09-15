@@ -3,38 +3,54 @@ create or replace table
 as
 with scores as
 (
-    select      debtor_idx,
-                client_idx,
-                pl_group,
-                case    upper(proposed_channel_)
-                        when    'SCORE_LETTERS'             then    'Letter'
-                        when    'SCORE_TEXTS'               then    'Text Message'
-                        when    'SCORE_VOAPPS'              then    'VoApp'
-                        when    'SCORE_EMAILS'              then    'Email'
-                        when    'SCORE_DIALER_AGENT'        then    'Dialer-Agent Call'
-                        when    'SCORE_DIALER_AGENTLESS'    then    'Dialer-Agentless Call'
-                        end     as proposed_channel,
-                score_value
+    with scores_long as
+    (
+        select      debtor_idx,
+                    client_idx,
+                    pl_group,
+                    case    upper(proposed_channel_)
+                            when    'SCORE_LETTERS'             then    'Letter'
+                            when    'SCORE_TEXTS'               then    'Text Message'
+                            when    'SCORE_VOAPPS'              then    'VoApp'
+                            when    'SCORE_EMAILS'              then    'Email'
+                            when    'SCORE_DIALER_AGENT'        then    'Dialer-Agent Call'
+                            when    'SCORE_DIALER_AGENTLESS'    then    'Dialer-Agentless Call'
+                            end     as proposed_channel,
+                    score_value
 
-    from        edwprodhh.hermes.master_prediction_scores
-                unpivot(
-                    score_value for proposed_channel_ in (
-                        score_letters,
-                        score_texts,
-                        score_voapps,
-                        score_emails,
-                        score_dialer_agent,
-                        score_dialer_agentless
+        from        edwprodhh.hermes.master_prediction_scores
+                    unpivot(
+                        score_value for proposed_channel_ in (
+                            score_letters,
+                            score_texts,
+                            score_voapps,
+                            score_emails,
+                            score_dialer_agent,
+                            score_dialer_agentless
+                        )
+                    )   as unpvt
+
+        where       score_value is not null
+                    and proposed_channel in (
+                        'Letter',
+                        'Text Message',
+                        'VoApp',
+                        'Email'
                     )
-                )   as unpvt
+    )
+    select      scores_long.*,
 
-    where       score_value is not null
-                and proposed_channel in (
-                    'Letter',
-                    'Text Message',
-                    'VoApp',
-                    'Email'
-                )
+                case    when    scores_long.proposed_channel = 'Letter'         then    pool.is_priority_minimum_letters
+                        when    scores_long.proposed_channel = 'Text Message'   then    pool.is_priority_minimum_texts
+                        when    scores_long.proposed_channel = 'VoApp'          then    pool.is_priority_minimum_voapps
+                        when    scores_long.proposed_channel = 'Email'          then    pool.is_priority_minimum_emails
+                        else    0
+                        end     as is_priority_minimum
+
+    from        scores_long
+                left join
+                    edwprodhh.hermes.master_prediction_pool as pool
+                    on  scores_long.debtor_idx = pool.debtor_idx
 )
 , calculate_marginal_wide as
 (
@@ -42,13 +58,14 @@ with scores as
                 scores.client_idx,
                 scores.pl_group,
                 scores.proposed_channel,
+                scores.is_priority_minimum,
                 scores.score_value                                                                                                  as marginal_fee,
                 channel_costs.unit_cost                                                                                             as marginal_cost,
                 (marginal_fee - marginal_cost)                                                                                      as marginal_profit,
                 edwprodhh.pub_jchang.divide(marginal_fee - marginal_cost, marginal_fee)                                             as marginal_margin,
 
-                row_number() over (order by marginal_profit desc)                                                                   as rank_profit,     -- 1 is best
-                row_number() over (order by marginal_margin desc)                                                                   as rank_margin,     -- 1 is best
+                row_number() over (order by scores.is_priority_minimum desc, marginal_profit desc)                                  as rank_profit,     -- 1 is best
+                row_number() over (order by scores.is_priority_minimum desc, marginal_margin desc)                                  as rank_margin,     -- 1 is best
                 
                 (rank_profit    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Profit')) +
                 (rank_margin    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Margin'))
@@ -59,78 +76,83 @@ with scores as
                     edwprodhh.hermes.master_config_channel_costs as channel_costs
                     on scores.proposed_channel = channel_costs.contact_channel
 )
-        --  ENSURING CONTACTS IN LOWER BUCKETS -->
 
-        ,deciles as 
-        ( 
-            select      debtor_idx,
-                        rank_weighted, 
-                        
-                        ntile(10) over (order by rank_weighted)                                                                             as decile 
-            
-            from        calculate_marginal_wide 
+-- --  ENSURING CONTACTS IN LOWER BUCKETS -->
+-- ,deciles as 
+-- ( 
+--     select      debtor_idx,
+--                 rank_weighted, 
+                
+--                 ntile(10) over (order by rank_weighted)                                                                             as decile 
+    
+--     from        calculate_marginal_wide 
 
-        ) 
-        , boundary_value as 
-        ( 
-            select      max(rank_weighted)                                                                                                as max_value_8
+-- ) 
+-- , boundary_value as 
+-- ( 
+--     select      max(rank_weighted)                                                                                                as max_value_8
 
-            from        deciles 
-            where       decile = 8 
+--     from        deciles 
+--     where       decile = 8 
 
-        ) , decileweights as
-        (
-            select      decile, 
-                        decile / 28.0 as weight_fraction,
-                        count(*) as decile_count,
-                        ceil(0.07 * count(*) * (decile / 28.0)) as rows_to_take  
-            
-            from        deciles
-            where       decile between 1 and 7
-            group by    decile
+-- ) , decileweights as
+-- (
+--     select      decile, 
+--                 decile / 28.0 as weight_fraction,
+--                 count(*) as decile_count,
+--                 ceil(0.07 * count(*) * (decile / 28.0)) as rows_to_take  
+    
+--     from        deciles
+--     where       decile between 1 and 7
+--     group by    decile
 
-        )
-        ,  random_selection as 
-        (
-            select      deciles.*,
-                        (select max_value_8 from boundary_value) - 1                                                                       as adjusted_rank_weighted, 
-                        row_number() over (partition by deciles.decile order by random()) as rn
-            
-            from        deciles 
-                        inner join decileweights on deciles.decile = decileweights.decile
-            where       d.decile between 1 and 7
-            qualify     row_number() over (partition by d.decile order by random()) <= dw.rows_to_take  
+-- )
+-- ,  random_selection as 
+-- (
+--     select      deciles.*,
+--                 (select max_value_8 from boundary_value) - 1                                                                       as adjusted_rank_weighted, 
+--                 row_number() over (partition by deciles.decile order by random()) as rn
+    
+--     from        deciles 
+--                 inner join decileweights on deciles.decile = decileweights.decile
+--     where       d.decile between 1 and 7
+--     qualify     row_number() over (partition by d.decile order by random()) <= dw.rows_to_take  
 
-        )
-        , calculate_marginal_wide2 as 
-        (
-            select      calculate_marginal_wide.debtor_idx,
-                        calculate_marginal_wide.client_idx,
-                        calculate_marginal_wide.pl_group,
-                        calculate_marginal_wide.proposed_channel,
-                        calculate_marginal_wide.marginal_fee,
-                        calculate_marginal_wide.marginal_cost,
-                        calculate_marginal_wide.marginal_profit,
-                        calculate_marginal_wide.marginal_margin,
-                        calculate_marginal_wide.rank_profit,
-                        calculate_marginal_wide.rank_margin,
-                        case 
-                                when random_selection.debtor_idx is not null then random_selection.adjusted_rank_weighted
-                                else calculate_marginal_wide.rank_weighted 
-                        end                                                                                                                                 as adjusted_rank_weighted
+-- )
+-- , calculate_marginal_wide2 as 
+-- (
+--     select      calculate_marginal_wide.debtor_idx,
+--                 calculate_marginal_wide.client_idx,
+--                 calculate_marginal_wide.pl_group,
+--                 calculate_marginal_wide.proposed_channel,
+--                 calculate_marginal_wide.marginal_fee,
+--                 calculate_marginal_wide.marginal_cost,
+--                 calculate_marginal_wide.marginal_profit,
+--                 calculate_marginal_wide.marginal_margin,
+--                 calculate_marginal_wide.rank_profit,
+--                 calculate_marginal_wide.rank_margin,
+--                 case 
+--                         when random_selection.debtor_idx is not null then random_selection.adjusted_rank_weighted
+--                         else calculate_marginal_wide.rank_weighted 
+--                 end                                                                                                                                 as adjusted_rank_weighted
 
-                    from calculate_marginal_wide
-                        left join random_selection on random_selection.debtor_idx = calculate_marginal_wide.debtor_idx 
-                    order by adjusted_rank_weighted
+--             from calculate_marginal_wide
+--                 left join random_selection on random_selection.debtor_idx = calculate_marginal_wide.debtor_idx 
+--             order by adjusted_rank_weighted
 
-        ) 
+-- ) 
+
+
 --  FILTER ON SET PARAMETERS  -->
 , filter_marginals as
 (
     select      *
     from        calculate_marginal_wide
-    where       marginal_profit         >= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MIN_PROFIT_MARGINAL')
-                and marginal_margin     >= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MIN_MARGIN_MARGINAL')
+    where       (
+                    marginal_profit         >= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MIN_PROFIT_MARGINAL')
+                    and marginal_margin     >= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MIN_MARGIN_MARGINAL')
+                )
+                or is_priority_minimum = 1
 )
 , filter_best_contact_options_per_packet as
 (
@@ -269,6 +291,7 @@ with scores as
                 client_idx,
                 pl_group,
                 proposed_channel,
+                is_priority_minimum,
                 marginal_fee,
                 marginal_cost,
                 marginal_profit,
@@ -329,6 +352,7 @@ with scores as
                 client_idx,
                 pl_group,
                 proposed_channel,
+                is_priority_minimum,
                 marginal_fee,
                 marginal_cost,
                 marginal_profit,
@@ -360,6 +384,7 @@ with scores as
                 client_idx,
                 pl_group,
                 proposed_channel,
+                is_priority_minimum,
                 marginal_fee,
                 marginal_cost,
                 marginal_profit,
@@ -456,6 +481,7 @@ with scores as
                 coalesce(pool.client_idx,           fast_track.client_idx)          as client_idx,
                 coalesce(pool.pl_group,             fast_track.pl_group)            as pl_group,
                 coalesce(pool.proposed_channel,     fast_track.proposed_channel)    as proposed_channel,
+                pool.is_priority_minimum,
                 pool.marginal_fee,
                 pool.marginal_cost,
                 pool.marginal_profit,
@@ -504,38 +530,54 @@ create or replace table
 as
 with scores as
 (
-    select      debtor_idx,
-                client_idx,
-                pl_group,
-                case    upper(proposed_channel_)
-                        when    'SCORE_LETTERS'             then    'Letter'
-                        when    'SCORE_TEXTS'               then    'Text Message'
-                        when    'SCORE_VOAPPS'              then    'VoApp'
-                        when    'SCORE_EMAILS'              then    'Email'
-                        when    'SCORE_DIALER_AGENT'        then    'Dialer-Agent Call'
-                        when    'SCORE_DIALER_AGENTLESS'    then    'Dialer-Agentless Call'
-                        end     as proposed_channel,
-                score_value
+    with scores_long as
+    (
+        select      debtor_idx,
+                    client_idx,
+                    pl_group,
+                    case    upper(proposed_channel_)
+                            when    'SCORE_LETTERS'             then    'Letter'
+                            when    'SCORE_TEXTS'               then    'Text Message'
+                            when    'SCORE_VOAPPS'              then    'VoApp'
+                            when    'SCORE_EMAILS'              then    'Email'
+                            when    'SCORE_DIALER_AGENT'        then    'Dialer-Agent Call'
+                            when    'SCORE_DIALER_AGENTLESS'    then    'Dialer-Agentless Call'
+                            end     as proposed_channel,
+                    score_value
 
-    from        edwprodhh.hermes.master_prediction_scores
-                unpivot(
-                    score_value for proposed_channel_ in (
-                        score_letters,
-                        score_texts,
-                        score_voapps,
-                        score_emails,
-                        score_dialer_agent,
-                        score_dialer_agentless
+        from        edwprodhh.hermes.master_prediction_scores
+                    unpivot(
+                        score_value for proposed_channel_ in (
+                            score_letters,
+                            score_texts,
+                            score_voapps,
+                            score_emails,
+                            score_dialer_agent,
+                            score_dialer_agentless
+                        )
+                    )   as unpvt
+
+        where       score_value is not null
+                    and proposed_channel in (
+                        'Letter',
+                        'Text Message',
+                        'VoApp',
+                        'Email'
                     )
-                )   as unpvt
+    )
+    select      scores_long.*,
 
-    where       score_value is not null
-                and proposed_channel in (
-                    'Letter',
-                    'Text Message',
-                    'VoApp',
-                    'Email'
-                )
+                case    when    scores_long.proposed_channel = 'Letter'         then    pool.is_priority_minimum_letters
+                        when    scores_long.proposed_channel = 'Text Message'   then    pool.is_priority_minimum_texts
+                        when    scores_long.proposed_channel = 'VoApp'          then    pool.is_priority_minimum_voapps
+                        when    scores_long.proposed_channel = 'Email'          then    pool.is_priority_minimum_emails
+                        else    0
+                        end     as is_priority_minimum
+
+    from        scores_long
+                left join
+                    edwprodhh.hermes.master_prediction_pool as pool
+                    on  scores_long.debtor_idx = pool.debtor_idx
 )
 , calculate_marginal_wide as
 (
@@ -543,13 +585,14 @@ with scores as
                 scores.client_idx,
                 scores.pl_group,
                 scores.proposed_channel,
+                scores.is_priority_minimum,
                 scores.score_value                                                                                                  as marginal_fee,
                 channel_costs.unit_cost                                                                                             as marginal_cost,
                 (marginal_fee - marginal_cost)                                                                                      as marginal_profit,
                 edwprodhh.pub_jchang.divide(marginal_fee - marginal_cost, marginal_fee)                                             as marginal_margin,
 
-                row_number() over (order by marginal_profit desc)                                                                   as rank_profit,     -- 1 is best
-                row_number() over (order by marginal_margin desc)                                                                   as rank_margin,     -- 1 is best
+                row_number() over (order by scores.is_priority_minimum desc, marginal_profit desc)                                  as rank_profit,     -- 1 is best
+                row_number() over (order by scores.is_priority_minimum desc, marginal_margin desc)                                  as rank_margin,     -- 1 is best
                 
                 (rank_profit    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Profit')) +
                 (rank_margin    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Margin'))
@@ -561,13 +604,82 @@ with scores as
                     on scores.proposed_channel = channel_costs.contact_channel
 )
 
+-- --  ENSURING CONTACTS IN LOWER BUCKETS -->
+-- ,deciles as 
+-- ( 
+--     select      debtor_idx,
+--                 rank_weighted, 
+                
+--                 ntile(10) over (order by rank_weighted)                                                                             as decile 
+    
+--     from        calculate_marginal_wide 
+
+-- ) 
+-- , boundary_value as 
+-- ( 
+--     select      max(rank_weighted)                                                                                                as max_value_8
+
+--     from        deciles 
+--     where       decile = 8 
+
+-- ) , decileweights as
+-- (
+--     select      decile, 
+--                 decile / 28.0 as weight_fraction,
+--                 count(*) as decile_count,
+--                 ceil(0.07 * count(*) * (decile / 28.0)) as rows_to_take  
+    
+--     from        deciles
+--     where       decile between 1 and 7
+--     group by    decile
+
+-- )
+-- ,  random_selection as 
+-- (
+--     select      deciles.*,
+--                 (select max_value_8 from boundary_value) - 1                                                                       as adjusted_rank_weighted, 
+--                 row_number() over (partition by deciles.decile order by random()) as rn
+    
+--     from        deciles 
+--                 inner join decileweights on deciles.decile = decileweights.decile
+--     where       d.decile between 1 and 7
+--     qualify     row_number() over (partition by d.decile order by random()) <= dw.rows_to_take  
+
+-- )
+-- , calculate_marginal_wide2 as 
+-- (
+--     select      calculate_marginal_wide.debtor_idx,
+--                 calculate_marginal_wide.client_idx,
+--                 calculate_marginal_wide.pl_group,
+--                 calculate_marginal_wide.proposed_channel,
+--                 calculate_marginal_wide.marginal_fee,
+--                 calculate_marginal_wide.marginal_cost,
+--                 calculate_marginal_wide.marginal_profit,
+--                 calculate_marginal_wide.marginal_margin,
+--                 calculate_marginal_wide.rank_profit,
+--                 calculate_marginal_wide.rank_margin,
+--                 case 
+--                         when random_selection.debtor_idx is not null then random_selection.adjusted_rank_weighted
+--                         else calculate_marginal_wide.rank_weighted 
+--                 end                                                                                                                                 as adjusted_rank_weighted
+
+--             from calculate_marginal_wide
+--                 left join random_selection on random_selection.debtor_idx = calculate_marginal_wide.debtor_idx 
+--             order by adjusted_rank_weighted
+
+-- ) 
+
+
 --  FILTER ON SET PARAMETERS  -->
 , filter_marginals as
 (
     select      *
     from        calculate_marginal_wide
-    where       marginal_profit         >= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MIN_PROFIT_MARGINAL')
-                and marginal_margin     >= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MIN_MARGIN_MARGINAL')
+    where       (
+                    marginal_profit         >= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MIN_PROFIT_MARGINAL')
+                    and marginal_margin     >= (select value from edwprodhh.hermes.master_config_constraints_global where constraint_name = 'MIN_MARGIN_MARGINAL')
+                )
+                or is_priority_minimum = 1
 )
 , filter_best_contact_options_per_packet as
 (
@@ -706,6 +818,7 @@ with scores as
                 client_idx,
                 pl_group,
                 proposed_channel,
+                is_priority_minimum,
                 marginal_fee,
                 marginal_cost,
                 marginal_profit,
@@ -766,6 +879,7 @@ with scores as
                 client_idx,
                 pl_group,
                 proposed_channel,
+                is_priority_minimum,
                 marginal_fee,
                 marginal_cost,
                 marginal_profit,
@@ -797,6 +911,7 @@ with scores as
                 client_idx,
                 pl_group,
                 proposed_channel,
+                is_priority_minimum,
                 marginal_fee,
                 marginal_cost,
                 marginal_profit,
@@ -893,6 +1008,7 @@ with scores as
                 coalesce(pool.client_idx,           fast_track.client_idx)          as client_idx,
                 coalesce(pool.pl_group,             fast_track.pl_group)            as pl_group,
                 coalesce(pool.proposed_channel,     fast_track.proposed_channel)    as proposed_channel,
+                pool.is_priority_minimum,
                 pool.marginal_fee,
                 pool.marginal_cost,
                 pool.marginal_profit,

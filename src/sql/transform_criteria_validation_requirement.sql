@@ -50,10 +50,7 @@ select      debtor.debtor_idx,
 
             pass_validation_age.val_ltr_date as validation_letter_date,
 
-            case    when    debtor.pl_group in (select pl_group from edwprodhh.hermes.transform_criteria_validation_clients)
-                    then    1
-                    else    0
-                    end     as requires_validation,
+            coalesce(client.is_fdcpa, 0) as requires_validation,
 
             case    when    debtors_sent_vals.debtor_idx is not null
                     then    1
@@ -83,6 +80,19 @@ select      debtor.debtor_idx,
             min(pass_validation_requirement_debtor) over (partition by packet_idx) as pass_validation_requirement
 
 from        edwprodhh.pub_jchang.master_debtor as debtor
+            -- inner join
+            --     edwprodhh.pub_jchang.master_client as client
+            --     on debtor.client_idx = client.client_idx
+            left join
+                (
+                    select      client_idx,
+                                case    when    coalesce(nullif(trim(fdcpa_flg), ''), '') = 'Y'
+                                        then    1
+                                        else    0
+                                        end     as is_fdcpa
+                    from        edwprodhh.pub_jchang.temp_csv_master_client_fdcpa
+                )   as client
+                on debtor.client_idx = client.client_idx
             left join
                 debtors_sent_vals
                 on debtor.debtor_idx = debtors_sent_vals.debtor_idx
@@ -154,10 +164,7 @@ select      debtor.debtor_idx,
 
             pass_validation_age.val_ltr_date as validation_letter_date,
 
-            case    when    debtor.pl_group in (select pl_group from edwprodhh.hermes.transform_criteria_validation_clients)
-                    then    1
-                    else    0
-                    end     as requires_validation,
+            coalesce(client.is_fdcpa, 0) as requires_validation,
 
             case    when    debtors_sent_vals.debtor_idx is not null
                     then    1
@@ -187,6 +194,19 @@ select      debtor.debtor_idx,
             min(pass_validation_requirement_debtor) over (partition by packet_idx) as pass_validation_requirement
 
 from        edwprodhh.pub_jchang.master_debtor as debtor
+            -- inner join
+            --     edwprodhh.pub_jchang.master_client as client
+            --     on debtor.client_idx = client.client_idx
+            left join
+                (
+                    select      client_idx,
+                                case    when    coalesce(nullif(trim(fdcpa_flg), ''), '') = 'Y'
+                                        then    1
+                                        else    0
+                                        end     as is_fdcpa
+                    from        edwprodhh.pub_jchang.temp_csv_master_client_fdcpa
+                )   as client
+                on debtor.client_idx = client.client_idx
             left join
                 debtors_sent_vals
                 on debtor.debtor_idx = debtors_sent_vals.debtor_idx

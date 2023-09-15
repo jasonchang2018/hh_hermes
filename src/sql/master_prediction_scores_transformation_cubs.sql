@@ -12,27 +12,24 @@ select
             dimdebtor.packet,
             debtor.debtornumber,
             debtor.pl_group,
-            scores.decile_local     as local,
-            scores.decile_global    as global,
-
-            --  In existing files for only NORMAL EQB Score
-            'TEST' as equabli_treatment_group,
-            -- dialergrp_lookup.dialergrp as dialergrp,
-            case    when    scores.decile_local in (8,9,10)
+            scores.decile_local                                 as local,
+            scores.decile_global                                as global,
+            
+            'TEST'                                              as equabli_treatment_group,
+            case    when    round(median(scores.decile_local) over (partition by debtor.packet_idx), 0) in (8,9,10)
                     then    'GRP4'
-                    when    scores.decile_local in (5,6,7)
+                    when    round(median(scores.decile_local) over (partition by debtor.packet_idx), 0) in (5,6,7)
                     then    'GRP3'
-                    when    scores.decile_local in (3,4)
+                    when    round(median(scores.decile_local) over (partition by debtor.packet_idx), 0) in (3,4)
                     then    'GRP2'
-                    when    scores.decile_local in (1,2)
+                    when    round(median(scores.decile_local) over (partition by debtor.packet_idx), 0) in (1,2)
                     then    'GRP1'
                     else    'GRP1'
                     end     as dialergrp,
-
-
-            --  In existing files for only VALIDATION EQB Score
-            'TEST' as equabli_validation_treatment_group,
-            debtor.batch_date::date + 10 as equabli_validation_expiration_date
+            -- dialergrp_lookup.dialergrp as dialergrp,
+            
+            'TEST'                                              as equabli_validation_treatment_group,
+            debtor.batch_date::date + 10                        as equabli_validation_expiration_date
 
 from        edwprodhh.hermes.master_prediction_scores_transformation as scores
             inner join

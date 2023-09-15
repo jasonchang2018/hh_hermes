@@ -13,9 +13,9 @@ insert into
 values
     --  COST
     --  INCREMENT: RUNNING LEVEL ONLY.
-    ('MAX_COST_RUNNING_TOTAL',          28000),
-    ('MAX_COST_RUNNING_LETTERS',        7500),
-    ('MAX_COST_RUNNING_TEXTS',          5400),
+    ('MAX_COST_RUNNING_TOTAL',          30000),
+    ('MAX_COST_RUNNING_LETTERS',        0),
+    ('MAX_COST_RUNNING_TEXTS',          12000),
     ('MAX_COST_RUNNING_VOAPPS',         21000),
     ('MAX_COST_RUNNING_EMAILS',         0),
     
