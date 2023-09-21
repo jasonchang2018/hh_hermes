@@ -16,13 +16,13 @@ select
             scores.decile_global                                as global,
             
             'TEST'                                              as equabli_treatment_group,
-            case    when    round(median(scores.decile_local) over (partition by debtor.packet_idx), 0) in (8,9,10)
+            case    when    round(median(scores.decile_local) over (partition by debtor.packet_idx), 0) in (9,10)
                     then    'GRP4'
-                    when    round(median(scores.decile_local) over (partition by debtor.packet_idx), 0) in (5,6,7)
+                    when    round(median(scores.decile_local) over (partition by debtor.packet_idx), 0) in (7,8)
                     then    'GRP3'
-                    when    round(median(scores.decile_local) over (partition by debtor.packet_idx), 0) in (3,4)
+                    when    round(median(scores.decile_local) over (partition by debtor.packet_idx), 0) in (4,5,6)
                     then    'GRP2'
-                    when    round(median(scores.decile_local) over (partition by debtor.packet_idx), 0) in (1,2)
+                    when    round(median(scores.decile_local) over (partition by debtor.packet_idx), 0) in (1,2,3)
                     then    'GRP1'
                     else    'GRP1'
                     end     as dialergrp,
