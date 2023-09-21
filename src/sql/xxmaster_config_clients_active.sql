@@ -94,8 +94,8 @@ where       (
                     'U OF CINCINNATI HEALTH SYSTEM - 3P',
                     'U OF IL AT CHICAGO - 3P',
                     'UNITED REGIONAL - 3P-2',
-                    'UNIVERSAL HEALTH SERVICES - 3P'
-
+                    'UNIVERSAL HEALTH SERVICES - 3P',
+                    'WEILL CORNELL PHY - 3P'
                 )
                 -- or client_idx in (
                 --     -- 'CO-ERCTB',         --'ELIZABETH RIVER CROSSINGS - 3P'

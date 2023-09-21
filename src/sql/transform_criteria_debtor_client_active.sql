@@ -3,7 +3,8 @@ create or replace table
 as
 select      debtor_idx,
 
-            case    when    client_idx in (select client_idx from edwprodhh.hermes.master_config_clients_active)
+            case    when    pl_group in         (select pl_group from edwprodhh.hermes.master_config_plgroup where is_client_active_hermes_contacts = 1)
+                    and     client_idx not in   (select client_idx from edwprodhh.hermes.master_config_client_exclude)
                     then    1
                     else    0
                     end     as pass_client_active_hermes_contacts
@@ -23,7 +24,8 @@ create or replace table
 as
 select      debtor_idx,
 
-            case    when    client_idx in (select client_idx from edwprodhh.hermes.master_config_clients_active)
+            case    when    pl_group in         (select pl_group from edwprodhh.hermes.master_config_plgroup where is_client_active_hermes_contacts = 1)
+                    and     client_idx not in   (select client_idx from edwprodhh.hermes.master_config_client_exclude)
                     then    1
                     else    0
                     end     as pass_client_active_hermes_contacts

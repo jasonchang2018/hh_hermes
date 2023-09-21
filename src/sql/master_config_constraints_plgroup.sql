@@ -116,6 +116,7 @@ select      distinct
                     when    pl_group = 'U OF IL AT CHICAGO - 3P'                                then    110
                     when    pl_group = 'UNITED REGIONAL - 3P-2'                                 then    150
                     when    pl_group = 'UNIVERSAL HEALTH SERVICES - 3P'                         then    1320
+                    when    pl_group = 'WEILL CORNELL PHY - 3P'                                 then    150
                     else    0
                     end     as  max_cost_running_client,
 
@@ -343,6 +344,7 @@ select      distinct
                     when    pl_group = 'U OF IL AT CHICAGO - 3P'                                then    0
                     when    pl_group = 'UNITED REGIONAL - 3P-2'                                 then    0
                     when    pl_group = 'UNIVERSAL HEALTH SERVICES - 3P'                         then    1078
+                    when    pl_group = 'WEILL CORNELL PHY - 3P'                                 then    150
                     else    0
                     end     as  max_cost_running_texts,
 
