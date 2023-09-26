@@ -14,15 +14,14 @@ with joined as
                 debtor_status.pass_debtor_status,
                 debtor_status.pass_debtor_active,
 
-                client_allowed_contacts.pass_client_allowed_letters,
-                client_allowed_contacts.pass_client_allowed_texts,
-                client_allowed_contacts.pass_client_allowed_voapps,
-                client_allowed_contacts.pass_client_allowed_calls,
+                client_config.is_client_allowed_letters as pass_client_allowed_letters,
+                client_config.is_client_allowed_texts   as pass_client_allowed_texts,
+                client_config.is_client_allowed_voapps  as pass_client_allowed_voapps,
+                client_config.is_client_allowed_calls   as pass_client_allowed_calls,
 
                 validation_requirement.requires_validation,
                 validation_requirement.pass_received_validation,
                 validation_requirement.pass_age_validation,
-                -- validation_requirement.pass_received_other_contacts,
                 validation_requirement.pass_validation_requirement_debtor,
                 validation_requirement.pass_validation_requirement,
                 validation_requirement.validation_letter_date,
@@ -139,9 +138,9 @@ with joined as
 
     from        edwprodhh.pub_jchang.master_debtor as debtor
 
+                inner join edwprodhh.hermes.master_config_plgroup                               as client_config                on debtor.pl_group   = client_config.pl_group
                 inner join edwprodhh.hermes.transform_criteria_debtor_client_active             as client_active                on debtor.debtor_idx = client_active.debtor_idx
                 inner join edwprodhh.hermes.transform_criteria_debtor_status                    as debtor_status                on debtor.debtor_idx = debtor_status.debtor_idx
-                inner join edwprodhh.hermes.transform_criteria_client_allowed_contacts          as client_allowed_contacts      on debtor.debtor_idx = client_allowed_contacts.debtor_idx
                 inner join edwprodhh.hermes.transform_criteria_validation_requirement           as validation_requirement       on debtor.debtor_idx = validation_requirement.debtor_idx
                 inner join edwprodhh.hermes.transform_criteria_address_allowed_email            as address_allowed_email        on debtor.debtor_idx = address_allowed_email.debtor_idx
                 inner join edwprodhh.hermes.transform_criteria_address_allowed_mail             as address_allowed_mail         on debtor.debtor_idx = address_allowed_mail.debtor_idx
@@ -242,7 +241,6 @@ alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwpro
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_validation_requirement;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_debtor_status;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_debtor_client_active;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_client_allowed_contacts;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_phone;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_mail;
 alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_email;
@@ -269,15 +267,14 @@ with joined as
                 debtor_status.pass_debtor_status,
                 debtor_status.pass_debtor_active,
 
-                client_allowed_contacts.pass_client_allowed_letters,
-                client_allowed_contacts.pass_client_allowed_texts,
-                client_allowed_contacts.pass_client_allowed_voapps,
-                client_allowed_contacts.pass_client_allowed_calls,
+                client_config.is_client_allowed_letters as pass_client_allowed_letters,
+                client_config.is_client_allowed_texts   as pass_client_allowed_texts,
+                client_config.is_client_allowed_voapps  as pass_client_allowed_voapps,
+                client_config.is_client_allowed_calls   as pass_client_allowed_calls,
 
                 validation_requirement.requires_validation,
                 validation_requirement.pass_received_validation,
                 validation_requirement.pass_age_validation,
-                -- validation_requirement.pass_received_other_contacts,
                 validation_requirement.pass_validation_requirement_debtor,
                 validation_requirement.pass_validation_requirement,
                 validation_requirement.validation_letter_date,
@@ -394,9 +391,9 @@ with joined as
 
     from        edwprodhh.pub_jchang.master_debtor as debtor
 
+                inner join edwprodhh.hermes.master_config_plgroup                               as client_config                on debtor.pl_group   = client_config.pl_group
                 inner join edwprodhh.hermes.transform_criteria_debtor_client_active             as client_active                on debtor.debtor_idx = client_active.debtor_idx
                 inner join edwprodhh.hermes.transform_criteria_debtor_status                    as debtor_status                on debtor.debtor_idx = debtor_status.debtor_idx
-                inner join edwprodhh.hermes.transform_criteria_client_allowed_contacts          as client_allowed_contacts      on debtor.debtor_idx = client_allowed_contacts.debtor_idx
                 inner join edwprodhh.hermes.transform_criteria_validation_requirement           as validation_requirement       on debtor.debtor_idx = validation_requirement.debtor_idx
                 inner join edwprodhh.hermes.transform_criteria_address_allowed_email            as address_allowed_email        on debtor.debtor_idx = address_allowed_email.debtor_idx
                 inner join edwprodhh.hermes.transform_criteria_address_allowed_mail             as address_allowed_mail         on debtor.debtor_idx = address_allowed_mail.debtor_idx

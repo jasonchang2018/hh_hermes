@@ -197,7 +197,7 @@ with scores as
 
                         from        calculate_packet_rankings
                                     left join
-                                        edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
+                                        edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                                         on calculate_packet_rankings.pl_group = constraints_plgroup.pl_group
 
                         where       calculate_packet_rankings.rank_within_packet = 1
@@ -229,7 +229,7 @@ with scores as
 
                         from        calculate_packet_rankings
                                     left join
-                                        edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
+                                        edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                                         on calculate_packet_rankings.pl_group = constraints_plgroup.pl_group
 
                         where       calculate_packet_rankings.rank_within_packet = 2
@@ -262,7 +262,7 @@ with scores as
 
                         from        calculate_packet_rankings
                                     left join
-                                        edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
+                                        edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                                         on calculate_packet_rankings.pl_group = constraints_plgroup.pl_group
 
                         where       calculate_packet_rankings.rank_within_packet = 3
@@ -323,7 +323,7 @@ with scores as
 
     from        filter_running_cost_channels
                 left join
-                    edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
+                    edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                     on filter_running_cost_channels.pl_group = constraints_plgroup.pl_group
                         
 )
@@ -724,7 +724,7 @@ with scores as
 
                         from        calculate_packet_rankings
                                     left join
-                                        edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
+                                        edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                                         on calculate_packet_rankings.pl_group = constraints_plgroup.pl_group
 
                         where       calculate_packet_rankings.rank_within_packet = 1
@@ -756,7 +756,7 @@ with scores as
 
                         from        calculate_packet_rankings
                                     left join
-                                        edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
+                                        edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                                         on calculate_packet_rankings.pl_group = constraints_plgroup.pl_group
 
                         where       calculate_packet_rankings.rank_within_packet = 2
@@ -789,7 +789,7 @@ with scores as
 
                         from        calculate_packet_rankings
                                     left join
-                                        edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
+                                        edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                                         on calculate_packet_rankings.pl_group = constraints_plgroup.pl_group
 
                         where       calculate_packet_rankings.rank_within_packet = 3
@@ -850,7 +850,7 @@ with scores as
 
     from        filter_running_cost_channels
                 left join
-                    edwprodhh.hermes.master_config_constraints_plgroup as constraints_plgroup
+                    edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                     on filter_running_cost_channels.pl_group = constraints_plgroup.pl_group
                         
 )
