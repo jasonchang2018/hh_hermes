@@ -43,7 +43,8 @@ with debtors_sent_vals as
                 val_ltr_date
     from        edwprodhh.dw.dimfiscal_hh_b
     where       val_ltr_date is not null
-                and val_ltr_date < current_date() - 45
+                -- and val_ltr_date < current_date() - 45  --will need to use this one for channels that contain offer (DUN Letter, SIF Text)
+                and val_ltr_date < current_date() - 5  --can use for Dialer, VoApp, and non-SIF Text
 )
 select      debtor.debtor_idx,
             debtor.packet_idx,
@@ -157,7 +158,8 @@ with debtors_sent_vals as
                 val_ltr_date
     from        edwprodhh.dw.dimfiscal_hh_b
     where       val_ltr_date is not null
-                and val_ltr_date < current_date() - 45
+                -- and val_ltr_date < current_date() - 45  --will need to use this one for channels that contain offer (DUN Letter, SIF Text)
+                and val_ltr_date < current_date() - 5  --can use for Dialer, VoApp, and non-SIF Text
 )
 select      debtor.debtor_idx,
             debtor.packet_idx,
