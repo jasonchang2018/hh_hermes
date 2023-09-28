@@ -81,18 +81,8 @@ select      debtor.debtor_idx,
             min(pass_validation_requirement_debtor) over (partition by packet_idx) as pass_validation_requirement
 
 from        edwprodhh.pub_jchang.master_debtor as debtor
-            -- inner join
-            --     edwprodhh.pub_jchang.master_client as client
-            --     on debtor.client_idx = client.client_idx
-            left join
-                (
-                    select      client_idx,
-                                case    when    coalesce(nullif(trim(fdcpa_flg), ''), '') = 'Y'
-                                        then    1
-                                        else    0
-                                        end     as is_fdcpa
-                    from        edwprodhh.pub_jchang.temp_csv_master_client_fdcpa
-                )   as client
+            inner join
+                edwprodhh.pub_jchang.master_client as client
                 on debtor.client_idx = client.client_idx
             left join
                 debtors_sent_vals
@@ -196,18 +186,8 @@ select      debtor.debtor_idx,
             min(pass_validation_requirement_debtor) over (partition by packet_idx) as pass_validation_requirement
 
 from        edwprodhh.pub_jchang.master_debtor as debtor
-            -- inner join
-            --     edwprodhh.pub_jchang.master_client as client
-            --     on debtor.client_idx = client.client_idx
-            left join
-                (
-                    select      client_idx,
-                                case    when    coalesce(nullif(trim(fdcpa_flg), ''), '') = 'Y'
-                                        then    1
-                                        else    0
-                                        end     as is_fdcpa
-                    from        edwprodhh.pub_jchang.temp_csv_master_client_fdcpa
-                )   as client
+            inner join
+                edwprodhh.pub_jchang.master_client as client
                 on debtor.client_idx = client.client_idx
             left join
                 debtors_sent_vals
