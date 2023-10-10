@@ -36,7 +36,7 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  debtor.pl_group = rules.pl_group
+                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Letter'
     
     --  1. Select the rule to evaluate.
@@ -77,7 +77,7 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  debtor.pl_group = rules.pl_group
+                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Text Message'
                     
     qualify     row_number() over (
@@ -106,7 +106,7 @@ with debtor as
      from       debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  debtor.pl_group = rules.pl_group
+                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'VoApp'
                     
     qualify     row_number() over (
@@ -135,7 +135,7 @@ with debtor as
      from       debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  debtor.pl_group = rules.pl_group
+                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Email'
                     
     qualify     row_number() over (
@@ -164,7 +164,7 @@ with debtor as
      from       debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  debtor.pl_group = rules.pl_group
+                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Dialer-Agent Call'
                     
     qualify     row_number() over (
@@ -193,7 +193,7 @@ with debtor as
      from       debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  debtor.pl_group = rules.pl_group
+                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Dialer-Agentless Call'
                     
     qualify     row_number() over (
@@ -294,7 +294,7 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  debtor.pl_group = rules.pl_group
+                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Letter'
     
     --  1. Select the rule to evaluate.
@@ -335,7 +335,7 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  debtor.pl_group = rules.pl_group
+                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Text Message'
                     
     qualify     row_number() over (
@@ -364,7 +364,7 @@ with debtor as
      from       debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  debtor.pl_group = rules.pl_group
+                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'VoApp'
                     
     qualify     row_number() over (
@@ -393,7 +393,7 @@ with debtor as
      from       debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  debtor.pl_group = rules.pl_group
+                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Email'
                     
     qualify     row_number() over (
@@ -422,7 +422,7 @@ with debtor as
      from       debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  debtor.pl_group = rules.pl_group
+                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Dialer-Agent Call'
                     
     qualify     row_number() over (
@@ -451,7 +451,7 @@ with debtor as
      from       debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  debtor.pl_group = rules.pl_group
+                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Dialer-Agentless Call'
                     
     qualify     row_number() over (
