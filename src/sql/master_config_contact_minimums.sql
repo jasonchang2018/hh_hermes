@@ -26,5 +26,6 @@ values
     ('CITY OF WASHINGTON DC - OAG - 3P',        'Text Message', 2, 10),
     ('CITY OF WASHINGTON DC - OLG - 3P',        'Text Message', 2, 10),
     ('CITY OF WASHINGTON DC - OP - 3P',         'Text Message', 2, 10),
-    ('CITY OF WASHINGTON DC - OSSE - 3P',       'Text Message', 2, 10)
+    ('CITY OF WASHINGTON DC - OSSE - 3P',       'Text Message', 2, 10),
+    ('ALL',                                     'Text Message', 1, 90)
 ;
