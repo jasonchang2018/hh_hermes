@@ -25,6 +25,7 @@ begin
     insert into
         edwprodhh.hermes.master_prediction_proposal_log
     select      *,
+                randstr(16, random()) as request_id,
                 :execute_time as execute_time
     from        edwprodhh.hermes.master_prediction_proposal
     ;

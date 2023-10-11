@@ -164,6 +164,7 @@ create table
     IS_PROPOSED_CONTACT             NUMBER(1,0),
     IS_FASTTRACK                    NUMBER(1,0),
     UPLOAD_DATE                     DATE,
+    request_id                      VARCHAR(16),
     execute_time                    TIMESTAMP_LTZ(9)
 )
 ;
