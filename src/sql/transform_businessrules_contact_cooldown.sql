@@ -107,7 +107,7 @@ select      debtor.debtor_idx,
 
             case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 10000
                     and     coalesce(contact_history.prev_n_voapps,         0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_texts,          0)                  <= 19
+                    and     coalesce(contact_history.prev_n_texts,          0)                  <= 11
                     and     coalesce(contact_history.prev_n_inbounds,       0)                  <= 10000
                     and     coalesce(contact_history.prev_date_letters,     '2000-01-01'::date) <= current_date() - 8
                     and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date()
@@ -252,7 +252,7 @@ select      debtor.debtor_idx,
 
             case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 10000
                     and     coalesce(contact_history.prev_n_voapps,         0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_texts,          0)                  <= 19
+                    and     coalesce(contact_history.prev_n_texts,          0)                  <= 11
                     and     coalesce(contact_history.prev_n_inbounds,       0)                  <= 10000
                     and     coalesce(contact_history.prev_date_letters,     '2000-01-01'::date) <= current_date() - 8
                     and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date()
