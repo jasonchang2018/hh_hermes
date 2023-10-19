@@ -32,6 +32,7 @@ create table
     VALID_PHONE_NUMBER_VOAPPS                   VARCHAR(16777216),
     VALID_PHONE_NUMBER_TEXTS                    VARCHAR(16777216),
     VALID_PHONE_NUMBER_DIALER                   VARCHAR(16777216),
+    PHONE_NUMBER_DEBTOR                         VARCHAR(16777216),
     CELL_CODE_DEBTOR                            VARCHAR(150),
     CELL_CODE_PACKET_AGG                        VARCHAR(16777216),
     CELL_CODE_PACKET_FACTORIZED                 VARCHAR(16777216),

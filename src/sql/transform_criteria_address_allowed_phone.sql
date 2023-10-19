@@ -82,6 +82,7 @@ select      debtor.debtor_idx,
             voappable_debtors.valid_phone_number_voapps as valid_phone_number_voapps,
             textable_debtors.valid_phone_number_texts   as valid_phone_number_texts,
             dialable_debtors.valid_phone_number_dialer  as valid_phone_number_dialer,
+            debtor.phone_number                         as phone_number_debtor,
 
             phone_debtor.cell                           as cell_code_debtor,
             phone_packet.cell_agg_distinct              as cell_code_packet_agg,
@@ -97,6 +98,7 @@ select      debtor.debtor_idx,
             coalesce(client.is_fdcpa, 0)                as is_fdcpa,
                     
             case    when    voappable_debtors.debtor_idx is not null
+                    and     debtor.phone_number is not null
                     then    1
                     else    0
                     end     as pass_phone_voapps,
@@ -108,12 +110,14 @@ select      debtor.debtor_idx,
                     and     dimdebtor.st in ('DC')
                     then    0
                     when    textable_debtors.debtor_idx is not null
+                    and     debtor.phone_number is not null
                     and     not regexp_like(coalesce(dimfiscal_co_a.commercial, ''), '^COM.*')
                     then    1
                     else    0
                     end     as pass_phone_texts,
                     
             case    when    dialable_debtors.debtor_idx is not null
+                    and     debtor.phone_number is not null
                     and     phone_packet.packet_cell is not null
                     and     phone_packet.packet_cell in ('A','B','C','L','M','N','T')
                     then    1
@@ -255,6 +259,7 @@ select      debtor.debtor_idx,
             voappable_debtors.valid_phone_number_voapps as valid_phone_number_voapps,
             textable_debtors.valid_phone_number_texts   as valid_phone_number_texts,
             dialable_debtors.valid_phone_number_dialer  as valid_phone_number_dialer,
+            debtor.phone_number                         as phone_number_debtor,
 
             phone_debtor.cell                           as cell_code_debtor,
             phone_packet.cell_agg_distinct              as cell_code_packet_agg,
@@ -270,6 +275,7 @@ select      debtor.debtor_idx,
             coalesce(client.is_fdcpa, 0)                as is_fdcpa,
                     
             case    when    voappable_debtors.debtor_idx is not null
+                    and     debtor.phone_number is not null
                     then    1
                     else    0
                     end     as pass_phone_voapps,
@@ -281,12 +287,14 @@ select      debtor.debtor_idx,
                     and     dimdebtor.st in ('DC')
                     then    0
                     when    textable_debtors.debtor_idx is not null
+                    and     debtor.phone_number is not null
                     and     not regexp_like(coalesce(dimfiscal_co_a.commercial, ''), '^COM.*')
                     then    1
                     else    0
                     end     as pass_phone_texts,
                     
             case    when    dialable_debtors.debtor_idx is not null
+                    and     debtor.phone_number is not null
                     and     phone_packet.packet_cell is not null
                     and     phone_packet.packet_cell in ('A','B','C','L','M','N','T')
                     then    1

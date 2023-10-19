@@ -13,6 +13,7 @@ select      debtor_idx,
 
             case    when    cancel_dt   is null
                     and     balance_dimdebtor > 0
+                    and     batch_date is not null
                     then    1
                     else    0
                     end     as pass_debtor_active
@@ -42,6 +43,7 @@ select      debtor_idx,
 
             case    when    cancel_dt   is null
                     and     balance_dimdebtor > 0
+                    and     batch_date is not null
                     then    1
                     else    0
                     end     as pass_debtor_active
