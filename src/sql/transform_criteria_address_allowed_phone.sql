@@ -36,31 +36,28 @@ with dialable_debtors as
     (
         select      phones.*,
                     debtor.packet_idx,
-                    -- client.is_fdcpa
-                    coalesce(client.is_fdcpa, 0) as is_fdcpa
+                    client.is_fdcpa
         from        edwprodhh.pub_jchang.transform_directory_phone_number as phones
                     inner join
                         edwprodhh.pub_jchang.master_debtor as debtor
                         on phones.debtor_idx = debtor.debtor_idx
-                    -- inner join
-                    --     edwprodhh.pub_jchang.master_client as client
-                    --     on debtor.client_idx = client.client_idx
-                    left join
-                        (
-                            select      client_idx,
-                                        case    when    coalesce(nullif(trim(fdcpa_flg), ''), '') = 'Y'
-                                                then    1
-                                                else    0
-                                                end     as is_fdcpa
-                            from        edwprodhh.pub_jchang.temp_csv_master_client_fdcpa
-                        )   as client
+                    inner join
+                        edwprodhh.pub_jchang.master_client as client
                         on debtor.client_idx = client.client_idx
                         
-        where       not (
-                        -- client.is_fdcpa = 1
-                        coalesce(client.is_fdcpa, 0) = 1
-                        and phones.phone_number_source = 'OTHER' --Skips, which cannot be texted for FDCPA.
-                    )
+        where       case    when    client.is_fdcpa = 1
+                            and     phones.phone_number_source = 'OTHER'                    --Skips, which cannot be texted for FDCPA.
+                            then    FALSE
+                            when    debtor.industry = 'HC'
+                            and     datediff(day, debtor.batch_date, current_date()) > 365
+                            and     phones.current_status not in ('CONSENT')                --Need consent for HC if debt_age older than 1 year
+                            then    FALSE
+                            when    debtor.industry = 'GOV'
+                            and     datediff(day, debtor.batch_date, current_date()) > 730  --Need consent for GOV if debt_age older than 2 years
+                            and     phones.current_status not in ('CONSENT')
+                            then    FALSE
+                            else    TRUE
+                            end
     )
     select      debtor_idx,
                 listagg(distinct phone_number, ';') as valid_phone_number_texts
@@ -94,8 +91,9 @@ select      debtor.debtor_idx,
 
             dimfiscal_co_a.commercial                   as commercial_code,
             dimdebtor.st                                as state,
-            -- client.is_fdcpa                             as is_fdcpa,
-            coalesce(client.is_fdcpa, 0)                as is_fdcpa,
+            client.is_fdcpa                             as is_fdcpa,
+            client.ash_cli                              as ash_cli,
+            debtor.payplan                              as payplan,
                     
             case    when    voappable_debtors.debtor_idx is not null
                     and     debtor.phone_number is not null
@@ -103,16 +101,68 @@ select      debtor.debtor_idx,
                     else    0
                     end     as pass_phone_voapps,
 
-            case    when    dimdebtor.st in ('NV', 'CT')
+            case    --  Exclusions must come first
+                    when    debtor.payplan is not null
                     then    0
-                    -- when    client.is_fdcpa = 1
-                    when    coalesce(client.is_fdcpa, 0) = 1
+                    when    debtor.status in ('PPA')
+                    then    0
+                    when    dimdebtor.st in ('MA', 'ZZ')
+                    then    0
+                    when    client.is_fdcpa = 1
                     and     dimdebtor.st in ('DC')
                     then    0
+                    when    client.ash_cli = 1
+                    and     dimdebtor.st in ('CA', 'NJ', 'TX')
+                    then    0
+
+                    --  Inclusions next
                     when    textable_debtors.debtor_idx is not null
                     and     debtor.phone_number is not null
                     and     not regexp_like(coalesce(dimfiscal_co_a.commercial, ''), '^COM.*')
-                    then    1
+                    then    case    when    dimdebtor.st = 'NV'
+                                    then    case    when    debtor.pl_group in (
+                                                                'UNIVERSAL HEALTH SERVICES - 3P',
+                                                                'UNIVERSAL HEALTH SERVICES - PHYS - 3P'
+                                                            )
+                                                    then    1
+                                                    else    0
+                                                    end
+                                    when    dimdebtor.st = 'WA'
+                                    then    case    when    debtor.pl_group in (
+                                                                'PROVIDENCE ST JOSEPH HEALTH - 3P',
+                                                                'PROVIDENCE ST JOSEPH HEALTH - 3P-2'
+                                                            )
+                                                    then    1
+                                                    else    0
+                                                    end
+                                    when    dimdebtor.st = 'CO'
+                                    then    case    when    debtor.pl_group in (
+                                                                'STATE OF CO - JUDICIAL DEPT - 3P'
+                                                            )
+                                                    then    1
+                                                    else    0
+                                                    end
+                                    when    dimdebtor.st = 'CT'
+                                    then    case    when    debtor.pl_group in (
+                                                                'STATE OF VA - DOT - 3P',
+                                                                'STATE OF VA - DOT - 3P-2',
+                                                                'STATE OF VA - DOT - ACCESS - 3P',
+                                                                'STATE OF VA - DOT - BK',
+                                                                'STATE OF VA - DOT - CC',
+                                                                'STATE OF MD - COMPTROLLER - 3P',
+                                                                'STATE OF MD - DBM CCU - 3P',
+                                                                'STATE OF MD - TOLLWAY - 3P',
+                                                                'COLUMBIA DOCTORS - 3P',
+                                                                'COLUMBIA DOCTORS - TPL',
+                                                                'COLUMBIA DOCTORS LEGAL',
+                                                                'MOUNT SINAI - 3P',
+                                                                'WEILL CORNELL PHY - 3P'
+                                                            )
+                                                    then    1
+                                                    else    0
+                                                    end
+                                    else    1
+                                    end
                     else    0
                     end     as pass_phone_texts,
                     
@@ -128,19 +178,8 @@ from        edwprodhh.pub_jchang.master_debtor as debtor
             inner join
                 edwprodhh.dw.dimdebtor as dimdebtor
                 on debtor.debtor_idx = dimdebtor.debtor_idx
-            -- inner join
-            --     edwprodhh.pub_jchang.master_client as client
-            --     on debtor.client_idx = client.client_idx
-            
-            left join
-                (
-                    select      client_idx,
-                                case    when    coalesce(nullif(trim(fdcpa_flg), ''), '') = 'Y'
-                                        then    1
-                                        else    0
-                                        end     as is_fdcpa
-                    from        edwprodhh.pub_jchang.temp_csv_master_client_fdcpa
-                )   as client
+            inner join
+                edwprodhh.pub_jchang.master_client as client
                 on debtor.client_idx = client.client_idx
 
             left join
@@ -213,31 +252,28 @@ with dialable_debtors as
     (
         select      phones.*,
                     debtor.packet_idx,
-                    -- client.is_fdcpa
-                    coalesce(client.is_fdcpa, 0) as is_fdcpa
+                    client.is_fdcpa
         from        edwprodhh.pub_jchang.transform_directory_phone_number as phones
                     inner join
                         edwprodhh.pub_jchang.master_debtor as debtor
                         on phones.debtor_idx = debtor.debtor_idx
-                    -- inner join
-                    --     edwprodhh.pub_jchang.master_client as client
-                    --     on debtor.client_idx = client.client_idx
-                    left join
-                        (
-                            select      client_idx,
-                                        case    when    coalesce(nullif(trim(fdcpa_flg), ''), '') = 'Y'
-                                                then    1
-                                                else    0
-                                                end     as is_fdcpa
-                            from        edwprodhh.pub_jchang.temp_csv_master_client_fdcpa
-                        )   as client
+                    inner join
+                        edwprodhh.pub_jchang.master_client as client
                         on debtor.client_idx = client.client_idx
                         
-        where       not (
-                        -- client.is_fdcpa = 1
-                        coalesce(client.is_fdcpa, 0) = 1
-                        and phones.phone_number_source = 'OTHER' --Skips, which cannot be texted for FDCPA.
-                    )
+        where       case    when    client.is_fdcpa = 1
+                            and     phones.phone_number_source = 'OTHER'                    --Skips, which cannot be texted for FDCPA.
+                            then    FALSE
+                            when    debtor.industry = 'HC'
+                            and     datediff(day, debtor.batch_date, current_date()) > 365
+                            and     phones.current_status not in ('CONSENT')                --Need consent for HC if debt_age older than 1 year
+                            then    FALSE
+                            when    debtor.industry = 'GOV'
+                            and     datediff(day, debtor.batch_date, current_date()) > 730  --Need consent for GOV if debt_age older than 2 years
+                            and     phones.current_status not in ('CONSENT')
+                            then    FALSE
+                            else    TRUE
+                            end
     )
     select      debtor_idx,
                 listagg(distinct phone_number, ';') as valid_phone_number_texts
@@ -271,8 +307,9 @@ select      debtor.debtor_idx,
 
             dimfiscal_co_a.commercial                   as commercial_code,
             dimdebtor.st                                as state,
-            -- client.is_fdcpa                             as is_fdcpa,
-            coalesce(client.is_fdcpa, 0)                as is_fdcpa,
+            client.is_fdcpa                             as is_fdcpa,
+            client.ash_cli                              as ash_cli,
+            debtor.payplan                              as payplan,
                     
             case    when    voappable_debtors.debtor_idx is not null
                     and     debtor.phone_number is not null
@@ -280,16 +317,68 @@ select      debtor.debtor_idx,
                     else    0
                     end     as pass_phone_voapps,
 
-            case    when    dimdebtor.st in ('NV', 'CT')
+            case    --  Exclusions must come first
+                    when    debtor.payplan is not null
                     then    0
-                    -- when    client.is_fdcpa = 1
-                    when    coalesce(client.is_fdcpa, 0) = 1
+                    when    debtor.status in ('PPA')
+                    then    0
+                    when    dimdebtor.st in ('MA', 'ZZ')
+                    then    0
+                    when    client.is_fdcpa = 1
                     and     dimdebtor.st in ('DC')
                     then    0
+                    when    client.ash_cli = 1
+                    and     dimdebtor.st in ('CA', 'NJ', 'TX')
+                    then    0
+
+                    --  Inclusions next
                     when    textable_debtors.debtor_idx is not null
                     and     debtor.phone_number is not null
                     and     not regexp_like(coalesce(dimfiscal_co_a.commercial, ''), '^COM.*')
-                    then    1
+                    then    case    when    dimdebtor.st = 'NV'
+                                    then    case    when    debtor.pl_group in (
+                                                                'UNIVERSAL HEALTH SERVICES - 3P',
+                                                                'UNIVERSAL HEALTH SERVICES - PHYS - 3P'
+                                                            )
+                                                    then    1
+                                                    else    0
+                                                    end
+                                    when    dimdebtor.st = 'WA'
+                                    then    case    when    debtor.pl_group in (
+                                                                'PROVIDENCE ST JOSEPH HEALTH - 3P',
+                                                                'PROVIDENCE ST JOSEPH HEALTH - 3P-2'
+                                                            )
+                                                    then    1
+                                                    else    0
+                                                    end
+                                    when    dimdebtor.st = 'CO'
+                                    then    case    when    debtor.pl_group in (
+                                                                'STATE OF CO - JUDICIAL DEPT - 3P'
+                                                            )
+                                                    then    1
+                                                    else    0
+                                                    end
+                                    when    dimdebtor.st = 'CT'
+                                    then    case    when    debtor.pl_group in (
+                                                                'STATE OF VA - DOT - 3P',
+                                                                'STATE OF VA - DOT - 3P-2',
+                                                                'STATE OF VA - DOT - ACCESS - 3P',
+                                                                'STATE OF VA - DOT - BK',
+                                                                'STATE OF VA - DOT - CC',
+                                                                'STATE OF MD - COMPTROLLER - 3P',
+                                                                'STATE OF MD - DBM CCU - 3P',
+                                                                'STATE OF MD - TOLLWAY - 3P',
+                                                                'COLUMBIA DOCTORS - 3P',
+                                                                'COLUMBIA DOCTORS - TPL',
+                                                                'COLUMBIA DOCTORS LEGAL',
+                                                                'MOUNT SINAI - 3P',
+                                                                'WEILL CORNELL PHY - 3P'
+                                                            )
+                                                    then    1
+                                                    else    0
+                                                    end
+                                    else    1
+                                    end
                     else    0
                     end     as pass_phone_texts,
                     
@@ -305,19 +394,8 @@ from        edwprodhh.pub_jchang.master_debtor as debtor
             inner join
                 edwprodhh.dw.dimdebtor as dimdebtor
                 on debtor.debtor_idx = dimdebtor.debtor_idx
-            -- inner join
-            --     edwprodhh.pub_jchang.master_client as client
-            --     on debtor.client_idx = client.client_idx
-            
-            left join
-                (
-                    select      client_idx,
-                                case    when    coalesce(nullif(trim(fdcpa_flg), ''), '') = 'Y'
-                                        then    1
-                                        else    0
-                                        end     as is_fdcpa
-                    from        edwprodhh.pub_jchang.temp_csv_master_client_fdcpa
-                )   as client
+            inner join
+                edwprodhh.pub_jchang.master_client as client
                 on debtor.client_idx = client.client_idx
 
             left join

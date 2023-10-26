@@ -42,6 +42,8 @@ create table
     COMMERCIAL_CODE                             VARCHAR(50),
     STATE                                       VARCHAR(20),
     IS_FDCPA                                    NUMBER(1,0),
+    ASH_CLI                                     NUMBER(1,0),
+    PAYPLAN                                     VARCHAR(50),
     PASS_PHONE_VOAPPS                           NUMBER(1,0),
     PASS_PHONE_TEXTS                            NUMBER(1,0),
     PASS_PHONE_CALLS                            NUMBER(1,0),
