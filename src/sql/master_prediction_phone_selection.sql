@@ -92,6 +92,8 @@ with all_phones as
                 and contacts.phone_debtor is not null
     group by    1,2
 )
+
+--  First, for each given packet, calculate the PHONE_SCORE_RAW based on all historical activity.
 , calculate_phone_score as
 (
     select      all_phones.packet_idx,
@@ -142,25 +144,51 @@ with all_phones as
                     on  all_phones.packet_idx   = attr.packet_idx
                     and all_phones.phone        = attr.phone
 )
+
+--  Second, convert PHONE_SCORE_RAW into a % (Sums to 100% per packet).
 , calculate_rotation as
 (
+    with transform as
+    (
+        select      *,
+
+                    power(1.25, phone_score_raw)                                                        as phone_score_transform,
+                    phone_score_transform / sum(phone_score_transform) over (partition by packet_idx)   as phone_score
+                    
+        from        calculate_phone_score
+    )
     select      *,
-                power(1.25, phone_score_raw)                                                        as phone_score_transform,
-                phone_score_transform / sum(phone_score_transform) over (partition by packet_idx)   as phone_score
-    from        calculate_phone_score
+                sum(phone_score) over (partition by packet_idx order by random())                       as phone_score_cdf
+    from        transform
+)
+
+--  Third, select a phone number with probability determined by the above %.
+--  We accomplish this by taking a random number [0-1] and taking the **first CDF value that is greater** than this random number.
+, filter_rotation as
+(
+    with rand_cutoff as
+    (
+        with packets as
+        (
+            select      distinct
+                        packet_idx
+            from        calculate_rotation
+        )
+        select      *,
+                    uniform(0::float, 1::float, random())                                               as rand_cutoff
+        from        packets
+    )
+    select      calculate_rotation.*,
+                rand_cutoff.rand_cutoff
+    from        calculate_rotation
+                inner join
+                    rand_cutoff
+                    on calculate_rotation.packet_idx = rand_cutoff.packet_idx
+    where       calculate_rotation.phone_score_cdf > rand_cutoff.rand_cutoff
+    qualify     row_number() over (partition by calculate_rotation.packet_idx order by calculate_rotation.phone_score_cdf asc) = 1
 )
 select      *
-from        calculate_rotation
-qualify     row_number() over (partition by packet_idx order by phone_score desc, random()) = 1
-;
-
-
-
-select      packet_idx
-from        edwprodhh.hermes.temp_master_prediction_phone_selection
-group by    1
-having      count(*) > 3
-            and count(case when phone_score = 0 then 1 end) <= 2
+from        filter_rotation
 ;
 
 
