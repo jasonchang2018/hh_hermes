@@ -6,7 +6,8 @@ with all_phones as
     select      distinct
                 packet_idx,
                 phone_format as phone
-    from        edwprodhh.pub_jchang.master_phone_number
+    from        edwprodhh.pub_jchang.master_phone_number as phone_fields
+    where       packet_idx not in (select packet_idx from edwprodhh.pub_jchang.transform_directory_phone_number where current_status = 'DNC')
 )
 , activity_calls_ob as
 (
@@ -190,15 +191,3 @@ with all_phones as
 select      *
 from        filter_rotation
 ;
-
-
-
-select      *
-from        edwprodhh.hermes.temp_master_prediction_phone_selection
-where       packet_idx in (
-                'CO-2321651*LV1',
-                'CO-3644714*KDOR',
-                'HH-46919558',
-                'HH-5663133*PRO'
-            )
-order by    packet_idx, phone_score desc
