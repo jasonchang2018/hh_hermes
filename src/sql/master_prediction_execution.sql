@@ -32,14 +32,6 @@ begin
 
 
     insert into
-        edwprodhh.hermes.master_prediction_dialer_rank_global_log
-    select      *,
-                :execute_time as execute_time
-    from        edwprodhh.hermes.master_prediction_dialer_rank_global
-    ;
-
-
-    insert into
         edwprodhh.hermes.master_prediction_scores_transformation_log
     select      *,
                 :execute_time as execute_time
@@ -52,6 +44,30 @@ begin
     select      *,
                 :execute_time as execute_time
     from        edwprodhh.hermes.master_prediction_scores_transformation_cubs
+    ;
+
+
+    insert into
+        edwprodhh.hermes.master_prediction_phone_selection_log
+    select      *,
+                :execute_time as execute_time
+    from        edwprodhh.hermes.master_prediction_phone_selection
+    ;
+
+
+    insert into
+        edwprodhh.hermes.master_prediction_dialer_file_log
+    select      *,
+                :execute_time as execute_time
+    from        edwprodhh.hermes.master_prediction_dialer_file
+    ;
+
+
+    insert into
+        edwprodhh.hermes.master_prediction_dialer_file_cubs_log
+    select      *,
+                :execute_time as execute_time
+    from        edwprodhh.hermes.master_prediction_dialer_file_cubs
     ;
 
 
@@ -72,12 +88,12 @@ end
 ;
 
 alter task edwprodhh.pub_jchang.sp_master_prediction_log add after edwprodhh.pub_jchang.replace_master_prediction_proposal;
-alter task edwprodhh.pub_jchang.sp_master_prediction_log add after edwprodhh.pub_jchang.replace_master_prediction_dialer_rank_global;
 alter task edwprodhh.pub_jchang.sp_master_prediction_log add after edwprodhh.pub_jchang.replace_master_prediction_scores_transformation;
+alter task edwprodhh.pub_jchang.sp_master_prediction_log add after edwprodhh.pub_jchang.replace_master_prediction_dialer_file;
 
 
 
-create task
+create or replace task
     edwprodhh.pub_jchang.sp_master_prediction_log
     warehouse = analysis_wh
 as
