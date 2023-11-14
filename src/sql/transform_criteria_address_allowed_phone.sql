@@ -13,8 +13,7 @@ with dialable_debtors as
 (
     with joined as
     (
-        select      phones.*,
-                    debtor.packet_idx
+        select      phones.*
         from        edwprodhh.pub_jchang.transform_directory_phone_number as phones
                     inner join
                         edwprodhh.pub_jchang.master_debtor as debtor
@@ -35,7 +34,6 @@ with dialable_debtors as
     with joined as
     (
         select      phones.*,
-                    debtor.packet_idx,
                     client.is_fdcpa
         from        edwprodhh.pub_jchang.transform_directory_phone_number as phones
                     inner join
@@ -117,7 +115,7 @@ select      debtor.debtor_idx,
 
                     --  Inclusions next
                     when    textable_debtors.debtor_idx is not null
-                    and     debtor.phone_number is not null
+                    -- and     debtor.phone_number is not null
                     and     not regexp_like(coalesce(dimfiscal_co_a.commercial, ''), '^COM.*')
                     then    case    when    dimdebtor.st = 'NV'
                                     then    case    when    debtor.pl_group in (
@@ -229,8 +227,7 @@ with dialable_debtors as
 (
     with joined as
     (
-        select      phones.*,
-                    debtor.packet_idx
+        select      phones.*
         from        edwprodhh.pub_jchang.transform_directory_phone_number as phones
                     inner join
                         edwprodhh.pub_jchang.master_debtor as debtor
@@ -251,7 +248,6 @@ with dialable_debtors as
     with joined as
     (
         select      phones.*,
-                    debtor.packet_idx,
                     client.is_fdcpa
         from        edwprodhh.pub_jchang.transform_directory_phone_number as phones
                     inner join
@@ -333,7 +329,7 @@ select      debtor.debtor_idx,
 
                     --  Inclusions next
                     when    textable_debtors.debtor_idx is not null
-                    and     debtor.phone_number is not null
+                    -- and     debtor.phone_number is not null
                     and     not regexp_like(coalesce(dimfiscal_co_a.commercial, ''), '^COM.*')
                     then    case    when    dimdebtor.st = 'NV'
                                     then    case    when    debtor.pl_group in (
