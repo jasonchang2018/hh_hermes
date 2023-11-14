@@ -211,15 +211,64 @@ create table
 
 
 create table
-    edwprodhh.hermes.master_prediction_dialer_rank_global_log
+    edwprodhh.hermes.master_prediction_phone_selection_log
 (
-    DEBTOR_IDX                      VARCHAR(50),
-    CLIENT_IDX                      VARCHAR(16),
-    PL_GROUP                        VARCHAR(16777216),
-    PROPOSED_CHANNEL                VARCHAR(16777216),
-    MARGINAL_FEE                    FLOAT,
-    RANK_GLOBAL                     NUMBER(18,0),
-    EXECUTE_TIME                    TIMESTAMP_LTZ(9)
+    PACKET_IDX                  VARCHAR(60),
+    PHONE	                    VARCHAR(16777216),
+    OB_CALL_IS_ANSWERED	        NUMBER(18,0),
+    OB_CALL_IS_NOT_ANSWERED	    NUMBER(18,0),
+    OB_CALL_IS_RPC	            NUMBER(18,0),
+    OB_CALL_IS_NOT_RPC	        NUMBER(18,0),
+    IB_CALL_N	                NUMBER(18,0),
+    TEXT_IS_SUCCESSFUL	        NUMBER(18,0),
+    TEXT_IS_ERROR	            NUMBER(18,0),
+    VOAPP_IS_SUCCESSFUL	        NUMBER(18,0),
+    VOAPP_IS_ERROR	            NUMBER(18,0),
+    ATTR_LAST	                NUMBER(1,0),
+    PHONE_SCORE_RAW	            NUMBER(29,1),
+    PHONE_SCORE_TRANSFORM	    FLOAT,
+    PHONE_SCORE	                FLOAT,
+    PHONE_SCORE_CDF	            FLOAT,
+    RAND_CUTOFF	                FLOAT,
+    IS_PROPOSED_PHONE	        NUMBER(1,0),
+    EXECUTE_TIME                TIMESTAMP_LTZ(9)
+)
+;
+
+
+create table
+    edwprodhh.hermes.master_prediction_dialer_file_log
+(
+    DEBTOR_IDX              VARCHAR(50),
+    PACKET_IDX              VARCHAR(60),
+    CLIENT_IDX              VARCHAR(16),
+    PL_GROUP                VARCHAR(16777216),
+    SCORE_DIALER_AGENT      FLOAT,
+    PHONE                   VARCHAR(16777216),
+    IS_PRIORITY_MINIMUM     NUMBER(1,0),
+    IS_PRIMARY_DIAL         NUMBER(1,0),
+    PACKET_PRIORITY         NUMBER(18,0),
+    PACKET_PERCENTILE       NUMBER(24,6),
+    LIST_NAME               VARCHAR(16777216),
+    PERCENTILE_MIN          NUMBER(36,6),
+    PERCENTILE_MAX          NUMBER(36,6),
+    UPLOAD_DATE             DATE,
+    EXECUTE_TIME            TIMESTAMP_LTZ(9)
+)
+;
+
+
+create table
+    edwprodhh.hermes.master_prediction_dialer_file_cubs_log
+(
+    LOGON	                VARCHAR(5),
+    DEBTORNUMBER	        VARCHAR(50),
+    PACKET	                VARCHAR(60),
+    CLIENT	                VARCHAR(15),
+    PL_GROUP	            VARCHAR(16777216),
+    PHONE	                VARCHAR(16777216),
+    LIST_NAME	            VARCHAR(16777216),
+    EXECUTE_TIME            TIMESTAMP_LTZ(9)
 )
 ;
 
