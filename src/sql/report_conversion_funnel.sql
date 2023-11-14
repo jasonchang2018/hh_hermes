@@ -238,9 +238,9 @@ with perc_of_total as
                             end     as sorter_funnel
 
         from        unioned_
-        where       case    when    hermes_funnel = 'Letters'   then    pl_group in (select pl_group from edwprodhh.hermes.transform_criteria_client_allowed_letters)
-                            when    hermes_funnel = 'VoApps'    then    pl_group in (select pl_group from edwprodhh.hermes.transform_criteria_client_allowed_voapps)
-                            when    hermes_funnel = 'Texts'     then    pl_group in (select pl_group from edwprodhh.hermes.transform_criteria_client_allowed_texts)
+        where       case    when    hermes_funnel = 'Letters'   then    pl_group in (select pl_group from edwprodhh.hermes.transform_config_plgroup where is_client_active_hermes_contacts = 1 and is_client_allowed_letters = 1)
+                            when    hermes_funnel = 'VoApps'    then    pl_group in (select pl_group from edwprodhh.hermes.transform_config_plgroup where is_client_active_hermes_contacts = 1 and is_client_allowed_voapps = 1)
+                            when    hermes_funnel = 'Texts'     then    pl_group in (select pl_group from edwprodhh.hermes.transform_config_plgroup where is_client_active_hermes_contacts = 1 and is_client_allowed_texts = 1)
                             end
     )
     select      *
@@ -539,9 +539,9 @@ with perc_of_total as
                             end     as sorter_funnel
 
         from        unioned_
-        where       case    when    hermes_funnel = 'Letters'   then    pl_group in (select pl_group from edwprodhh.hermes.transform_criteria_client_allowed_letters)
-                            when    hermes_funnel = 'VoApps'    then    pl_group in (select pl_group from edwprodhh.hermes.transform_criteria_client_allowed_voapps)
-                            when    hermes_funnel = 'Texts'     then    pl_group in (select pl_group from edwprodhh.hermes.transform_criteria_client_allowed_texts)
+        where       case    when    hermes_funnel = 'Letters'   then    pl_group in (select pl_group from edwprodhh.hermes.transform_config_plgroup where is_client_active_hermes_contacts = 1 and is_client_allowed_letters = 1)
+                            when    hermes_funnel = 'VoApps'    then    pl_group in (select pl_group from edwprodhh.hermes.transform_config_plgroup where is_client_active_hermes_contacts = 1 and is_client_allowed_voapps = 1)
+                            when    hermes_funnel = 'Texts'     then    pl_group in (select pl_group from edwprodhh.hermes.transform_config_plgroup where is_client_active_hermes_contacts = 1 and is_client_allowed_texts = 1)
                             end
     )
     select      *
@@ -864,9 +864,9 @@ with perc_of_total as
                             end     as sorter_funnel
 
         from        unioned_
-        where       case    when    hermes_funnel = 'Letters'   then    pl_group in (select pl_group from edwprodhh.hermes.transform_criteria_client_allowed_letters)
-                            when    hermes_funnel = 'VoApps'    then    pl_group in (select pl_group from edwprodhh.hermes.transform_criteria_client_allowed_voapps)
-                            when    hermes_funnel = 'Texts'     then    pl_group in (select pl_group from edwprodhh.hermes.transform_criteria_client_allowed_texts)
+        where       case    when    hermes_funnel = 'Letters'   then    pl_group in (select pl_group from edwprodhh.hermes.transform_config_plgroup where is_client_active_hermes_contacts = 1 and is_client_allowed_letters = 1)
+                            when    hermes_funnel = 'VoApps'    then    pl_group in (select pl_group from edwprodhh.hermes.transform_config_plgroup where is_client_active_hermes_contacts = 1 and is_client_allowed_voapps = 1)
+                            when    hermes_funnel = 'Texts'     then    pl_group in (select pl_group from edwprodhh.hermes.transform_config_plgroup where is_client_active_hermes_contacts = 1 and is_client_allowed_texts = 1)
                             end
     )
     select      *
@@ -1165,9 +1165,9 @@ with perc_of_total as
                             end     as sorter_funnel
 
         from        unioned_
-        where       case    when    hermes_funnel = 'Letters'   then    pl_group in (select pl_group from edwprodhh.hermes.transform_criteria_client_allowed_letters)
-                            when    hermes_funnel = 'VoApps'    then    pl_group in (select pl_group from edwprodhh.hermes.transform_criteria_client_allowed_voapps)
-                            when    hermes_funnel = 'Texts'     then    pl_group in (select pl_group from edwprodhh.hermes.transform_criteria_client_allowed_texts)
+        where       case    when    hermes_funnel = 'Letters'   then    pl_group in (select pl_group from edwprodhh.hermes.transform_config_plgroup where is_client_active_hermes_contacts = 1 and is_client_allowed_letters = 1)
+                            when    hermes_funnel = 'VoApps'    then    pl_group in (select pl_group from edwprodhh.hermes.transform_config_plgroup where is_client_active_hermes_contacts = 1 and is_client_allowed_voapps = 1)
+                            when    hermes_funnel = 'Texts'     then    pl_group in (select pl_group from edwprodhh.hermes.transform_config_plgroup where is_client_active_hermes_contacts = 1 and is_client_allowed_texts = 1)
                             end
     )
     select      *
