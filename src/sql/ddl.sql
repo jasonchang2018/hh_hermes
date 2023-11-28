@@ -268,6 +268,7 @@ create table
     PL_GROUP	            VARCHAR(16777216),
     PHONE	                VARCHAR(16777216),
     LIST_NAME	            VARCHAR(16777216),
+    UPLOAD_DATE	            DATE,
     EXECUTE_TIME            TIMESTAMP_LTZ(9)
 )
 ;
