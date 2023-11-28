@@ -1,7 +1,15 @@
 create or replace table
     edwprodhh.hermes.transform_criteria_address_allowed_phone
 as
-with dialable_debtors as
+with fiscal_dialer_phones as
+(
+    select      distinct
+                debtor_idx,
+                phone_valid
+    from        edwprodhh.pub_jchang.master_phone_number
+    where       included_in_cubs_dialer_file = 1
+)
+, dialable_debtors as
 (
     select      debtor_idx,
                 listagg(distinct phone_valid, ';') as valid_phone_number_dialer
@@ -18,6 +26,10 @@ with dialable_debtors as
                     inner join
                         edwprodhh.pub_jchang.master_debtor as debtor
                         on phones.debtor_idx = debtor.debtor_idx
+                    inner join
+                        fiscal_dialer_phones as fiscal
+                        on  phones.debtor_idx   = fiscal.debtor_idx
+                        and phones.phone_number = fiscal.phone_valid
     )
     select      debtor_idx,
                 listagg(distinct phone_number, ';') as valid_phone_number_voapps
@@ -42,6 +54,10 @@ with dialable_debtors as
                     inner join
                         edwprodhh.pub_jchang.master_client as client
                         on debtor.client_idx = client.client_idx
+                    inner join
+                        fiscal_dialer_phones as fiscal
+                        on  phones.debtor_idx   = fiscal.debtor_idx
+                        and phones.phone_number = fiscal.phone_valid
                         
         where       case    when    client.is_fdcpa = 1
                             and     phones.phone_number_source = 'OTHER'                    --Skips, which cannot be texted for FDCPA.
@@ -207,7 +223,7 @@ from        edwprodhh.pub_jchang.master_debtor as debtor
 
 
 
-create task
+create or replace task
     edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_phone
     warehouse = analysis_wh
     after edwprodhh.pub_jchang.hermes_root
@@ -215,7 +231,15 @@ as
 create or replace table
     edwprodhh.hermes.transform_criteria_address_allowed_phone
 as
-with dialable_debtors as
+with fiscal_dialer_phones as
+(
+    select      distinct
+                debtor_idx,
+                phone_valid
+    from        edwprodhh.pub_jchang.master_phone_number
+    where       included_in_cubs_dialer_file = 1
+)
+, dialable_debtors as
 (
     select      debtor_idx,
                 listagg(distinct phone_valid, ';') as valid_phone_number_dialer
@@ -232,6 +256,10 @@ with dialable_debtors as
                     inner join
                         edwprodhh.pub_jchang.master_debtor as debtor
                         on phones.debtor_idx = debtor.debtor_idx
+                    inner join
+                        fiscal_dialer_phones as fiscal
+                        on  phones.debtor_idx   = fiscal.debtor_idx
+                        and phones.phone_number = fiscal.phone_valid
     )
     select      debtor_idx,
                 listagg(distinct phone_number, ';') as valid_phone_number_voapps
@@ -256,6 +284,10 @@ with dialable_debtors as
                     inner join
                         edwprodhh.pub_jchang.master_client as client
                         on debtor.client_idx = client.client_idx
+                    inner join
+                        fiscal_dialer_phones as fiscal
+                        on  phones.debtor_idx   = fiscal.debtor_idx
+                        and phones.phone_number = fiscal.phone_valid
                         
         where       case    when    client.is_fdcpa = 1
                             and     phones.phone_number_source = 'OTHER'                    --Skips, which cannot be texted for FDCPA.
