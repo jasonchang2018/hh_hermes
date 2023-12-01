@@ -81,13 +81,13 @@ select      debtor.debtor_idx,
                     else    0
                     end     as pass_letters_warmup,
 
-            case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 4
+            case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 3
                     and     coalesce(contact_history.prev_n_voapps,         0)                  <= 10000
                     and     coalesce(contact_history.prev_n_texts,          0)                  <= 10000
                     and     coalesce(contact_history.prev_n_inbounds,       0)                  <= 10000
                     and     coalesce(contact_history.prev_date_letters,     '2000-01-01'::date) <= current_date() - 35
-                    and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date()
-                    and     coalesce(contact_history.prev_date_texts,       '2000-01-01'::date) <= current_date()
+                    and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_texts,       '2000-01-01'::date) <= current_date() - 8
                     and     coalesce(contact_history.prev_date_inbounds,    '2000-01-01'::date) <= current_date()
                     then    1
                     else    0
@@ -138,7 +138,7 @@ from        edwprodhh.pub_jchang.master_debtor as debtor
 
 
 
-create task
+create or replace task
     edwprodhh.pub_jchang.replace_transform_businessrules_contact_cooldown
     warehouse = analysis_wh
     after edwprodhh.pub_jchang.hermes_root
@@ -226,13 +226,13 @@ select      debtor.debtor_idx,
                     else    0
                     end     as pass_letters_warmup,
 
-            case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 4
+            case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 3
                     and     coalesce(contact_history.prev_n_voapps,         0)                  <= 10000
                     and     coalesce(contact_history.prev_n_texts,          0)                  <= 10000
                     and     coalesce(contact_history.prev_n_inbounds,       0)                  <= 10000
                     and     coalesce(contact_history.prev_date_letters,     '2000-01-01'::date) <= current_date() - 35
-                    and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date()
-                    and     coalesce(contact_history.prev_date_texts,       '2000-01-01'::date) <= current_date()
+                    and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_texts,       '2000-01-01'::date) <= current_date() - 8
                     and     coalesce(contact_history.prev_date_inbounds,    '2000-01-01'::date) <= current_date()
                     then    1
                     else    0
