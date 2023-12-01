@@ -6,10 +6,12 @@ create table
 )
 ;
 
+truncate table edwprodhh.hermes.master_config_channel_costs;
+
 insert into
     edwprodhh.hermes.master_config_channel_costs
 values
-    ('Letter',                  0.65),
+    ('Letter',                  0.71),
     ('Text Message',            0.03),
     ('VoApp',                   0.06),
     ('Email',                   0.03),
