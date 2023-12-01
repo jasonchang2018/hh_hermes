@@ -8,6 +8,8 @@ create or replace table
 )
 ;
 
+truncate table edwprodhh.hermes.master_config_contact_minimums;
+
 
 insert into
     edwprodhh.hermes.master_config_contact_minimums
@@ -30,5 +32,6 @@ values
     ('ALL',                                     'Text Message',         1, 90),
     ('ALL',                                     'Dialer-Agent Call',    1, 10),
     ('ALL',                                     'Dialer-Agent Call',    2, 30),
-    ('ALL',                                     'Dialer-Agent Call',    3, 45)
+    ('ALL',                                     'Dialer-Agent Call',    3, 45),
+    ('ALL',                                     'Letter',               1, 90)
 ;
