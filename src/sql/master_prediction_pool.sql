@@ -104,6 +104,12 @@ with joined as
                 contact_minimums.is_priority_minimum_emails,
                 contact_minimums.is_priority_minimum_dialeragent,
                 contact_minimums.is_priority_minimum_dialeragentless,
+                contact_delay.pass_delay_letters,
+                contact_delay.pass_delay_texts,
+                contact_delay.pass_delay_voapps,
+                contact_delay.pass_delay_emails,
+                contact_delay.pass_delay_dialeragent,
+                contact_delay.pass_delay_dialeragentless,
                 
                 debtor_balance.assigned,
                 debtor_balance.balance_dimdebtor,
@@ -156,6 +162,7 @@ with joined as
                 inner join edwprodhh.hermes.transform_criteria_address_allowed_phone            as address_allowed_phone        on debtor.debtor_idx = address_allowed_phone.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_contact_cooldown            as contact_cooldown             on debtor.debtor_idx = contact_cooldown.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_contact_priority_minimums   as contact_minimums             on debtor.debtor_idx = contact_minimums.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_contact_priority_delay      as contact_delay                on debtor.debtor_idx = contact_delay.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_debtor_balance              as debtor_balance               on debtor.debtor_idx = debtor_balance.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_debtor_experian             as debtor_experian              on debtor.debtor_idx = debtor_experian.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_debtor_income               as debtor_income                on debtor.debtor_idx = debtor_income.debtor_idx
@@ -178,6 +185,7 @@ select      *,
                     and     pass_debtor_age_packet                  =   1
                     and     pass_letters_cooldown                   =   1
                     and     pass_letters_warmup                     =   1
+                    and     pass_delay_letters                      =   1
                     then    1
                     else    0
                     end     as is_eligible_letters,
@@ -192,6 +200,7 @@ select      *,
                     and     pass_packet_balance                     =   1
                     and     pass_debtor_age_packet                  =   1
                     and     pass_texts_cooldown                     =   1
+                    and     pass_delay_texts                        =   1
                     then    1
                     else    0
                     end     as is_eligible_texts,
@@ -206,11 +215,12 @@ select      *,
                     and     pass_packet_balance                     =   1
                     and     pass_debtor_age_packet                  =   1
                     and     pass_voapps_cooldown                    =   1
+                    and     pass_delay_voapps                       =   1
                     and     pass_7in7                               =   1
                     then    1
                     else    0
                     end     as is_eligible_voapps,
-                    
+
 
             NULL as is_eligible_emails,
             
@@ -219,8 +229,8 @@ select      *,
                     and     pass_debtor_status                      =   1
                     and     pass_debtor_active                      =   1
                     and     pass_phone_calls                        =   1
+                    and     pass_delay_dialeragent                  =   1
                     and     pass_7in7                               =   1
-                    -- and     pass_debtor_first_score_dialer_agent    =   1
                     then    1
                     else    0
                     end     as is_eligible_dialer_agent,
@@ -237,29 +247,29 @@ select      *,
 from        joined
 ;
 
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_contact_cooldown;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_contact_priority_minimums;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_balance;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_taxyear;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_payplan;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_maturity;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_lastpayment;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_income;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_experian;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_debttype;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_businessrules_debtor_score_history;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_validation_requirement;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_debtor_status;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_debtor_client_active;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_phone;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_mail;
-alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_email;
-
 
 
 create or replace task
     edwprodhh.pub_jchang.replace_master_prediction_pool
     warehouse = analysis_wh
+    after       edwprodhh.pub_jchang.replace_transform_businessrules_contact_cooldown,
+                edwprodhh.pub_jchang.replace_transform_businessrules_contact_priority_minimums,
+                edwprodhh.pub_jchang.replace_transform_businessrules_contact_priority_delay,
+                edwprodhh.pub_jchang.replace_transform_businessrules_debtor_balance,
+                edwprodhh.pub_jchang.replace_transform_businessrules_debtor_taxyear,
+                edwprodhh.pub_jchang.replace_transform_businessrules_debtor_payplan,
+                edwprodhh.pub_jchang.replace_transform_businessrules_debtor_maturity,
+                edwprodhh.pub_jchang.replace_transform_businessrules_debtor_lastpayment,
+                edwprodhh.pub_jchang.replace_transform_businessrules_debtor_income,
+                edwprodhh.pub_jchang.replace_transform_businessrules_debtor_experian,
+                edwprodhh.pub_jchang.replace_transform_businessrules_debtor_debttype,
+                edwprodhh.pub_jchang.replace_transform_businessrules_debtor_score_history,
+                edwprodhh.pub_jchang.replace_transform_criteria_validation_requirement,
+                edwprodhh.pub_jchang.replace_transform_criteria_debtor_status,
+                edwprodhh.pub_jchang.replace_transform_criteria_debtor_client_active,
+                edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_phone,
+                edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_mail,
+                edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_email
 as
 create or replace table
     edwprodhh.hermes.master_prediction_pool
@@ -367,6 +377,12 @@ with joined as
                 contact_minimums.is_priority_minimum_emails,
                 contact_minimums.is_priority_minimum_dialeragent,
                 contact_minimums.is_priority_minimum_dialeragentless,
+                contact_delay.pass_delay_letters,
+                contact_delay.pass_delay_texts,
+                contact_delay.pass_delay_voapps,
+                contact_delay.pass_delay_emails,
+                contact_delay.pass_delay_dialeragent,
+                contact_delay.pass_delay_dialeragentless,
                 
                 debtor_balance.assigned,
                 debtor_balance.balance_dimdebtor,
@@ -419,6 +435,7 @@ with joined as
                 inner join edwprodhh.hermes.transform_criteria_address_allowed_phone            as address_allowed_phone        on debtor.debtor_idx = address_allowed_phone.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_contact_cooldown            as contact_cooldown             on debtor.debtor_idx = contact_cooldown.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_contact_priority_minimums   as contact_minimums             on debtor.debtor_idx = contact_minimums.debtor_idx
+                inner join edwprodhh.hermes.transform_businessrules_contact_priority_delay      as contact_delay                on debtor.debtor_idx = contact_delay.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_debtor_balance              as debtor_balance               on debtor.debtor_idx = debtor_balance.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_debtor_experian             as debtor_experian              on debtor.debtor_idx = debtor_experian.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_debtor_income               as debtor_income                on debtor.debtor_idx = debtor_income.debtor_idx
@@ -441,6 +458,7 @@ select      *,
                     and     pass_debtor_age_packet                  =   1
                     and     pass_letters_cooldown                   =   1
                     and     pass_letters_warmup                     =   1
+                    and     pass_delay_letters                      =   1
                     then    1
                     else    0
                     end     as is_eligible_letters,
@@ -455,6 +473,7 @@ select      *,
                     and     pass_packet_balance                     =   1
                     and     pass_debtor_age_packet                  =   1
                     and     pass_texts_cooldown                     =   1
+                    and     pass_delay_texts                        =   1
                     then    1
                     else    0
                     end     as is_eligible_texts,
@@ -469,11 +488,12 @@ select      *,
                     and     pass_packet_balance                     =   1
                     and     pass_debtor_age_packet                  =   1
                     and     pass_voapps_cooldown                    =   1
+                    and     pass_delay_voapps                       =   1
                     and     pass_7in7                               =   1
                     then    1
                     else    0
                     end     as is_eligible_voapps,
-                    
+
 
             NULL as is_eligible_emails,
             
@@ -482,8 +502,8 @@ select      *,
                     and     pass_debtor_status                      =   1
                     and     pass_debtor_active                      =   1
                     and     pass_phone_calls                        =   1
+                    and     pass_delay_dialeragent                  =   1
                     and     pass_7in7                               =   1
-                    -- and     pass_debtor_first_score_dialer_agent    =   1
                     then    1
                     else    0
                     end     as is_eligible_dialer_agent,

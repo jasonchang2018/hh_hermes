@@ -38,6 +38,7 @@ with debtor as
                     edwprodhh.hermes.master_config_contact_minimums as rules
                     on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Letter'
+                    and debtor.days_since_placement >= rules.delay_days_placement
     
     --  1. Select the rule to evaluate.
     --      There can be multiple rules for multiple channels.
@@ -79,6 +80,7 @@ with debtor as
                     edwprodhh.hermes.master_config_contact_minimums as rules
                     on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Text Message'
+                    and debtor.days_since_placement >= rules.delay_days_placement
                     
     qualify     row_number() over (
                     partition by    debtor.debtor_idx
@@ -108,6 +110,7 @@ with debtor as
                     edwprodhh.hermes.master_config_contact_minimums as rules
                     on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'VoApp'
+                    and debtor.days_since_placement >= rules.delay_days_placement
                     
     qualify     row_number() over (
                     partition by    debtor.debtor_idx
@@ -137,6 +140,7 @@ with debtor as
                     edwprodhh.hermes.master_config_contact_minimums as rules
                     on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Email'
+                    and debtor.days_since_placement >= rules.delay_days_placement
                     
     qualify     row_number() over (
                     partition by    debtor.debtor_idx
@@ -166,6 +170,7 @@ with debtor as
                     edwprodhh.hermes.master_config_contact_minimums as rules
                     on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Dialer-Agent Call'
+                    and debtor.days_since_placement >= rules.delay_days_placement
                     
     qualify     row_number() over (
                     partition by    debtor.debtor_idx
@@ -195,6 +200,7 @@ with debtor as
                     edwprodhh.hermes.master_config_contact_minimums as rules
                     on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Dialer-Agentless Call'
+                    and debtor.days_since_placement >= rules.delay_days_placement
                     
     qualify     row_number() over (
                     partition by    debtor.debtor_idx
@@ -251,7 +257,7 @@ from        debtor
 
 
 
-create task
+create or replace task
     edwprodhh.pub_jchang.replace_transform_businessrules_contact_priority_minimums
     warehouse = analysis_wh
     after edwprodhh.pub_jchang.hermes_root
@@ -296,6 +302,7 @@ with debtor as
                     edwprodhh.hermes.master_config_contact_minimums as rules
                     on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Letter'
+                    and debtor.days_since_placement >= rules.delay_days_placement
     
     --  1. Select the rule to evaluate.
     --      There can be multiple rules for multiple channels.
@@ -337,6 +344,7 @@ with debtor as
                     edwprodhh.hermes.master_config_contact_minimums as rules
                     on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Text Message'
+                    and debtor.days_since_placement >= rules.delay_days_placement
                     
     qualify     row_number() over (
                     partition by    debtor.debtor_idx
@@ -366,6 +374,7 @@ with debtor as
                     edwprodhh.hermes.master_config_contact_minimums as rules
                     on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'VoApp'
+                    and debtor.days_since_placement >= rules.delay_days_placement
                     
     qualify     row_number() over (
                     partition by    debtor.debtor_idx
@@ -395,6 +404,7 @@ with debtor as
                     edwprodhh.hermes.master_config_contact_minimums as rules
                     on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Email'
+                    and debtor.days_since_placement >= rules.delay_days_placement
                     
     qualify     row_number() over (
                     partition by    debtor.debtor_idx
@@ -424,6 +434,7 @@ with debtor as
                     edwprodhh.hermes.master_config_contact_minimums as rules
                     on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Dialer-Agent Call'
+                    and debtor.days_since_placement >= rules.delay_days_placement
                     
     qualify     row_number() over (
                     partition by    debtor.debtor_idx
@@ -453,6 +464,7 @@ with debtor as
                     edwprodhh.hermes.master_config_contact_minimums as rules
                     on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
                     and rules.proposed_channel = 'Dialer-Agentless Call'
+                    and debtor.days_since_placement >= rules.delay_days_placement
                     
     qualify     row_number() over (
                     partition by    debtor.debtor_idx
