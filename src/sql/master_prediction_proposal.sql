@@ -412,9 +412,7 @@ with scores as
     --  ASSUMES RUN ON FRIDAY EVENING -> UPLOAD MONDAY THRU NEXT FRIDAY
     --  HOWEVER, UNSURE WHETHER CURRENT_DATE() WILL BE FRIDAY OR SATURDAY, SO CAUTIOUSLY TRUNCATE TO WEEK FOR CALCULATION
     select      filter_cost_global.*,
-                case    when    proposed_channel = 'Letter'
-                        then    date_trunc('week', current_date()) + 7
-                        when    proposed_channel = 'Text Message'
+                case    when    proposed_channel in  ('Text Message', 'Letter')
                         then    case    when    percentiles.ntile >= 0
                                         and     percentiles.ntile <= 0.20
                                         then    date_trunc('week', current_date()) + 7
@@ -432,9 +430,7 @@ with scores as
                                         then    date_trunc('week', current_date()) + 11
                                         else    date_trunc('week', current_date()) + 11
                                         end
-                        when    proposed_channel = 'VoApp'
-                        then    date_trunc('week', current_date()) + 7
-                        when    proposed_channel = 'Email'
+                        when    proposed_channel in ('VoApp', 'Email')
                         then    date_trunc('week', current_date()) + 7
                         else    date_trunc('week', current_date()) + 7
                         end     as upload_date
@@ -939,9 +935,7 @@ with scores as
     --  ASSUMES RUN ON FRIDAY EVENING -> UPLOAD MONDAY THRU NEXT FRIDAY
     --  HOWEVER, UNSURE WHETHER CURRENT_DATE() WILL BE FRIDAY OR SATURDAY, SO CAUTIOUSLY TRUNCATE TO WEEK FOR CALCULATION
     select      filter_cost_global.*,
-                case    when    proposed_channel = 'Letter'
-                        then    date_trunc('week', current_date()) + 7
-                        when    proposed_channel = 'Text Message'
+                case    when    proposed_channel in  ('Text Message', 'Letter')
                         then    case    when    percentiles.ntile >= 0
                                         and     percentiles.ntile <= 0.20
                                         then    date_trunc('week', current_date()) + 7
@@ -959,9 +953,7 @@ with scores as
                                         then    date_trunc('week', current_date()) + 11
                                         else    date_trunc('week', current_date()) + 11
                                         end
-                        when    proposed_channel = 'VoApp'
-                        then    date_trunc('week', current_date()) + 7
-                        when    proposed_channel = 'Email'
+                        when    proposed_channel in ('VoApp', 'Email')
                         then    date_trunc('week', current_date()) + 7
                         else    date_trunc('week', current_date()) + 7
                         end     as upload_date
