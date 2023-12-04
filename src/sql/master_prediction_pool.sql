@@ -21,9 +21,15 @@ with joined as
 
                 validation_requirement.requires_validation,
                 validation_requirement.pass_received_validation,
-                validation_requirement.pass_age_validation,
-                validation_requirement.pass_validation_requirement_debtor,
-                validation_requirement.pass_validation_requirement,
+                -- validation_requirement.pass_age_validation,
+                -- validation_requirement.pass_validation_requirement_debtor,
+                -- validation_requirement.pass_validation_requirement,
+                validation_requirement.pass_validation_age_nonoffer,
+                validation_requirement.pass_validation_age_offer,
+                validation_requirement.pass_validation_requirement_debtor_nonoffer,
+                validation_requirement.pass_validation_requirement_debtor_offer,
+                validation_requirement.pass_validation_requirement_nonoffer,
+                validation_requirement.pass_validation_requirement_offer,
                 validation_requirement.validation_letter_date,
 
                 address_allowed_email.email_address,
@@ -164,7 +170,7 @@ select      *,
 
             case    when    pass_client_active_hermes_contacts      =   1
                     and     pass_client_allowed_letters             =   1
-                    and     pass_validation_requirement             =   1
+                    and     pass_validation_requirement_offer       =   1
                     and     pass_debtor_status                      =   1
                     and     pass_debtor_active                      =   1
                     and     pass_address_letters                    =   1
@@ -178,7 +184,7 @@ select      *,
 
             case    when    pass_client_active_hermes_contacts      =   1
                     and     pass_client_allowed_texts               =   1
-                    and     pass_validation_requirement             =   1
+                    and     pass_validation_requirement_nonoffer    =   1
                     and     pass_debtor_status                      =   1
                     and     pass_debtor_active                      =   1
                     and     pass_phone_texts                        =   1
@@ -192,7 +198,7 @@ select      *,
 
             case    when    pass_client_active_hermes_contacts      =   1
                     and     pass_client_allowed_voapps              =   1
-                    and     pass_validation_requirement             =   1
+                    and     pass_validation_requirement_nonoffer    =   1
                     and     pass_debtor_status                      =   1
                     and     pass_debtor_active                      =   1
                     and     pass_phone_voapps                       =   1
@@ -209,6 +215,7 @@ select      *,
             NULL as is_eligible_emails,
             
             case    when    pass_client_allowed_calls               in  (0,1)
+                    and     pass_validation_requirement_nonoffer    =   1
                     and     pass_debtor_status                      =   1
                     and     pass_debtor_active                      =   1
                     and     pass_phone_calls                        =   1
@@ -250,7 +257,7 @@ alter task edwprodhh.pub_jchang.replace_master_prediction_pool  add after edwpro
 
 
 
-create task
+create or replace task
     edwprodhh.pub_jchang.replace_master_prediction_pool
     warehouse = analysis_wh
 as
@@ -277,9 +284,15 @@ with joined as
 
                 validation_requirement.requires_validation,
                 validation_requirement.pass_received_validation,
-                validation_requirement.pass_age_validation,
-                validation_requirement.pass_validation_requirement_debtor,
-                validation_requirement.pass_validation_requirement,
+                -- validation_requirement.pass_age_validation,
+                -- validation_requirement.pass_validation_requirement_debtor,
+                -- validation_requirement.pass_validation_requirement,
+                validation_requirement.pass_validation_age_nonoffer,
+                validation_requirement.pass_validation_age_offer,
+                validation_requirement.pass_validation_requirement_debtor_nonoffer,
+                validation_requirement.pass_validation_requirement_debtor_offer,
+                validation_requirement.pass_validation_requirement_nonoffer,
+                validation_requirement.pass_validation_requirement_offer,
                 validation_requirement.validation_letter_date,
 
                 address_allowed_email.email_address,
@@ -420,7 +433,7 @@ select      *,
 
             case    when    pass_client_active_hermes_contacts      =   1
                     and     pass_client_allowed_letters             =   1
-                    and     pass_validation_requirement             =   1
+                    and     pass_validation_requirement_offer       =   1
                     and     pass_debtor_status                      =   1
                     and     pass_debtor_active                      =   1
                     and     pass_address_letters                    =   1
@@ -434,7 +447,7 @@ select      *,
 
             case    when    pass_client_active_hermes_contacts      =   1
                     and     pass_client_allowed_texts               =   1
-                    and     pass_validation_requirement             =   1
+                    and     pass_validation_requirement_nonoffer    =   1
                     and     pass_debtor_status                      =   1
                     and     pass_debtor_active                      =   1
                     and     pass_phone_texts                        =   1
@@ -448,7 +461,7 @@ select      *,
 
             case    when    pass_client_active_hermes_contacts      =   1
                     and     pass_client_allowed_voapps              =   1
-                    and     pass_validation_requirement             =   1
+                    and     pass_validation_requirement_nonoffer    =   1
                     and     pass_debtor_status                      =   1
                     and     pass_debtor_active                      =   1
                     and     pass_phone_voapps                       =   1
@@ -465,6 +478,7 @@ select      *,
             NULL as is_eligible_emails,
             
             case    when    pass_client_allowed_calls               in  (0,1)
+                    and     pass_validation_requirement_nonoffer    =   1
                     and     pass_debtor_status                      =   1
                     and     pass_debtor_active                      =   1
                     and     pass_phone_calls                        =   1

@@ -40,11 +40,19 @@ with debtors_sent_vals as
 , pass_validation_age as
 (
     select 		debtor_idx,
-                val_ltr_date
+                val_ltr_date,
+                case    when    val_ltr_date is not null
+                        and     val_ltr_date < current_date() - 5  --can use for Dialer, VoApp, and non-SIF Text
+                        then    1
+                        else    0
+                        end     as pass_validation_age_nonoffer,
+                case    when    val_ltr_date is not null
+                        and     val_ltr_date < current_date() - 45  --will need to use this one for channels that contain offer (DUN Letter, SIF Text)
+                        then    1
+                        else    0
+                        end     as pass_validation_age_offer
+                
     from        edwprodhh.dw.dimfiscal_hh_b
-    where       val_ltr_date is not null
-                -- and val_ltr_date < current_date() - 45  --will need to use this one for channels that contain offer (DUN Letter, SIF Text)
-                and val_ltr_date < current_date() - 5  --can use for Dialer, VoApp, and non-SIF Text
 )
 select      debtor.debtor_idx,
             debtor.packet_idx,
@@ -58,27 +66,39 @@ select      debtor.debtor_idx,
                     else    0
                     end     as pass_received_validation,
 
-            case    when    pass_validation_age.debtor_idx is not null
-                    then    1
-                    else    0
-                    end     as pass_age_validation,
+            coalesce(pass_validation_age.pass_validation_age_nonoffer,  0) as pass_validation_age_nonoffer,
+            coalesce(pass_validation_age.pass_validation_age_offer,     0) as pass_validation_age_offer,
+
+            -- case    when    pass_validation_age.debtor_idx is not null
+            --         then    1
+            --         else    0
+            --         end     as pass_age_validation,
 
             case    when    historical_contacts_sent.debtor_idx is not null
                     then    1
                     else    0
                     end     as pass_received_other_contacts,
 
-            case    when    requires_validation             = 0
+            case    when    requires_validation                     = 0
                     or      (
                                 pass_received_validation            = 1
-                                and pass_age_validation             = 1
+                                and pass_validation_age_nonoffer    = 1
                             )
-                    -- or      pass_received_other_contacts    = 1
                     then    1
                     else    0
-                    end     as pass_validation_requirement_debtor,
+                    end     as pass_validation_requirement_debtor_nonoffer,
 
-            min(pass_validation_requirement_debtor) over (partition by packet_idx) as pass_validation_requirement
+            case    when    requires_validation                     = 0
+                    or      (
+                                pass_received_validation            = 1
+                                and pass_validation_age_offer       = 1
+                            )
+                    then    1
+                    else    0
+                    end     as pass_validation_requirement_debtor_offer,
+
+            min(pass_validation_requirement_debtor_nonoffer)    over (partition by packet_idx) as pass_validation_requirement_nonoffer,
+            min(pass_validation_requirement_debtor_offer)       over (partition by packet_idx) as pass_validation_requirement_offer
 
 from        edwprodhh.pub_jchang.master_debtor as debtor
             inner join
@@ -98,7 +118,7 @@ from        edwprodhh.pub_jchang.master_debtor as debtor
 
 
 
-create task
+create or replace task
     edwprodhh.pub_jchang.replace_transform_criteria_validation_requirement
     warehouse = analysis_wh
     after edwprodhh.pub_jchang.hermes_root
@@ -145,11 +165,19 @@ with debtors_sent_vals as
 , pass_validation_age as
 (
     select 		debtor_idx,
-                val_ltr_date
+                val_ltr_date,
+                case    when    val_ltr_date is not null
+                        and     val_ltr_date < current_date() - 5  --can use for Dialer, VoApp, and non-SIF Text
+                        then    1
+                        else    0
+                        end     as pass_validation_age_nonoffer,
+                case    when    val_ltr_date is not null
+                        and     val_ltr_date < current_date() - 45  --will need to use this one for channels that contain offer (DUN Letter, SIF Text)
+                        then    1
+                        else    0
+                        end     as pass_validation_age_offer
+                
     from        edwprodhh.dw.dimfiscal_hh_b
-    where       val_ltr_date is not null
-                -- and val_ltr_date < current_date() - 45  --will need to use this one for channels that contain offer (DUN Letter, SIF Text)
-                and val_ltr_date < current_date() - 5  --can use for Dialer, VoApp, and non-SIF Text
 )
 select      debtor.debtor_idx,
             debtor.packet_idx,
@@ -163,27 +191,39 @@ select      debtor.debtor_idx,
                     else    0
                     end     as pass_received_validation,
 
-            case    when    pass_validation_age.debtor_idx is not null
-                    then    1
-                    else    0
-                    end     as pass_age_validation,
+            coalesce(pass_validation_age.pass_validation_age_nonoffer,  0) as pass_validation_age_nonoffer,
+            coalesce(pass_validation_age.pass_validation_age_offer,     0) as pass_validation_age_offer,
+
+            -- case    when    pass_validation_age.debtor_idx is not null
+            --         then    1
+            --         else    0
+            --         end     as pass_age_validation,
 
             case    when    historical_contacts_sent.debtor_idx is not null
                     then    1
                     else    0
                     end     as pass_received_other_contacts,
 
-            case    when    requires_validation             = 0
+            case    when    requires_validation                     = 0
                     or      (
                                 pass_received_validation            = 1
-                                and pass_age_validation             = 1
+                                and pass_validation_age_nonoffer    = 1
                             )
-                    -- or      pass_received_other_contacts    = 1
                     then    1
                     else    0
-                    end     as pass_validation_requirement_debtor,
+                    end     as pass_validation_requirement_debtor_nonoffer,
 
-            min(pass_validation_requirement_debtor) over (partition by packet_idx) as pass_validation_requirement
+            case    when    requires_validation                     = 0
+                    or      (
+                                pass_received_validation            = 1
+                                and pass_validation_age_offer       = 1
+                            )
+                    then    1
+                    else    0
+                    end     as pass_validation_requirement_debtor_offer,
+
+            min(pass_validation_requirement_debtor_nonoffer)    over (partition by packet_idx) as pass_validation_requirement_nonoffer,
+            min(pass_validation_requirement_debtor_offer)       over (partition by packet_idx) as pass_validation_requirement_offer
 
 from        edwprodhh.pub_jchang.master_debtor as debtor
             inner join

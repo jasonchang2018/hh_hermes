@@ -167,7 +167,7 @@ from        calculate_upload_date
 
 
 alter task edwprodhh.pub_jchang.replace_master_prediction_dialer_file add after edwprodhh.pub_jchang.replace_master_prediction_phone_selection;
-alter task edwprodhh.pub_jchang.replace_master_prediction_dialer_file add after edwprodhh.pub_jchang.replace_master_prediction_scores;
+alter task edwprodhh.pub_jchang.replace_master_prediction_dialer_file add after edwprodhh.pub_jchang.insert_master_prediction_scores_dialeragent;
 
 
 create or replace task
