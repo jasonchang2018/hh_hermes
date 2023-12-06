@@ -7,6 +7,14 @@ begin
 
 
     insert into
+        edwprodhh.hermes.master_config_treatment_router_log
+    select      *,
+                :execute_time as execute_time
+    from        edwprodhh.hermes.master_config_treatment_router
+    ;
+
+
+    insert into
         edwprodhh.hermes.master_prediction_pool_log
     select      *,
                 :execute_time as execute_time

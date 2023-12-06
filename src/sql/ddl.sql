@@ -2,6 +2,18 @@ create schema edwprodhh.hermes;
 
 
 create table
+    edwprodhh.hermes.master_config_treatment_router_log
+(
+    DEBTOR_IDX              VARCHAR(50),
+    TREATMENT_GROUP	        VARCHAR(16777216),
+    TREATMENT_DESCRIPTION	VARCHAR(16777216),
+    TEST_NAME	            VARCHAR(16777216),
+    TEST_DESCRIPTION	    VARCHAR(16777216)
+)
+;
+
+
+create table
     edwprodhh.hermes.master_prediction_pool_log
 (
     DEBTOR_IDX                                      VARCHAR(50),
