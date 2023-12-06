@@ -1,13 +1,12 @@
 create or replace table
     edwprodhh.hermes.transform_businessrules_debtor_balance
 as
-select      debtor_idx,
-            assigned,
-            balance_dimdebtor,
-            -- sum(case when cancel_dt is not null then balance_dimdebtor else 0 end) over (partition by packet_idx) as balance_dimdebtor_packet_,
-            sum(balance_dimdebtor) over (partition by packet_idx) as balance_dimdebtor_packet_,
+select      debtor.debtor_idx,
+            debtor.assigned,
+            debtor.balance_dimdebtor,
+            sum(debtor.balance_dimdebtor) over (partition by packet_idx) as balance_dimdebtor_packet_,
 
-            case    when    pl_group in (
+            case    when    debtor.pl_group in (
                                         'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2', 'CHILDRENS HOSP OF ATLANTA - 3P',
                                         'FRANCISCAN HEALTH - 3P', 'PROMEDICA HS - 3P-2', 'COUNTY OF LAKE IL - 3P',
                                         'STATE OF IL - DOR - 3P', 'STATE OF KS - DOR - 3P',
@@ -23,25 +22,22 @@ select      debtor_idx,
                                         'PRISMA HEALTH UNIVERSITY - 3P', 'U OF CINCINNATI HEALTH SYSTEM - 3P',
                                         'PRISMA HEALTH - 3P', 'PROVIDENCE ST JOSEPH HEALTH - 3P', 'IU HEALTH - 3P'
                                     )
-                            -- then    case    when    balance_dimdebtor >= 25
-                            then    case    when    balance_dimdebtor > 25
+                            then    case    when    debtor.balance_dimdebtor > 25
                                             then    1
                                             else    0
                                             end
-                            when    pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
-                            -- then    case    when    balance_dimdebtor >= 5
-                            then    case    when    balance_dimdebtor > 25
+                            when    debtor.pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
+                            then    case    when    debtor.balance_dimdebtor > 25
                                             then    1
                                             else    0
                                             end
-                            -- else    case    when    balance_dimdebtor >= 50
-                            else    case    when    balance_dimdebtor > 25
+                            else    case    when    debtor.balance_dimdebtor > 25
                                             then    1
                                             else    0
                                             end
                             end     as pass_debtor_balance,
 
-            case    when    pl_group in (
+            case    when    debtor.pl_group in (
                                         'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2', 'CHILDRENS HOSP OF ATLANTA - 3P',
                                         'FRANCISCAN HEALTH - 3P', 'PROMEDICA HS - 3P-2', 'COUNTY OF LAKE IL - 3P',
                                         'STATE OF IL - DOR - 3P', 'STATE OF KS - DOR - 3P',
@@ -57,22 +53,16 @@ select      debtor_idx,
                                         'PRISMA HEALTH UNIVERSITY - 3P', 'U OF CINCINNATI HEALTH SYSTEM - 3P',
                                         'PRISMA HEALTH - 3P', 'PROVIDENCE ST JOSEPH HEALTH - 3P', 'IU HEALTH - 3P'
                                     )
-                            -- then    case    when    balance_dimdebtor_packet_ >= 50
                             then    case    when    balance_dimdebtor_packet_ > 25
-                            -- then    case    when    balance_dimdebtor_packet_ > 50
                                             then    1
                                             else    0
                                             end
-                            when    pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
-                            -- then    case    when    balance_dimdebtor_packet_ >= 25
+                            when    debtor.pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
                             then    case    when    balance_dimdebtor_packet_ > 25
-                            -- then    case    when    balance_dimdebtor_packet_ > 50
                                             then    1
                                             else    0
                                             end
-                            -- else    case    when    balance_dimdebtor_packet_ >= 75
                             else    case    when    balance_dimdebtor_packet_ > 25
-                            -- else    case    when    balance_dimdebtor_packet_ > 50
                                             then    1
                                             else    0
                                             end
@@ -80,7 +70,7 @@ select      debtor_idx,
 
 
 
-                    case    when    pl_group in (
+                    case    when    debtor.pl_group in (
                                         'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2', 'CHILDRENS HOSP OF ATLANTA - 3P',
                                         'FRANCISCAN HEALTH - 3P', 'PROMEDICA HS - 3P-2', 'COUNTY OF LAKE IL - 3P',
                                         'STATE OF IL - DOR - 3P', 'STATE OF KS - DOR - 3P',
@@ -96,30 +86,30 @@ select      debtor_idx,
                                         'PRISMA HEALTH UNIVERSITY - 3P', 'U OF CINCINNATI HEALTH SYSTEM - 3P',
                                         'PRISMA HEALTH - 3P', 'PROVIDENCE ST JOSEPH HEALTH - 3P', 'IU HEALTH - 3P'
                                     )
-                            -- then    case    when    assigned >= 50
-                            then    case    when    assigned > 0
+                            then    case    when    debtor.assigned > 0
                                             then    1
                                             else    0
                                             end
-                            when    pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
-                            -- then    case    when    assigned >= 25CROSSINGS - 3P')
-                            then    case    when    assigned > 0
+                            when    debtor.pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
+                            then    case    when    debtor.assigned > 0
                                             then    1
                                             else    0
                                             end
-                            -- else    case    when    assigned >= 75
-                            else    case    when    assigned > 0
+                            else    case    when    debtor.assigned > 0
                                             then    1
                                             else    0
                                             end
                             end     as pass_debtor_assigned
 
-from        edwprodhh.pub_jchang.master_debtor
+from        edwprodhh.pub_jchang.master_debtor as debtor
+            left join
+                edwprodhh.hermes.master_config_treatment_router as router
+                on debtor.debtor_idx = router.debtor_idx
 ;
 
 
 
-create task
+create or replace task
     edwprodhh.pub_jchang.replace_transform_businessrules_debtor_balance
     warehouse = analysis_wh
     after edwprodhh.pub_jchang.hermes_root
@@ -127,13 +117,12 @@ as
 create or replace table
     edwprodhh.hermes.transform_businessrules_debtor_balance
 as
-select      debtor_idx,
-            assigned,
-            balance_dimdebtor,
-            -- sum(case when cancel_dt is not null then balance_dimdebtor else 0 end) over (partition by packet_idx) as balance_dimdebtor_packet_,
-            sum(balance_dimdebtor) over (partition by packet_idx) as balance_dimdebtor_packet_,
+select      debtor.debtor_idx,
+            debtor.assigned,
+            debtor.balance_dimdebtor,
+            sum(debtor.balance_dimdebtor) over (partition by packet_idx) as balance_dimdebtor_packet_,
 
-            case    when    pl_group in (
+            case    when    debtor.pl_group in (
                                         'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2', 'CHILDRENS HOSP OF ATLANTA - 3P',
                                         'FRANCISCAN HEALTH - 3P', 'PROMEDICA HS - 3P-2', 'COUNTY OF LAKE IL - 3P',
                                         'STATE OF IL - DOR - 3P', 'STATE OF KS - DOR - 3P',
@@ -149,25 +138,22 @@ select      debtor_idx,
                                         'PRISMA HEALTH UNIVERSITY - 3P', 'U OF CINCINNATI HEALTH SYSTEM - 3P',
                                         'PRISMA HEALTH - 3P', 'PROVIDENCE ST JOSEPH HEALTH - 3P', 'IU HEALTH - 3P'
                                     )
-                            -- then    case    when    balance_dimdebtor >= 25
-                            then    case    when    balance_dimdebtor > 25
+                            then    case    when    debtor.balance_dimdebtor > 25
                                             then    1
                                             else    0
                                             end
-                            when    pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
-                            -- then    case    when    balance_dimdebtor >= 5
-                            then    case    when    balance_dimdebtor > 25
+                            when    debtor.pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
+                            then    case    when    debtor.balance_dimdebtor > 25
                                             then    1
                                             else    0
                                             end
-                            -- else    case    when    balance_dimdebtor >= 50
-                            else    case    when    balance_dimdebtor > 25
+                            else    case    when    debtor.balance_dimdebtor > 25
                                             then    1
                                             else    0
                                             end
                             end     as pass_debtor_balance,
 
-            case    when    pl_group in (
+            case    when    debtor.pl_group in (
                                         'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2', 'CHILDRENS HOSP OF ATLANTA - 3P',
                                         'FRANCISCAN HEALTH - 3P', 'PROMEDICA HS - 3P-2', 'COUNTY OF LAKE IL - 3P',
                                         'STATE OF IL - DOR - 3P', 'STATE OF KS - DOR - 3P',
@@ -183,22 +169,16 @@ select      debtor_idx,
                                         'PRISMA HEALTH UNIVERSITY - 3P', 'U OF CINCINNATI HEALTH SYSTEM - 3P',
                                         'PRISMA HEALTH - 3P', 'PROVIDENCE ST JOSEPH HEALTH - 3P', 'IU HEALTH - 3P'
                                     )
-                            -- then    case    when    balance_dimdebtor_packet_ >= 50
                             then    case    when    balance_dimdebtor_packet_ > 25
-                            -- then    case    when    balance_dimdebtor_packet_ > 50
                                             then    1
                                             else    0
                                             end
-                            when    pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
-                            -- then    case    when    balance_dimdebtor_packet_ >= 25
+                            when    debtor.pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
                             then    case    when    balance_dimdebtor_packet_ > 25
-                            -- then    case    when    balance_dimdebtor_packet_ > 50
                                             then    1
                                             else    0
                                             end
-                            -- else    case    when    balance_dimdebtor_packet_ >= 75
                             else    case    when    balance_dimdebtor_packet_ > 25
-                            -- else    case    when    balance_dimdebtor_packet_ > 50
                                             then    1
                                             else    0
                                             end
@@ -206,7 +186,7 @@ select      debtor_idx,
 
 
 
-                    case    when    pl_group in (
+                    case    when    debtor.pl_group in (
                                         'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2', 'CHILDRENS HOSP OF ATLANTA - 3P',
                                         'FRANCISCAN HEALTH - 3P', 'PROMEDICA HS - 3P-2', 'COUNTY OF LAKE IL - 3P',
                                         'STATE OF IL - DOR - 3P', 'STATE OF KS - DOR - 3P',
@@ -222,23 +202,23 @@ select      debtor_idx,
                                         'PRISMA HEALTH UNIVERSITY - 3P', 'U OF CINCINNATI HEALTH SYSTEM - 3P',
                                         'PRISMA HEALTH - 3P', 'PROVIDENCE ST JOSEPH HEALTH - 3P', 'IU HEALTH - 3P'
                                     )
-                            -- then    case    when    assigned >= 50
-                            then    case    when    assigned > 0
+                            then    case    when    debtor.assigned > 0
                                             then    1
                                             else    0
                                             end
-                            when    pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
-                            -- then    case    when    assigned >= 25CROSSINGS - 3P')
-                            then    case    when    assigned > 0
+                            when    debtor.pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
+                            then    case    when    debtor.assigned > 0
                                             then    1
                                             else    0
                                             end
-                            -- else    case    when    assigned >= 75
-                            else    case    when    assigned > 0
+                            else    case    when    debtor.assigned > 0
                                             then    1
                                             else    0
                                             end
                             end     as pass_debtor_assigned
 
-from        edwprodhh.pub_jchang.master_debtor
+from        edwprodhh.pub_jchang.master_debtor as debtor
+            left join
+                edwprodhh.hermes.master_config_treatment_router as router
+                on debtor.debtor_idx = router.debtor_idx
 ;

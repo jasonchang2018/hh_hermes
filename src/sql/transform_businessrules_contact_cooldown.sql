@@ -134,6 +134,9 @@ from        edwprodhh.pub_jchang.master_debtor as debtor
             left join
                 contact_history
                 on debtor.packet_idx = contact_history.packet_idx
+            left join
+                edwprodhh.hermes.master_config_treatment_router as router
+                on debtor.debtor_idx = router.debtor_idx
 ;
 
 
@@ -279,4 +282,7 @@ from        edwprodhh.pub_jchang.master_debtor as debtor
             left join
                 contact_history
                 on debtor.packet_idx = contact_history.packet_idx
+            left join
+                edwprodhh.hermes.master_config_treatment_router as router
+                on debtor.debtor_idx = router.debtor_idx
 ;

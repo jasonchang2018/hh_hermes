@@ -253,6 +253,9 @@ from        debtor
             left join
                 rules_dialeragentless
                 on debtor.debtor_idx = rules_dialeragentless.debtor_idx
+            left join
+                edwprodhh.hermes.master_config_treatment_router as router
+                on debtor.debtor_idx = router.debtor_idx
 ;
 
 
@@ -517,4 +520,7 @@ from        debtor
             left join
                 rules_dialeragentless
                 on debtor.debtor_idx = rules_dialeragentless.debtor_idx
+            left join
+                edwprodhh.hermes.master_config_treatment_router as router
+                on debtor.debtor_idx = router.debtor_idx
 ;

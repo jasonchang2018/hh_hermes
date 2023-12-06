@@ -34,11 +34,14 @@ from        edwprodhh.pub_jchang.master_debtor as debtor
             left join
                 edwprodhh.pub_mbutler.master_zip_code_stats as zip_income
                 on debtor.zip_code = zip_income.zip_code
+            left join
+                edwprodhh.hermes.master_config_treatment_router as router
+                on debtor.debtor_idx = router.debtor_idx
 ;
 
 
 
-create task
+create or replace task
     edwprodhh.pub_jchang.replace_transform_businessrules_debtor_income
     warehouse = analysis_wh
     after edwprodhh.pub_jchang.hermes_root
@@ -79,4 +82,7 @@ from        edwprodhh.pub_jchang.master_debtor as debtor
             left join
                 edwprodhh.pub_mbutler.master_zip_code_stats as zip_income
                 on debtor.zip_code = zip_income.zip_code
+            left join
+                edwprodhh.hermes.master_config_treatment_router as router
+                on debtor.debtor_idx = router.debtor_idx
 ;

@@ -17,11 +17,14 @@ from        edwprodhh.pub_jchang.master_debtor as debtor
             left join
                 edwprodhh.dw.dimdeskinfo as desk
                 on dimdebtor.logon || '-' || dimdebtor.desk = desk.desk_idx
+            left join
+                edwprodhh.hermes.master_config_treatment_router as router
+                on debtor.debtor_idx = router.debtor_idx
 ;
 
 
 
-create task
+create or replace task
     edwprodhh.pub_jchang.replace_transform_businessrules_debtor_payplan
     warehouse = analysis_wh
     after edwprodhh.pub_jchang.hermes_root
@@ -45,4 +48,7 @@ from        edwprodhh.pub_jchang.master_debtor as debtor
             left join
                 edwprodhh.dw.dimdeskinfo as desk
                 on dimdebtor.logon || '-' || dimdebtor.desk = desk.desk_idx
+            left join
+                edwprodhh.hermes.master_config_treatment_router as router
+                on debtor.debtor_idx = router.debtor_idx
 ;
