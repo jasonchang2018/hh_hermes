@@ -2,11 +2,28 @@ create schema edwprodhh.hermes;
 
 
 create table
+    edwprodhh.hermes.master_config_treatment_router_log
+(
+    DEBTOR_IDX              VARCHAR(50),
+    TREATMENT_GROUP	        VARCHAR(16777216),
+    TREATMENT_DESCRIPTION	VARCHAR(16777216),
+    TEST_NAME	            VARCHAR(16777216),
+    TEST_DESCRIPTION	    VARCHAR(16777216),
+    execute_time            TIMESTAMP_LTZ(9)
+)
+;
+
+
+create table
     edwprodhh.hermes.master_prediction_pool_log
 (
     DEBTOR_IDX                                      VARCHAR(50),
     CLIENT_IDX                                      VARCHAR(16),
     PL_GROUP                                        VARCHAR(16777216),
+    TREATMENT_GROUP	                                VARCHAR(16777216),
+    TREATMENT_DESCRIPTION	                        VARCHAR(16777216),
+    TEST_NAME	                                    VARCHAR(16777216),
+    TEST_DESCRIPTION	                            VARCHAR(16777216),
     PASS_CLIENT_ACTIVE_HERMES_CONTACTS              NUMBER(1,0),
     STATUS                                          VARCHAR(16777216),
     CANCEL_DT                                       TIMESTAMP_NTZ(9),

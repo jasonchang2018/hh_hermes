@@ -1,13 +1,13 @@
 create or replace table
     edwprodhh.hermes.transform_businessrules_debtor_maturity
 as
-select      debtor_idx,
-            datediff(day, batch_date,                                       current_date()) as age_placement,
-            datediff(day, lst_chg_dt,                                       current_date()) as age_debt,
-            datediff(day, max(batch_date) over (partition by packet_idx),   current_date()) as age_packet,
+select      debtor.debtor_idx,
+            datediff(day, debtor.batch_date,                                            current_date()) as age_placement,
+            datediff(day, debtor.lst_chg_dt,                                            current_date()) as age_debt,
+            datediff(day, max(debtor.batch_date) over (partition by debtor.packet_idx), current_date()) as age_packet,
 
 
-            case    when    pl_group in (
+            case    when    debtor.pl_group in (
                                 'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2', 'CHILDRENS HOSP OF ATLANTA - 3P',
                                 'FRANCISCAN HEALTH - 3P', 'PROMEDICA HS - 3P-2', 'COUNTY OF LAKE IL - 3P',
                                 'STATE OF IL - DOR - 3P', 'STATE OF KS - DOR - 3P',
@@ -35,7 +35,7 @@ select      debtor_idx,
 
 
 
-            case    when    pl_group in (
+            case    when    debtor.pl_group in (
                                 'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2', 'CHILDRENS HOSP OF ATLANTA - 3P',
                                 'FRANCISCAN HEALTH - 3P', 'PROMEDICA HS - 3P-2', 'COUNTY OF LAKE IL - 3P',
                                 'STATE OF IL - DOR - 3P', 'STATE OF KS - DOR - 3P',
@@ -63,12 +63,12 @@ select      debtor_idx,
 
 
 
-            case    when    logon = 'HH'
+            case    when    debtor.logon = 'HH'
                     then    case    when    coalesce(age_packet, 0) <= 366
                                     then    1
                                     else    0
                                     end
-                    when    logon = 'CO'
+                    when    debtor.logon = 'CO'
                     then    case    when    coalesce(age_packet, 0) <= 731
                                     then    1
                                     else    0
@@ -79,12 +79,15 @@ select      debtor_idx,
                                     end
                     end     as pass_debtor_age_packet
 
-from        edwprodhh.pub_jchang.master_debtor
+from        edwprodhh.pub_jchang.master_debtor as debtor
+            left join
+                edwprodhh.hermes.master_config_treatment_router as router
+                on debtor.debtor_idx = router.debtor_idx
 ;
 
 
 
-create task
+create or replace task
     edwprodhh.pub_jchang.replace_transform_businessrules_debtor_maturity
     warehouse = analysis_wh
     after edwprodhh.pub_jchang.hermes_root
@@ -92,13 +95,13 @@ as
 create or replace table
     edwprodhh.hermes.transform_businessrules_debtor_maturity
 as
-select      debtor_idx,
-            datediff(day, batch_date,                                       current_date()) as age_placement,
-            datediff(day, lst_chg_dt,                                       current_date()) as age_debt,
-            datediff(day, max(batch_date) over (partition by packet_idx),   current_date()) as age_packet,
+select      debtor.debtor_idx,
+            datediff(day, debtor.batch_date,                                            current_date()) as age_placement,
+            datediff(day, debtor.lst_chg_dt,                                            current_date()) as age_debt,
+            datediff(day, max(debtor.batch_date) over (partition by debtor.packet_idx), current_date()) as age_packet,
 
 
-            case    when    pl_group in (
+            case    when    debtor.pl_group in (
                                 'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2', 'CHILDRENS HOSP OF ATLANTA - 3P',
                                 'FRANCISCAN HEALTH - 3P', 'PROMEDICA HS - 3P-2', 'COUNTY OF LAKE IL - 3P',
                                 'STATE OF IL - DOR - 3P', 'STATE OF KS - DOR - 3P',
@@ -126,7 +129,7 @@ select      debtor_idx,
 
 
 
-            case    when    pl_group in (
+            case    when    debtor.pl_group in (
                                 'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2', 'CHILDRENS HOSP OF ATLANTA - 3P',
                                 'FRANCISCAN HEALTH - 3P', 'PROMEDICA HS - 3P-2', 'COUNTY OF LAKE IL - 3P',
                                 'STATE OF IL - DOR - 3P', 'STATE OF KS - DOR - 3P',
@@ -154,12 +157,12 @@ select      debtor_idx,
 
 
 
-            case    when    logon = 'HH'
+            case    when    debtor.logon = 'HH'
                     then    case    when    coalesce(age_packet, 0) <= 366
                                     then    1
                                     else    0
                                     end
-                    when    logon = 'CO'
+                    when    debtor.logon = 'CO'
                     then    case    when    coalesce(age_packet, 0) <= 731
                                     then    1
                                     else    0
@@ -170,5 +173,8 @@ select      debtor_idx,
                                     end
                     end     as pass_debtor_age_packet
 
-from        edwprodhh.pub_jchang.master_debtor
+from        edwprodhh.pub_jchang.master_debtor as debtor
+            left join
+                edwprodhh.hermes.master_config_treatment_router as router
+                on debtor.debtor_idx = router.debtor_idx
 ;

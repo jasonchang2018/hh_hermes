@@ -3,11 +3,17 @@ create or replace table
 as
 with debtor as
 (
-    select      debtor_idx,
-                pl_group,
-                batch_date,
-                datediff(day, batch_date, current_date()) as days_since_placement
-    from        edwprodhh.pub_jchang.master_debtor
+    select      debtor.debtor_idx,
+                debtor.pl_group,
+                debtor.batch_date,
+                datediff(day, debtor.batch_date, current_date()) as days_since_placement,
+
+                router.treatment_group
+
+    from        edwprodhh.pub_jchang.master_debtor as debtor
+                left join
+                    edwprodhh.hermes.master_config_treatment_router as router
+                    on debtor.debtor_idx = router.debtor_idx
 )
 , rules_letters as
 (
@@ -21,8 +27,9 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
-                    and rules.proposed_channel = 'Letter'
+                    on  (debtor.pl_group            =  rules.pl_group        or rules.pl_group           = 'ALL')
+                    and (debtor.treatment_group     =  rules.treatment_group or rules.treatment_group    = 'ALL')
+                    and rules.proposed_channel      = 'Letter'
 
     qualify     row_number() over (partition by debtor.debtor_idx order by rules.delay_days_placement desc) = 1
 )
@@ -38,8 +45,9 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
-                    and rules.proposed_channel = 'Text Message'
+                    on  (debtor.pl_group            =  rules.pl_group        or rules.pl_group           = 'ALL')
+                    and (debtor.treatment_group     =  rules.treatment_group or rules.treatment_group    = 'ALL')
+                    and rules.proposed_channel      = 'Text Message'
 
     qualify     row_number() over (partition by debtor.debtor_idx order by rules.delay_days_placement desc) = 1
 )
@@ -55,8 +63,9 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
-                    and rules.proposed_channel = 'VoApp'
+                    on  (debtor.pl_group            =  rules.pl_group        or rules.pl_group           = 'ALL')
+                    and (debtor.treatment_group     =  rules.treatment_group or rules.treatment_group    = 'ALL')
+                    and rules.proposed_channel      = 'VoApp'
 
     qualify     row_number() over (partition by debtor.debtor_idx order by rules.delay_days_placement desc) = 1
 )
@@ -72,8 +81,9 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
-                    and rules.proposed_channel = 'Email'
+                    on  (debtor.pl_group            =  rules.pl_group        or rules.pl_group           = 'ALL')
+                    and (debtor.treatment_group     =  rules.treatment_group or rules.treatment_group    = 'ALL')
+                    and rules.proposed_channel      = 'Email'
 
     qualify     row_number() over (partition by debtor.debtor_idx order by rules.delay_days_placement desc) = 1
 )
@@ -89,8 +99,9 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
-                    and rules.proposed_channel = 'Dialer-Agent Call'
+                    on  (debtor.pl_group            =  rules.pl_group        or rules.pl_group           = 'ALL')
+                    and (debtor.treatment_group     =  rules.treatment_group or rules.treatment_group    = 'ALL')
+                    and rules.proposed_channel      = 'Dialer-Agent Call'
 
     qualify     row_number() over (partition by debtor.debtor_idx order by rules.delay_days_placement desc) = 1
 )
@@ -106,8 +117,9 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
-                    and rules.proposed_channel = 'Dialer-Agentless Call'
+                    on  (debtor.pl_group            =  rules.pl_group        or rules.pl_group           = 'ALL')
+                    and (debtor.treatment_group     =  rules.treatment_group or rules.treatment_group    = 'ALL')
+                    and rules.proposed_channel      = 'Dialer-Agentless Call'
 
     qualify     row_number() over (partition by debtor.debtor_idx order by rules.delay_days_placement desc) = 1
 )
@@ -142,6 +154,9 @@ from        debtor
             left join
                 rules_dialeragentless
                 on debtor.debtor_idx = rules_dialeragentless.debtor_idx
+            left join
+                edwprodhh.hermes.master_config_treatment_router as router
+                on debtor.debtor_idx = router.debtor_idx
 ;
 
 
@@ -156,11 +171,17 @@ create or replace table
 as
 with debtor as
 (
-    select      debtor_idx,
-                pl_group,
-                batch_date,
-                datediff(day, batch_date, current_date()) as days_since_placement
-    from        edwprodhh.pub_jchang.master_debtor
+    select      debtor.debtor_idx,
+                debtor.pl_group,
+                debtor.batch_date,
+                datediff(day, debtor.batch_date, current_date()) as days_since_placement,
+
+                router.treatment_group
+                
+    from        edwprodhh.pub_jchang.master_debtor as debtor
+                left join
+                    edwprodhh.hermes.master_config_treatment_router as router
+                    on debtor.debtor_idx = router.debtor_idx
 )
 , rules_letters as
 (
@@ -174,8 +195,9 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
-                    and rules.proposed_channel = 'Letter'
+                    on  (debtor.pl_group            =  rules.pl_group        or rules.pl_group           = 'ALL')
+                    and (debtor.treatment_group     =  rules.treatment_group or rules.treatment_group    = 'ALL')
+                    and rules.proposed_channel      = 'Letter'
 
     qualify     row_number() over (partition by debtor.debtor_idx order by rules.delay_days_placement desc) = 1
 )
@@ -191,8 +213,9 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
-                    and rules.proposed_channel = 'Text Message'
+                    on  (debtor.pl_group            =  rules.pl_group        or rules.pl_group           = 'ALL')
+                    and (debtor.treatment_group     =  rules.treatment_group or rules.treatment_group    = 'ALL')
+                    and rules.proposed_channel      = 'Text Message'
 
     qualify     row_number() over (partition by debtor.debtor_idx order by rules.delay_days_placement desc) = 1
 )
@@ -208,8 +231,9 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
-                    and rules.proposed_channel = 'VoApp'
+                    on  (debtor.pl_group            =  rules.pl_group        or rules.pl_group           = 'ALL')
+                    and (debtor.treatment_group     =  rules.treatment_group or rules.treatment_group    = 'ALL')
+                    and rules.proposed_channel      = 'VoApp'
 
     qualify     row_number() over (partition by debtor.debtor_idx order by rules.delay_days_placement desc) = 1
 )
@@ -225,8 +249,9 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
-                    and rules.proposed_channel = 'Email'
+                    on  (debtor.pl_group            =  rules.pl_group        or rules.pl_group           = 'ALL')
+                    and (debtor.treatment_group     =  rules.treatment_group or rules.treatment_group    = 'ALL')
+                    and rules.proposed_channel      = 'Email'
 
     qualify     row_number() over (partition by debtor.debtor_idx order by rules.delay_days_placement desc) = 1
 )
@@ -242,8 +267,9 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
-                    and rules.proposed_channel = 'Dialer-Agent Call'
+                    on  (debtor.pl_group            =  rules.pl_group        or rules.pl_group           = 'ALL')
+                    and (debtor.treatment_group     =  rules.treatment_group or rules.treatment_group    = 'ALL')
+                    and rules.proposed_channel      = 'Dialer-Agent Call'
 
     qualify     row_number() over (partition by debtor.debtor_idx order by rules.delay_days_placement desc) = 1
 )
@@ -259,8 +285,9 @@ with debtor as
     from        debtor
                 inner join
                     edwprodhh.hermes.master_config_contact_minimums as rules
-                    on  (debtor.pl_group = rules.pl_group or rules.pl_group = 'ALL')
-                    and rules.proposed_channel = 'Dialer-Agentless Call'
+                    on  (debtor.pl_group            =  rules.pl_group        or rules.pl_group           = 'ALL')
+                    and (debtor.treatment_group     =  rules.treatment_group or rules.treatment_group    = 'ALL')
+                    and rules.proposed_channel      = 'Dialer-Agentless Call'
 
     qualify     row_number() over (partition by debtor.debtor_idx order by rules.delay_days_placement desc) = 1
 )
@@ -295,4 +322,7 @@ from        debtor
             left join
                 rules_dialeragentless
                 on debtor.debtor_idx = rules_dialeragentless.debtor_idx
+            left join
+                edwprodhh.hermes.master_config_treatment_router as router
+                on debtor.debtor_idx = router.debtor_idx
 ;

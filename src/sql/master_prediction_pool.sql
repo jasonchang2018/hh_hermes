@@ -7,6 +7,11 @@ with joined as
                 debtor.client_idx,
                 debtor.pl_group,
 
+                router.treatment_group,
+                router.treatment_description,
+                router.test_name,
+                router.test_description,
+
                 client_active.pass_client_active_hermes_contacts,
 
                 debtor_status.status,
@@ -172,6 +177,7 @@ with joined as
                 inner join edwprodhh.hermes.transform_businessrules_debtor_payplan              as debtor_payplan               on debtor.debtor_idx = debtor_payplan.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_debtor_score_history        as debtor_scorehist             on debtor.debtor_idx = debtor_scorehist.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_debtor_debttype             as debtor_debttype              on debtor.debtor_idx = debtor_debttype.debtor_idx
+                inner join edwprodhh.hermes.master_config_treatment_router                      as router                       on debtor.debtor_idx = router.debtor_idx
 )
 select      *,
 
@@ -280,6 +286,11 @@ with joined as
                 debtor.client_idx,
                 debtor.pl_group,
 
+                router.treatment_group,
+                router.treatment_description,
+                router.test_name,
+                router.test_description,
+
                 client_active.pass_client_active_hermes_contacts,
 
                 debtor_status.status,
@@ -445,6 +456,7 @@ with joined as
                 inner join edwprodhh.hermes.transform_businessrules_debtor_payplan              as debtor_payplan               on debtor.debtor_idx = debtor_payplan.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_debtor_score_history        as debtor_scorehist             on debtor.debtor_idx = debtor_scorehist.debtor_idx
                 inner join edwprodhh.hermes.transform_businessrules_debtor_debttype             as debtor_debttype              on debtor.debtor_idx = debtor_debttype.debtor_idx
+                inner join edwprodhh.hermes.master_config_treatment_router                      as router                       on debtor.debtor_idx = router.debtor_idx
 )
 select      *,
 

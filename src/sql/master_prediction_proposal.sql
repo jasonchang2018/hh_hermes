@@ -45,7 +45,10 @@ with scores as
                         when    scores_long.proposed_channel = 'VoApp'          then    pool.is_priority_minimum_voapps
                         when    scores_long.proposed_channel = 'Email'          then    pool.is_priority_minimum_emails
                         else    0
-                        end     as is_priority_minimum
+                        end     as is_priority_minimum,
+
+                pool.treatment_group,
+                case when pool.treatment_group is not null then uniform(0, 9, random()) else NULL end as stratum
 
     from        scores_long
                 left join
@@ -64,8 +67,8 @@ with scores as
                 (marginal_fee - marginal_cost)                                                                                      as marginal_profit,
                 edwprodhh.pub_jchang.divide(marginal_fee - marginal_cost, marginal_fee)                                             as marginal_margin,
 
-                row_number() over (order by scores.is_priority_minimum desc, marginal_profit desc)                                  as rank_profit,     -- 1 is best
-                row_number() over (order by scores.is_priority_minimum desc, marginal_margin desc)                                  as rank_margin,     -- 1 is best
+                row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_profit desc)                                  as rank_profit,     -- 1 is best
+                row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_margin desc)                                  as rank_margin,     -- 1 is best
                 
                 (rank_profit    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Profit')) +
                 (rank_margin    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Margin'))
@@ -516,7 +519,7 @@ from        calculate_filtered
 
 
 
-create task
+create or replace task
     edwprodhh.pub_jchang.replace_master_prediction_proposal
     warehouse = analysis_wh
     after edwprodhh.pub_jchang.replace_master_prediction_scores
@@ -568,7 +571,10 @@ with scores as
                         when    scores_long.proposed_channel = 'VoApp'          then    pool.is_priority_minimum_voapps
                         when    scores_long.proposed_channel = 'Email'          then    pool.is_priority_minimum_emails
                         else    0
-                        end     as is_priority_minimum
+                        end     as is_priority_minimum,
+
+                pool.treatment_group,
+                case when pool.treatment_group is not null then uniform(0, 9, random()) else NULL end as stratum
 
     from        scores_long
                 left join
@@ -587,8 +593,8 @@ with scores as
                 (marginal_fee - marginal_cost)                                                                                      as marginal_profit,
                 edwprodhh.pub_jchang.divide(marginal_fee - marginal_cost, marginal_fee)                                             as marginal_margin,
 
-                row_number() over (order by scores.is_priority_minimum desc, marginal_profit desc)                                  as rank_profit,     -- 1 is best
-                row_number() over (order by scores.is_priority_minimum desc, marginal_margin desc)                                  as rank_margin,     -- 1 is best
+                row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_profit desc)                                  as rank_profit,     -- 1 is best
+                row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_margin desc)                                  as rank_margin,     -- 1 is best
                 
                 (rank_profit    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Profit')) +
                 (rank_margin    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Margin'))
