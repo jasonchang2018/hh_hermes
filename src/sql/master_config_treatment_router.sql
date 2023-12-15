@@ -19,23 +19,26 @@ with mapping as
 )
 select      debtor.debtor_idx,
 
-            case    when    min(debtor.batch_date) over (partition by debtor.packet_idx) >= '1970-01-01' --insert test start here
-                    then    case    when    mapping.num in (0,1,2,3,4)
-                                    then    'CONTROL'
-                                    else    'TEST'
+            case    when    debtor.industry = 'HC'
+                    then    case    when    min(debtor.batch_date) over (partition by debtor.packet_idx) >= '2023-12-11' --insert test start here
+                                    then    case    when    mapping.num in (0,1,2,3,4)
+                                                    then    'CONTROL'
+                                                    else    'TEST'
+                                                    end
+                                    else    'NOT IN EXP'
                                     end
-                    else    NULL
+                    else    'NOT IN EXP'
                     end     as treatment_group,
 
             case    when    treatment_group = 'CONTROL'
-                    then    NULL
+                    then    'Validation - Dunning Letter - 3 Texts'
                     when    treatment_group = 'TEST'
-                    then    NULL
+                    then    'Validation - 3 Texts - Dunning Letter'
                     else    NULL
                     end     as treatment_description,
 
-            NULL as test_name,
-            NULL as test_description
+            'Lead Letter with Texts' as test_name,
+            'Determine revenue, cost, and profit implications from preceding first Dunning Letter with Texts.' as test_description
 
 from        edwprodhh.pub_jchang.master_debtor as debtor
             inner join
@@ -71,23 +74,26 @@ with mapping as
 )
 select      debtor.debtor_idx,
 
-            case    when    min(debtor.batch_date) over (partition by debtor.packet_idx) >= '1970-01-01' --insert test start here
-                    then    case    when    mapping.num in (0,1,2,3,4)
-                                    then    'CONTROL'
-                                    else    'TEST'
+            case    when    debtor.industry = 'HC'
+                    then    case    when    min(debtor.batch_date) over (partition by debtor.packet_idx) >= '2023-12-11' --insert test start here
+                                    then    case    when    mapping.num in (0,1,2,3,4)
+                                                    then    'CONTROL'
+                                                    else    'TEST'
+                                                    end
+                                    else    'NOT IN EXP'
                                     end
-                    else    NULL
+                    else    'NOT IN EXP'
                     end     as treatment_group,
 
             case    when    treatment_group = 'CONTROL'
-                    then    NULL
+                    then    'Validation - Dunning Letter - 3 Texts'
                     when    treatment_group = 'TEST'
-                    then    NULL
+                    then    'Validation - 3 Texts - Dunning Letter'
                     else    NULL
                     end     as treatment_description,
 
-            NULL as test_name,
-            NULL as test_description
+            'Lead Letter with Texts' as test_name,
+            'Determine revenue, cost, and profit implications from preceding first Dunning Letter with Texts.' as test_description
 
 from        edwprodhh.pub_jchang.master_debtor as debtor
             inner join
