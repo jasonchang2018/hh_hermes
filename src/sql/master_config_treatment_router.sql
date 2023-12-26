@@ -20,6 +20,11 @@ with mapping as
 select      debtor.debtor_idx,
 
             case    when    debtor.industry = 'HC'
+                    and     debtor.pl_group not in (
+                                'LURIE CHILDRENS - 1P',
+                                'CARLE HEALTHCARE - PHY - 1P',
+                                'PROVIDENCE ST JOSEPH HEALTH - 3P-2'
+                            )
                     then    case    when    min(debtor.batch_date) over (partition by debtor.packet_idx) >= '2023-12-11' --insert test start here
                                     then    case    when    mapping.num in (0,1,2,3,4)
                                                     then    'CONTROL'
@@ -75,6 +80,11 @@ with mapping as
 select      debtor.debtor_idx,
 
             case    when    debtor.industry = 'HC'
+                    and     debtor.pl_group not in (
+                                'LURIE CHILDRENS - 1P',
+                                'CARLE HEALTHCARE - PHY - 1P',
+                                'PROVIDENCE ST JOSEPH HEALTH - 3P-2'
+                            )
                     then    case    when    min(debtor.batch_date) over (partition by debtor.packet_idx) >= '2023-12-11' --insert test start here
                                     then    case    when    mapping.num in (0,1,2,3,4)
                                                     then    'CONTROL'
