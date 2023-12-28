@@ -58,6 +58,10 @@ with fiscal_dialer_phones as
                         fiscal_dialer_phones as fiscal
                         on  phones.debtor_idx   = fiscal.debtor_idx
                         and phones.phone_number = fiscal.phone_valid
+                    left join
+                        edwprodhh.hermes.transform_criteria_texts_exclusions as text_stops
+                        on  phones.debtor_idx   = text_stops.debtor_idx
+                        and phones.phone_number = text_stops.phone_number
                         
         where       case    when    client.is_fdcpa = 1
                             and     phones.phone_number_source = 'OTHER'                    --Skips, which cannot be texted for FDCPA.
@@ -72,6 +76,7 @@ with fiscal_dialer_phones as
                             then    FALSE
                             else    TRUE
                             end
+                        and coalesce(text_stops.stop_text, 0) = 0
     )
     select      debtor_idx,
                 listagg(distinct phone_number, ';') as valid_phone_number_texts
@@ -288,6 +293,10 @@ with fiscal_dialer_phones as
                         fiscal_dialer_phones as fiscal
                         on  phones.debtor_idx   = fiscal.debtor_idx
                         and phones.phone_number = fiscal.phone_valid
+                    left join
+                        edwprodhh.hermes.transform_criteria_texts_exclusions as text_stops
+                        on  phones.debtor_idx   = text_stops.debtor_idx
+                        and phones.phone_number = text_stops.phone_number
                         
         where       case    when    client.is_fdcpa = 1
                             and     phones.phone_number_source = 'OTHER'                    --Skips, which cannot be texted for FDCPA.
@@ -302,6 +311,7 @@ with fiscal_dialer_phones as
                             then    FALSE
                             else    TRUE
                             end
+                        and coalesce(text_stops.stop_text, 0) = 0
     )
     select      debtor_idx,
                 listagg(distinct phone_number, ';') as valid_phone_number_texts

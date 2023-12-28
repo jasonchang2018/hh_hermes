@@ -9,16 +9,19 @@ with debtor as
 
                 router.treatment_group,
 
-                datediff(day, debtor.batch_date, current_date())                                                            as days_since_placement,
+                datediff(day, debtor.batch_date, current_date())                                                                                                                        as days_since_placement,
                 
-                count(case when contacts_pkt.contact_type in ('Letter')                 then contacts_pkt.contact_id end)   as prev_n_letters,
-                count(case when contacts_pkt.contact_type in ('VoApp')                  then contacts_pkt.contact_id end)   as prev_n_voapps,
-                count(case when contacts_pkt.contact_type in ('Text Message')           then contacts_pkt.contact_id end)   as prev_n_texts,
-                count(case when contacts_pkt.contact_type in ('Email')                  then contacts_pkt.contact_id end)   as prev_n_emails,
-                count(case when contacts_pkt.contact_type in ('Dialer-Agent Call')      then contacts_pkt.contact_id end)   as prev_n_dialer_agent,
-                count(case when contacts_pkt.contact_type in ('Dialer-Agentless Call')  then contacts_pkt.contact_id end)   as prev_n_dialer_agentless
+                greatest(count(case when contacts_pkt.contact_type in ('Letter')        then contacts_pkt.contact_id end) - max(case when client.is_fdcpa = 1 then 1 else 0 end), 0)    as prev_n_letters, --want to send at least one letter after first packet-validation
+                count(case when contacts_pkt.contact_type in ('VoApp')                  then contacts_pkt.contact_id end)                                                               as prev_n_voapps,
+                count(case when contacts_pkt.contact_type in ('Text Message')           then contacts_pkt.contact_id end)                                                               as prev_n_texts,
+                count(case when contacts_pkt.contact_type in ('Email')                  then contacts_pkt.contact_id end)                                                               as prev_n_emails,
+                count(case when contacts_pkt.contact_type in ('Dialer-Agent Call')      then contacts_pkt.contact_id end)                                                               as prev_n_dialer_agent,
+                count(case when contacts_pkt.contact_type in ('Dialer-Agentless Call')  then contacts_pkt.contact_id end)                                                               as prev_n_dialer_agentless
 
     from        edwprodhh.pub_jchang.master_debtor as debtor
+                inner join
+                    edwprodhh.pub_jchang.master_client as client
+                    on debtor.client_idx = client.client_idx
                 left join
                     edwprodhh.pub_jchang.transform_contacts as contacts_pkt
                     on  debtor.packet_idx           =  contacts_pkt.packet_idx
@@ -288,16 +291,19 @@ with debtor as
 
                 router.treatment_group,
 
-                datediff(day, debtor.batch_date, current_date())                                                            as days_since_placement,
+                datediff(day, debtor.batch_date, current_date())                                                                                                                        as days_since_placement,
                 
-                count(case when contacts_pkt.contact_type in ('Letter')                 then contacts_pkt.contact_id end)   as prev_n_letters,
-                count(case when contacts_pkt.contact_type in ('VoApp')                  then contacts_pkt.contact_id end)   as prev_n_voapps,
-                count(case when contacts_pkt.contact_type in ('Text Message')           then contacts_pkt.contact_id end)   as prev_n_texts,
-                count(case when contacts_pkt.contact_type in ('Email')                  then contacts_pkt.contact_id end)   as prev_n_emails,
-                count(case when contacts_pkt.contact_type in ('Dialer-Agent Call')      then contacts_pkt.contact_id end)   as prev_n_dialer_agent,
-                count(case when contacts_pkt.contact_type in ('Dialer-Agentless Call')  then contacts_pkt.contact_id end)   as prev_n_dialer_agentless
+                greatest(count(case when contacts_pkt.contact_type in ('Letter')        then contacts_pkt.contact_id end) - max(case when client.is_fdcpa = 1 then 1 else 0 end), 0)    as prev_n_letters, --want to send at least one letter after first packet-validation
+                count(case when contacts_pkt.contact_type in ('VoApp')                  then contacts_pkt.contact_id end)                                                               as prev_n_voapps,
+                count(case when contacts_pkt.contact_type in ('Text Message')           then contacts_pkt.contact_id end)                                                               as prev_n_texts,
+                count(case when contacts_pkt.contact_type in ('Email')                  then contacts_pkt.contact_id end)                                                               as prev_n_emails,
+                count(case when contacts_pkt.contact_type in ('Dialer-Agent Call')      then contacts_pkt.contact_id end)                                                               as prev_n_dialer_agent,
+                count(case when contacts_pkt.contact_type in ('Dialer-Agentless Call')  then contacts_pkt.contact_id end)                                                               as prev_n_dialer_agentless
 
     from        edwprodhh.pub_jchang.master_debtor as debtor
+                inner join
+                    edwprodhh.pub_jchang.master_client as client
+                    on debtor.client_idx = client.client_idx
                 left join
                     edwprodhh.pub_jchang.transform_contacts as contacts_pkt
                     on  debtor.packet_idx           =  contacts_pkt.packet_idx

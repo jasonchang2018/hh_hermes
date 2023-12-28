@@ -177,7 +177,7 @@ with debtor as
                 datediff(day, debtor.batch_date, current_date()) as days_since_placement,
 
                 router.treatment_group
-                
+
     from        edwprodhh.pub_jchang.master_debtor as debtor
                 left join
                     edwprodhh.hermes.master_config_treatment_router as router
