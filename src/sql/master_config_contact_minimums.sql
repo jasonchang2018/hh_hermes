@@ -46,7 +46,7 @@ values
     ----  RESOLUTION TREATMENTS  ----
 
     --    NOT IN EXP
-    ('ALL',                                         'Letter',               1,                      90,                         0,                          'NOT IN EXP'),
+    -- ('ALL',                                         'Letter',               1,                      90,                         0,                          'NOT IN EXP'),
     ('ALL',                                         'Text Message',         4,                      90,                         0,                          'NOT IN EXP'),
 
 

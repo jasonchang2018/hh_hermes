@@ -3,11 +3,34 @@ create or replace table
 as
 with all_phones as
 (
-    select      distinct
-                packet_idx,
-                phone_format as phone
-    from        edwprodhh.pub_jchang.master_phone_number as phone_fields
-    where       packet_idx not in (select packet_idx from edwprodhh.pub_jchang.transform_directory_phone_number where current_status = 'DNC')
+    with qualified as
+    (
+        select      distinct
+                    packet_idx,
+                    phone_format as phone,
+                    dialer_file_label
+        from        edwprodhh.pub_jchang.master_phone_number
+        where       packet_idx not in (select packet_idx from edwprodhh.pub_jchang.transform_directory_phone_number where current_status = 'DNC')
+
+                    --  Take most conservative.
+        qualify     row_number() over (
+                        partition by    packet_idx, phone_format
+                        order by        case    when    dialer_file_label = 'DNC'       then    0
+                                                when    dialer_file_label = 'DOMAN'     then    1
+                                                when    dialer_file_label = 'CLTMAN'    then    2
+                                                when    dialer_file_label = 'DOIPA'     then    3
+                                                when    dialer_file_label = 'DOAUTH'    then    4
+                                                when    dialer_file_label = 'CLTIPA'    then    5
+                                                when    dialer_file_label = 'CLTAUTH'   then    6
+                                                when    dialer_file_label = 'DOLAND'    then    7
+                                                when    dialer_file_label = 'LAND'      then    8
+                                                else    9
+                                                end     asc
+                    )   = 1
+    )
+    select      *
+    from        qualified
+    where       dialer_file_label not in ('DNC', 'DOMAN', 'CLTMAN')
 )
 , activity_calls_ob as
 (
@@ -99,6 +122,7 @@ with all_phones as
 (
     select      all_phones.packet_idx,
                 all_phones.phone,
+                all_phones.dialer_file_label,
 
                 coalesce(calls_ob.is_answered,      0)          as ob_call_is_answered,
                 coalesce(calls_ob.is_not_answered,  0)          as ob_call_is_not_answered,
@@ -111,17 +135,20 @@ with all_phones as
                 coalesce(voapps.is_error,           0)          as voapp_is_error,
                 coalesce(attr.has_last_attr,        0)          as attr_last,
                 
+                ob_call_is_answered                                                             *  1.00     +
+                ob_call_is_not_answered                                                         * -0.50     +
+                ob_call_is_rpc                                                                  *  1.00     +
+                ob_call_is_not_rpc                                                              * -0.50     +
+                text_is_successful                                                              *  0.00     +
+                text_is_error                                                                   * -2.00     +
+                voapp_is_successful                                                             *  0.00     +
+                voapp_is_error                                                                  * -2.00     +
+                ib_call_n                                                                       *  4.00     +
+                attr_last                                                                       *  8.00     +
+                (all_phones.dialer_file_label in ('CLTAUTH', 'CLTIPA', 'LAND'))::number(1,0)    *  2.00     +
+                (all_phones.dialer_file_label in ('DOIPA', 'DOAUTH', 'DOLAND'))::number(1,0)    * -2.00
 
-                ob_call_is_answered         *  1.00     +
-                ob_call_is_not_answered     * -0.50     +
-                ob_call_is_rpc              *  1.00     +
-                ob_call_is_not_rpc          * -0.50     +
-                text_is_successful          *  0.00     +
-                text_is_error               * -2.00     +
-                voapp_is_successful         *  0.00     +
-                voapp_is_error              * -2.00     +
-                ib_call_n                   *  4.00     +
-                attr_last                   *  8.00             as phone_score_raw
+                as phone_score_raw
 
         from    all_phones
                 left join
@@ -215,11 +242,34 @@ create or replace table
 as
 with all_phones as
 (
-    select      distinct
-                packet_idx,
-                phone_format as phone
-    from        edwprodhh.pub_jchang.master_phone_number as phone_fields
-    where       packet_idx not in (select packet_idx from edwprodhh.pub_jchang.transform_directory_phone_number where current_status = 'DNC')
+    with qualified as
+    (
+        select      distinct
+                    packet_idx,
+                    phone_format as phone,
+                    dialer_file_label
+        from        edwprodhh.pub_jchang.master_phone_number
+        where       packet_idx not in (select packet_idx from edwprodhh.pub_jchang.transform_directory_phone_number where current_status = 'DNC')
+
+                    --  Take most conservative.
+        qualify     row_number() over (
+                        partition by    packet_idx, phone_format
+                        order by        case    when    dialer_file_label = 'DNC'       then    0
+                                                when    dialer_file_label = 'DOMAN'     then    1
+                                                when    dialer_file_label = 'CLTMAN'    then    2
+                                                when    dialer_file_label = 'DOIPA'     then    3
+                                                when    dialer_file_label = 'DOAUTH'    then    4
+                                                when    dialer_file_label = 'CLTIPA'    then    5
+                                                when    dialer_file_label = 'CLTAUTH'   then    6
+                                                when    dialer_file_label = 'DOLAND'    then    7
+                                                when    dialer_file_label = 'LAND'      then    8
+                                                else    9
+                                                end     asc
+                    )   = 1
+    )
+    select      *
+    from        qualified
+    where       dialer_file_label not in ('DNC', 'DOMAN', 'CLTMAN')
 )
 , activity_calls_ob as
 (
@@ -311,6 +361,7 @@ with all_phones as
 (
     select      all_phones.packet_idx,
                 all_phones.phone,
+                all_phones.dialer_file_label,
 
                 coalesce(calls_ob.is_answered,      0)          as ob_call_is_answered,
                 coalesce(calls_ob.is_not_answered,  0)          as ob_call_is_not_answered,
@@ -323,17 +374,20 @@ with all_phones as
                 coalesce(voapps.is_error,           0)          as voapp_is_error,
                 coalesce(attr.has_last_attr,        0)          as attr_last,
                 
+                ob_call_is_answered                                                             *  1.00     +
+                ob_call_is_not_answered                                                         * -0.50     +
+                ob_call_is_rpc                                                                  *  1.00     +
+                ob_call_is_not_rpc                                                              * -0.50     +
+                text_is_successful                                                              *  0.00     +
+                text_is_error                                                                   * -2.00     +
+                voapp_is_successful                                                             *  0.00     +
+                voapp_is_error                                                                  * -2.00     +
+                ib_call_n                                                                       *  4.00     +
+                attr_last                                                                       *  8.00     +
+                (all_phones.dialer_file_label in ('CLTAUTH', 'CLTIPA', 'LAND'))::number(1,0)    *  2.00     +
+                (all_phones.dialer_file_label in ('DOIPA', 'DOAUTH', 'DOLAND'))::number(1,0)    * -2.00
 
-                ob_call_is_answered         *  1.00     +
-                ob_call_is_not_answered     * -0.50     +
-                ob_call_is_rpc              *  1.00     +
-                ob_call_is_not_rpc          * -0.50     +
-                text_is_successful          *  0.00     +
-                text_is_error               * -2.00     +
-                voapp_is_successful         *  0.00     +
-                voapp_is_error              * -2.00     +
-                ib_call_n                   *  4.00     +
-                attr_last                   *  8.00             as phone_score_raw
+                as phone_score_raw
 
         from    all_phones
                 left join
@@ -365,6 +419,9 @@ with all_phones as
     (
         select      *,
 
+                    --  Base must be >= 1.
+                    --  1 represents random selection.
+                    --  Bases much larger than 1 represents heavier weight towards history.
                     power(1.25, phone_score_raw)                                                        as phone_score_transform,
                     edwprodhh.pub_jchang.divide(
                         phone_score_transform,
