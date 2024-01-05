@@ -241,6 +241,7 @@ create table
 (
     PACKET_IDX                  VARCHAR(60),
     PHONE	                    VARCHAR(16777216),
+    DIALER_FILE_LABEL           VARCHAR(16777216),
     OB_CALL_IS_ANSWERED	        NUMBER(18,0),
     OB_CALL_IS_NOT_ANSWERED	    NUMBER(18,0),
     OB_CALL_IS_RPC	            NUMBER(18,0),
@@ -269,8 +270,10 @@ create table
     PACKET_IDX              VARCHAR(60),
     CLIENT_IDX              VARCHAR(16),
     PL_GROUP                VARCHAR(16777216),
+    DEPARTMENT              VARCHAR(16777216),
     SCORE_DIALER_AGENT      FLOAT,
     PHONE                   VARCHAR(16777216),
+    DIALER_FILE_LABEL       VARCHAR(16777216),
     IS_PRIORITY_MINIMUM     NUMBER(1,0),
     IS_PRIMARY_DIAL         NUMBER(1,0),
     PACKET_PRIORITY         NUMBER(18,0),
@@ -279,6 +282,7 @@ create table
     PERCENTILE_MIN          NUMBER(36,6),
     PERCENTILE_MAX          NUMBER(36,6),
     UPLOAD_DATE             DATE,
+    EXPORT_NAME             VARCHAR(16777216),
     EXECUTE_TIME            TIMESTAMP_LTZ(9)
 )
 ;
@@ -287,13 +291,19 @@ create table
 create table
     edwprodhh.hermes.master_prediction_dialer_file_cubs_log
 (
+    "ACCOUNT#"	            VARCHAR(50),
     LOGON	                VARCHAR(5),
-    DEBTORNUMBER	        VARCHAR(50),
-    PACKET	                VARCHAR(60),
-    CLIENT	                VARCHAR(15),
-    PL_GROUP	            VARCHAR(16777216),
+    ACCOUNT	                VARCHAR(16777216),
+    ADDRESS	                VARCHAR(100),
+    CITY	                VARCHAR(50),
+    ST	                    VARCHAR(20),
+    ZIP	                    VARCHAR(16777216),
+    "CLIENT-NAME"	        VARCHAR(100),
+    BALANCE	                NUMBER(16,2),
+    "ST-CD"	                VARCHAR(16777216),
     PHONE	                VARCHAR(16777216),
     LIST_NAME	            VARCHAR(16777216),
+    DIALER_FILE_LABEL	    VARCHAR(16777216),
     UPLOAD_DATE	            DATE,
     EXECUTE_TIME            TIMESTAMP_LTZ(9)
 )
