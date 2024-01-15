@@ -5,7 +5,7 @@ with list_rankings as
 (
     with calculate_list_summary as
     (
-        select      client.department_name as department,
+        select      edwprodhh.pub_jchang.hermes_dialer_department(debtor.industry, debtor.pl_group) as department,
 
                     case    when    extract(dow from calls.callplacedtime)    = 1     then    '1MON'
                             when    extract(dow from calls.callplacedtime)    = 2     then    '2TUE'
@@ -41,9 +41,6 @@ with list_rankings as
                     inner join
                         edwprodhh.pub_jchang.master_debtor as debtor
                         on calls.debtor_idx = debtor.debtor_idx
-                    inner join
-                        edwprodhh.pub_jchang.master_client as client
-                        on debtor.client_idx = client.client_idx
 
         where       calls.calldirection_detail = 'Dialer-Agent'
                     and calls.callplacedtime >= dateadd(month, -3, date_trunc('month', current_date()))
@@ -91,7 +88,7 @@ with list_rankings as
                 debtor.packet_idx,
                 scores.client_idx,
                 scores.pl_group,
-                client.department_name as department,
+                edwprodhh.pub_jchang.hermes_dialer_department(debtor.industry, debtor.pl_group) as department,
                 scores.score_dialer_agent,
                 phones.phone,
                 phones.dialer_file_label,
@@ -104,10 +101,6 @@ with list_rankings as
                 inner join
                     edwprodhh.pub_jchang.master_debtor as debtor
                     on scores.debtor_idx = debtor.debtor_idx
-                inner join
-                    edwprodhh.pub_jchang.master_client as client
-                    on debtor.client_idx = client.client_idx
-                    and client.department_name is not null
                 inner join
                     edwprodhh.hermes.master_prediction_phone_selection as phones
                     on debtor.packet_idx = phones.packet_idx
@@ -235,7 +228,7 @@ with list_rankings as
 (
     with calculate_list_summary as
     (
-        select      client.department_name as department,
+        select      edwprodhh.pub_jchang.hermes_dialer_department(debtor.industry, debtor.pl_group) as department,
 
                     case    when    extract(dow from calls.callplacedtime)    = 1     then    '1MON'
                             when    extract(dow from calls.callplacedtime)    = 2     then    '2TUE'
@@ -271,9 +264,6 @@ with list_rankings as
                     inner join
                         edwprodhh.pub_jchang.master_debtor as debtor
                         on calls.debtor_idx = debtor.debtor_idx
-                    inner join
-                        edwprodhh.pub_jchang.master_client as client
-                        on debtor.client_idx = client.client_idx
 
         where       calls.calldirection_detail = 'Dialer-Agent'
                     and calls.callplacedtime >= dateadd(month, -3, date_trunc('month', current_date()))
@@ -321,7 +311,7 @@ with list_rankings as
                 debtor.packet_idx,
                 scores.client_idx,
                 scores.pl_group,
-                client.department_name as department,
+                edwprodhh.pub_jchang.hermes_dialer_department(debtor.industry, debtor.pl_group) as department,
                 scores.score_dialer_agent,
                 phones.phone,
                 phones.dialer_file_label,
@@ -334,10 +324,6 @@ with list_rankings as
                 inner join
                     edwprodhh.pub_jchang.master_debtor as debtor
                     on scores.debtor_idx = debtor.debtor_idx
-                inner join
-                    edwprodhh.pub_jchang.master_client as client
-                    on debtor.client_idx = client.client_idx
-                    and client.department_name is not null
                 inner join
                     edwprodhh.hermes.master_prediction_phone_selection as phones
                     on debtor.packet_idx = phones.packet_idx
