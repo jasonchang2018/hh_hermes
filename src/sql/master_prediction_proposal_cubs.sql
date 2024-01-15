@@ -5,7 +5,7 @@ with proposal as
 (
     select      debtor_idx,
                 case    when    proposed_channel = 'Text Message'
-                        then    'Texts'
+                        then    'Texts' || case when template = 'SIF' then '-SIF' else '' end
                         else    proposed_channel
                         end     as proposed_channel
     from        edwprodhh.hermes.master_prediction_proposal_log
