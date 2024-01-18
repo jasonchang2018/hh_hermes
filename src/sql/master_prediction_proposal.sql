@@ -67,8 +67,10 @@ with scores as
                 (marginal_fee - marginal_cost)                                                                                      as marginal_profit,
                 edwprodhh.pub_jchang.divide(marginal_fee - marginal_cost, marginal_fee)                                             as marginal_margin,
 
-                row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_profit desc)                                  as rank_profit,     -- 1 is best
-                row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_margin desc)                                  as rank_margin,     -- 1 is best
+                -- row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_profit desc)                                  as rank_profit,     -- 1 is best
+                -- row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_margin desc)                                  as rank_margin,     -- 1 is best
+                row_number() over (order by scores.is_priority_minimum desc, marginal_profit desc)                                  as rank_profit,     -- stratum introduces jitter and increases equitable allocation to experiment groups
+                row_number() over (order by scores.is_priority_minimum desc, marginal_margin desc)                                  as rank_margin,     -- stratum introduces jitter and increases equitable allocation to experiment groups
                 
                 (rank_profit    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Profit')) +
                 (rank_margin    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Margin'))
@@ -651,8 +653,10 @@ with scores as
                 (marginal_fee - marginal_cost)                                                                                      as marginal_profit,
                 edwprodhh.pub_jchang.divide(marginal_fee - marginal_cost, marginal_fee)                                             as marginal_margin,
 
-                row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_profit desc)                                  as rank_profit,     -- 1 is best
-                row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_margin desc)                                  as rank_margin,     -- 1 is best
+                -- row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_profit desc)                                  as rank_profit,     -- 1 is best
+                -- row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_margin desc)                                  as rank_margin,     -- 1 is best
+                row_number() over (order by scores.is_priority_minimum desc, marginal_profit desc)                                  as rank_profit,     -- stratum introduces jitter and increases equitable allocation to experiment groups
+                row_number() over (order by scores.is_priority_minimum desc, marginal_margin desc)                                  as rank_margin,     -- stratum introduces jitter and increases equitable allocation to experiment groups
                 
                 (rank_profit    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Profit')) +
                 (rank_margin    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Margin'))
@@ -1138,8 +1142,7 @@ with scores as
                                                                     'UNIVERSAL HEALTH SERVICES - 3P',               --
                                                                     'WEILL CORNELL PHY - 3P'                        --
                                                                 )
-                                                        -- then    case    when    percentile >= 0.50
-                                                        then    case    when    percentile >= 0.99
+                                                        then    case    when    percentile >= 0.50
                                                                         then    case    when    mod(rn, 2) = 1
                                                                                         then    'SIF'
                                                                                         else    'MAIN'
