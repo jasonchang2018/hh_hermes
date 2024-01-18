@@ -45,6 +45,27 @@ with contact_history as
                     on contacts.packet_idx = last_rpc.packet_idx
     group by    1
 )
+, proposal_history as
+(
+    select      debtor.packet_idx,
+                
+                count(case when proposals.proposed_channel in ('Letter')                                                    then proposals.request_id     end)          as prev_n_letters_proposed,
+                count(case when proposals.proposed_channel in ('VoApp')                                                     then proposals.request_id     end)          as prev_n_voapps_proposed,
+                count(case when proposals.proposed_channel in ('Text Message')                                              then proposals.request_id     end)          as prev_n_texts_proposed,
+                
+                count(case when proposals.proposed_channel in ('VoApp') and proposals.upload_date >= current_date() - 7     then proposals.request_id     end)          as prev_n_voapps_7_proposed,
+                
+                max(                                                                                                             proposals.upload_date      )::date     as prev_date_contacts_proposed,
+                max(  case when proposals.proposed_channel in ('Letter')                                                    then proposals.upload_date   end)::date     as prev_date_letters_proposed,
+                max(  case when proposals.proposed_channel in ('VoApp')                                                     then proposals.upload_date   end)::date     as prev_date_voapps_proposed,
+                max(  case when proposals.proposed_channel in ('Text Message')                                              then proposals.upload_date   end)::date     as prev_date_texts_proposed
+
+    from        edwprodhh.hermes.master_prediction_proposal_log as proposals
+                inner join
+                    edwprodhh.pub_jchang.master_debtor as debtor
+                    on proposals.debtor_idx = debtor.debtor_idx
+    group by    1
+)
 select      debtor.debtor_idx,
 
             least(
@@ -76,55 +97,83 @@ select      debtor.debtor_idx,
             coalesce(contact_history.prev_date_outbound_manual,     '1970-01-01'::date) as prev_date_outbound_manual,
             coalesce(contact_history.prev_date_rpc,                 '1970-01-01'::date) as prev_date_rpc,
 
+            coalesce(proposal_history.prev_n_letters_proposed,      0)                  as prev_n_letters_proposed,
+            coalesce(proposal_history.prev_n_voapps_proposed,       0)                  as prev_n_voapps_proposed,
+            coalesce(proposal_history.prev_n_texts_proposed,        0)                  as prev_n_texts_proposed,
+            coalesce(proposal_history.prev_n_voapps_7_proposed,     0)                  as prev_n_voapps_7_proposed,
+            coalesce(proposal_history.prev_date_contacts_proposed,  '1970-01-01'::date) as prev_date_contacts_proposed,
+            coalesce(proposal_history.prev_date_letters_proposed,   '1970-01-01'::date) as prev_date_letters_proposed,
+            coalesce(proposal_history.prev_date_voapps_proposed,    '1970-01-01'::date) as prev_date_voapps_proposed,
+            coalesce(proposal_history.prev_date_texts_proposed,     '1970-01-01'::date) as prev_date_texts_proposed,
+
             case    when    coalesce(next_date_letters,                     '3000-01-01'::date) >  current_date() + 14
                     then    1
                     else    0
                     end     as pass_letters_warmup,
 
-            case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 3
-                    and     coalesce(contact_history.prev_n_voapps,         0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_texts,          0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_inbounds,       0)                  <= 10000
-                    and     coalesce(contact_history.prev_date_letters,     '2000-01-01'::date) <= current_date() - 35
-                    and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(contact_history.prev_date_texts,       '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(contact_history.prev_date_inbounds,    '2000-01-01'::date) <= current_date()
+            case    when    coalesce(contact_history.prev_n_letters,                0)                  <= 3
+                    and     coalesce(contact_history.prev_n_voapps,                 0)                  <= 10000
+                    and     coalesce(contact_history.prev_n_texts,                  0)                  <= 10000
+                    and     coalesce(contact_history.prev_n_inbounds,               0)                  <= 10000
+                    and     coalesce(contact_history.prev_date_letters,             '2000-01-01'::date) <= current_date() - 35
+                    and     coalesce(contact_history.prev_date_voapps,              '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_texts,               '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_inbounds,            '2000-01-01'::date) <= current_date()
+                    and     coalesce(proposal_history.prev_n_letters_proposed,      0)                  <= 3
+                    and     coalesce(proposal_history.prev_n_voapps_proposed,       0)                  <= 10000
+                    and     coalesce(proposal_history.prev_n_texts_proposed,        0)                  <= 10000
+                    and     coalesce(proposal_history.prev_date_letters_proposed,   '2000-01-01'::date) <= current_date() - 35
+                    and     coalesce(proposal_history.prev_date_voapps_proposed,    '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(proposal_history.prev_date_texts_proposed,     '2000-01-01'::date) <= current_date() - 8
                     then    1
                     else    0
                     end     as pass_letters_cooldown,
 
-            case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_voapps,         0)                  <= 19
-                    and     coalesce(contact_history.prev_n_texts,          0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_inbounds,       0)                  <= 10000
-                    and     coalesce(contact_history.prev_date_letters,     '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(contact_history.prev_date_texts,       '2000-01-01'::date) <= current_date()
-                    and     coalesce(contact_history.prev_date_inbounds,    '2000-01-01'::date) <= current_date()
+            case    when    coalesce(contact_history.prev_n_letters,                0)                  <= 10000
+                    and     coalesce(contact_history.prev_n_voapps,                 0)                  <= 11
+                    and     coalesce(contact_history.prev_n_texts,                  0)                  <= 10000
+                    and     coalesce(contact_history.prev_n_inbounds,               0)                  <= 10000
+                    and     coalesce(contact_history.prev_date_letters,             '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_voapps,              '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_texts,               '2000-01-01'::date) <= current_date()
+                    and     coalesce(contact_history.prev_date_inbounds,            '2000-01-01'::date) <= current_date()
+                    and     coalesce(proposal_history.prev_n_letters_proposed,      0)                  <= 10000
+                    and     coalesce(proposal_history.prev_n_voapps_proposed,       0)                  <= 11
+                    and     coalesce(proposal_history.prev_n_texts_proposed,        0)                  <= 10000
+                    and     coalesce(proposal_history.prev_date_letters_proposed,   '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(proposal_history.prev_date_voapps_proposed,    '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(proposal_history.prev_date_texts_proposed,     '2000-01-01'::date) <= current_date()
                     then    1
                     else    0
                     end     as pass_voapps_cooldown,
 
-            case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_voapps,         0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_texts,          0)                  <= 11
-                    and     coalesce(contact_history.prev_n_inbounds,       0)                  <= 10000
-                    and     coalesce(contact_history.prev_date_letters,     '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date()
-                    and     coalesce(contact_history.prev_date_texts,       '2000-01-01'::date) <= current_date() - 5
-                    and     coalesce(contact_history.prev_date_inbounds,    '2000-01-01'::date) <= current_date()
+            case    when    coalesce(contact_history.prev_n_letters,                0)                  <= 10000
+                    and     coalesce(contact_history.prev_n_voapps,                 0)                  <= 10000
+                    and     coalesce(contact_history.prev_n_texts,                  0)                  <= 11
+                    and     coalesce(contact_history.prev_n_inbounds,               0)                  <= 10000
+                    and     coalesce(contact_history.prev_date_letters,             '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_voapps,              '2000-01-01'::date) <= current_date()
+                    and     coalesce(contact_history.prev_date_texts,               '2000-01-01'::date) <= current_date() - 5
+                    and     coalesce(contact_history.prev_date_inbounds,            '2000-01-01'::date) <= current_date()
+                    and     coalesce(proposal_history.prev_n_letters_proposed,      0)                  <= 10000
+                    and     coalesce(proposal_history.prev_n_voapps_proposed,       0)                  <= 10000
+                    and     coalesce(proposal_history.prev_n_texts_proposed,        0)                  <= 11
+                    and     coalesce(proposal_history.prev_date_letters_proposed,   '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(proposal_history.prev_date_voapps_proposed,    '2000-01-01'::date) <= current_date()
+                    and     coalesce(proposal_history.prev_date_texts_proposed,     '2000-01-01'::date) <= current_date() - 8
                     then    1
                     else    0
                     end     as pass_texts_cooldown,
 
-            case    when    coalesce(contact_history.prev_n_voapps_7,               0)              +
-                            coalesce(contact_history.prev_n_dialer_agent_7,         0)              +
+            case    when    coalesce(contact_history.prev_n_dialer_agent_7,         0)              +
                             coalesce(contact_history.prev_n_dialer_agentless_7,     0)              +
-                            coalesce(contact_history.prev_n_outbound_manual_7,      0)                  <  7
+                            coalesce(contact_history.prev_n_outbound_manual_7,      0)              +
+                            coalesce(contact_history.prev_n_voapps_7,               0)              +
+                            coalesce(proposal_history.prev_n_voapps_7_proposed,     0)                  <  7
                     and     coalesce(contact_history.prev_date_rpc,                 '2000-01-01')       <= current_date() - 8
                     then    1
                     else    0
-                    end     as pass_7in7
+                    end     as pass_7in7                    
 
 
 from        edwprodhh.pub_jchang.master_debtor as debtor
@@ -134,6 +183,9 @@ from        edwprodhh.pub_jchang.master_debtor as debtor
             left join
                 contact_history
                 on debtor.packet_idx = contact_history.packet_idx
+            left join
+                proposal_history
+                on debtor.packet_idx = proposal_history.packet_idx
             left join
                 edwprodhh.hermes.master_config_treatment_router as router
                 on debtor.debtor_idx = router.debtor_idx
@@ -193,6 +245,27 @@ with contact_history as
                     on contacts.packet_idx = last_rpc.packet_idx
     group by    1
 )
+, proposal_history as
+(
+    select      debtor.packet_idx,
+                
+                count(case when proposals.proposed_channel in ('Letter')                                                    then proposals.request_id     end)          as prev_n_letters_proposed,
+                count(case when proposals.proposed_channel in ('VoApp')                                                     then proposals.request_id     end)          as prev_n_voapps_proposed,
+                count(case when proposals.proposed_channel in ('Text Message')                                              then proposals.request_id     end)          as prev_n_texts_proposed,
+                
+                count(case when proposals.proposed_channel in ('VoApp') and proposals.upload_date >= current_date() - 7     then proposals.request_id     end)          as prev_n_voapps_7_proposed,
+                
+                max(                                                                                                             proposals.upload_date      )::date     as prev_date_contacts_proposed,
+                max(  case when proposals.proposed_channel in ('Letter')                                                    then proposals.upload_date   end)::date     as prev_date_letters_proposed,
+                max(  case when proposals.proposed_channel in ('VoApp')                                                     then proposals.upload_date   end)::date     as prev_date_voapps_proposed,
+                max(  case when proposals.proposed_channel in ('Text Message')                                              then proposals.upload_date   end)::date     as prev_date_texts_proposed
+
+    from        edwprodhh.hermes.master_prediction_proposal_log as proposals
+                inner join
+                    edwprodhh.pub_jchang.master_debtor as debtor
+                    on proposals.debtor_idx = debtor.debtor_idx
+    group by    1
+)
 select      debtor.debtor_idx,
 
             least(
@@ -224,55 +297,83 @@ select      debtor.debtor_idx,
             coalesce(contact_history.prev_date_outbound_manual,     '1970-01-01'::date) as prev_date_outbound_manual,
             coalesce(contact_history.prev_date_rpc,                 '1970-01-01'::date) as prev_date_rpc,
 
+            coalesce(proposal_history.prev_n_letters_proposed,      0)                  as prev_n_letters_proposed,
+            coalesce(proposal_history.prev_n_voapps_proposed,       0)                  as prev_n_voapps_proposed,
+            coalesce(proposal_history.prev_n_texts_proposed,        0)                  as prev_n_texts_proposed,
+            coalesce(proposal_history.prev_n_voapps_7_proposed,     0)                  as prev_n_voapps_7_proposed,
+            coalesce(proposal_history.prev_date_contacts_proposed,  '1970-01-01'::date) as prev_date_contacts_proposed,
+            coalesce(proposal_history.prev_date_letters_proposed,   '1970-01-01'::date) as prev_date_letters_proposed,
+            coalesce(proposal_history.prev_date_voapps_proposed,    '1970-01-01'::date) as prev_date_voapps_proposed,
+            coalesce(proposal_history.prev_date_texts_proposed,     '1970-01-01'::date) as prev_date_texts_proposed,
+
             case    when    coalesce(next_date_letters,                     '3000-01-01'::date) >  current_date() + 14
                     then    1
                     else    0
                     end     as pass_letters_warmup,
 
-            case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 3
-                    and     coalesce(contact_history.prev_n_voapps,         0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_texts,          0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_inbounds,       0)                  <= 10000
-                    and     coalesce(contact_history.prev_date_letters,     '2000-01-01'::date) <= current_date() - 35
-                    and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(contact_history.prev_date_texts,       '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(contact_history.prev_date_inbounds,    '2000-01-01'::date) <= current_date()
+            case    when    coalesce(contact_history.prev_n_letters,                0)                  <= 3
+                    and     coalesce(contact_history.prev_n_voapps,                 0)                  <= 10000
+                    and     coalesce(contact_history.prev_n_texts,                  0)                  <= 10000
+                    and     coalesce(contact_history.prev_n_inbounds,               0)                  <= 10000
+                    and     coalesce(contact_history.prev_date_letters,             '2000-01-01'::date) <= current_date() - 35
+                    and     coalesce(contact_history.prev_date_voapps,              '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_texts,               '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_inbounds,            '2000-01-01'::date) <= current_date()
+                    and     coalesce(proposal_history.prev_n_letters_proposed,      0)                  <= 3
+                    and     coalesce(proposal_history.prev_n_voapps_proposed,       0)                  <= 10000
+                    and     coalesce(proposal_history.prev_n_texts_proposed,        0)                  <= 10000
+                    and     coalesce(proposal_history.prev_date_letters_proposed,   '2000-01-01'::date) <= current_date() - 35
+                    and     coalesce(proposal_history.prev_date_voapps_proposed,    '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(proposal_history.prev_date_texts_proposed,     '2000-01-01'::date) <= current_date() - 8
                     then    1
                     else    0
                     end     as pass_letters_cooldown,
 
-            case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_voapps,         0)                  <= 19
-                    and     coalesce(contact_history.prev_n_texts,          0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_inbounds,       0)                  <= 10000
-                    and     coalesce(contact_history.prev_date_letters,     '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(contact_history.prev_date_texts,       '2000-01-01'::date) <= current_date()
-                    and     coalesce(contact_history.prev_date_inbounds,    '2000-01-01'::date) <= current_date()
+            case    when    coalesce(contact_history.prev_n_letters,                0)                  <= 10000
+                    and     coalesce(contact_history.prev_n_voapps,                 0)                  <= 11
+                    and     coalesce(contact_history.prev_n_texts,                  0)                  <= 10000
+                    and     coalesce(contact_history.prev_n_inbounds,               0)                  <= 10000
+                    and     coalesce(contact_history.prev_date_letters,             '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_voapps,              '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_texts,               '2000-01-01'::date) <= current_date()
+                    and     coalesce(contact_history.prev_date_inbounds,            '2000-01-01'::date) <= current_date()
+                    and     coalesce(proposal_history.prev_n_letters_proposed,      0)                  <= 10000
+                    and     coalesce(proposal_history.prev_n_voapps_proposed,       0)                  <= 11
+                    and     coalesce(proposal_history.prev_n_texts_proposed,        0)                  <= 10000
+                    and     coalesce(proposal_history.prev_date_letters_proposed,   '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(proposal_history.prev_date_voapps_proposed,    '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(proposal_history.prev_date_texts_proposed,     '2000-01-01'::date) <= current_date()
                     then    1
                     else    0
                     end     as pass_voapps_cooldown,
 
-            case    when    coalesce(contact_history.prev_n_letters,        0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_voapps,         0)                  <= 10000
-                    and     coalesce(contact_history.prev_n_texts,          0)                  <= 11
-                    and     coalesce(contact_history.prev_n_inbounds,       0)                  <= 10000
-                    and     coalesce(contact_history.prev_date_letters,     '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(contact_history.prev_date_voapps,      '2000-01-01'::date) <= current_date()
-                    and     coalesce(contact_history.prev_date_texts,       '2000-01-01'::date) <= current_date() - 5
-                    and     coalesce(contact_history.prev_date_inbounds,    '2000-01-01'::date) <= current_date()
+            case    when    coalesce(contact_history.prev_n_letters,                0)                  <= 10000
+                    and     coalesce(contact_history.prev_n_voapps,                 0)                  <= 10000
+                    and     coalesce(contact_history.prev_n_texts,                  0)                  <= 11
+                    and     coalesce(contact_history.prev_n_inbounds,               0)                  <= 10000
+                    and     coalesce(contact_history.prev_date_letters,             '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(contact_history.prev_date_voapps,              '2000-01-01'::date) <= current_date()
+                    and     coalesce(contact_history.prev_date_texts,               '2000-01-01'::date) <= current_date() - 5
+                    and     coalesce(contact_history.prev_date_inbounds,            '2000-01-01'::date) <= current_date()
+                    and     coalesce(proposal_history.prev_n_letters_proposed,      0)                  <= 10000
+                    and     coalesce(proposal_history.prev_n_voapps_proposed,       0)                  <= 10000
+                    and     coalesce(proposal_history.prev_n_texts_proposed,        0)                  <= 11
+                    and     coalesce(proposal_history.prev_date_letters_proposed,   '2000-01-01'::date) <= current_date() - 8
+                    and     coalesce(proposal_history.prev_date_voapps_proposed,    '2000-01-01'::date) <= current_date()
+                    and     coalesce(proposal_history.prev_date_texts_proposed,     '2000-01-01'::date) <= current_date() - 8
                     then    1
                     else    0
                     end     as pass_texts_cooldown,
 
-            case    when    coalesce(contact_history.prev_n_voapps_7,               0)              +
-                            coalesce(contact_history.prev_n_dialer_agent_7,         0)              +
+            case    when    coalesce(contact_history.prev_n_dialer_agent_7,         0)              +
                             coalesce(contact_history.prev_n_dialer_agentless_7,     0)              +
-                            coalesce(contact_history.prev_n_outbound_manual_7,      0)                  <  7
+                            coalesce(contact_history.prev_n_outbound_manual_7,      0)              +
+                            coalesce(contact_history.prev_n_voapps_7,               0)              +
+                            coalesce(proposal_history.prev_n_voapps_7_proposed,     0)                  <  7
                     and     coalesce(contact_history.prev_date_rpc,                 '2000-01-01')       <= current_date() - 8
                     then    1
                     else    0
-                    end     as pass_7in7
+                    end     as pass_7in7                    
 
 
 from        edwprodhh.pub_jchang.master_debtor as debtor
@@ -282,6 +383,9 @@ from        edwprodhh.pub_jchang.master_debtor as debtor
             left join
                 contact_history
                 on debtor.packet_idx = contact_history.packet_idx
+            left join
+                proposal_history
+                on debtor.packet_idx = proposal_history.packet_idx
             left join
                 edwprodhh.hermes.master_config_treatment_router as router
                 on debtor.debtor_idx = router.debtor_idx
