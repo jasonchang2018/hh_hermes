@@ -64,6 +64,7 @@ with contact_history as
                 inner join
                     edwprodhh.pub_jchang.master_debtor as debtor
                     on proposals.debtor_idx = debtor.debtor_idx
+    where       proposals.is_proposed_contact = 1
     group by    1
 )
 select      debtor.debtor_idx,
@@ -137,12 +138,12 @@ select      debtor.debtor_idx,
                     and     coalesce(contact_history.prev_date_voapps,              '2000-01-01'::date) <= current_date() - 8
                     and     coalesce(contact_history.prev_date_texts,               '2000-01-01'::date) <= current_date()
                     and     coalesce(contact_history.prev_date_inbounds,            '2000-01-01'::date) <= current_date()
-                    and     coalesce(proposal_history.prev_n_letters_proposed,      0)                  <= 10000
-                    and     coalesce(proposal_history.prev_n_voapps_proposed,       0)                  <= 11
-                    and     coalesce(proposal_history.prev_n_texts_proposed,        0)                  <= 10000
-                    and     coalesce(proposal_history.prev_date_letters_proposed,   '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(proposal_history.prev_date_voapps_proposed,    '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(proposal_history.prev_date_texts_proposed,     '2000-01-01'::date) <= current_date()
+                    -- and     coalesce(proposal_history.prev_n_letters_proposed,      0)                  <= 10000
+                    -- and     coalesce(proposal_history.prev_n_voapps_proposed,       0)                  <= 11
+                    -- and     coalesce(proposal_history.prev_n_texts_proposed,        0)                  <= 10000
+                    -- and     coalesce(proposal_history.prev_date_letters_proposed,   '2000-01-01'::date) <= current_date() - 8
+                    -- and     coalesce(proposal_history.prev_date_voapps_proposed,    '2000-01-01'::date) <= current_date() - 8
+                    -- and     coalesce(proposal_history.prev_date_texts_proposed,     '2000-01-01'::date) <= current_date()
                     then    1
                     else    0
                     end     as pass_voapps_cooldown,
@@ -264,6 +265,7 @@ with contact_history as
                 inner join
                     edwprodhh.pub_jchang.master_debtor as debtor
                     on proposals.debtor_idx = debtor.debtor_idx
+    where       proposals.is_proposed_contact = 1
     group by    1
 )
 select      debtor.debtor_idx,
@@ -337,12 +339,12 @@ select      debtor.debtor_idx,
                     and     coalesce(contact_history.prev_date_voapps,              '2000-01-01'::date) <= current_date() - 8
                     and     coalesce(contact_history.prev_date_texts,               '2000-01-01'::date) <= current_date()
                     and     coalesce(contact_history.prev_date_inbounds,            '2000-01-01'::date) <= current_date()
-                    and     coalesce(proposal_history.prev_n_letters_proposed,      0)                  <= 10000
-                    and     coalesce(proposal_history.prev_n_voapps_proposed,       0)                  <= 11
-                    and     coalesce(proposal_history.prev_n_texts_proposed,        0)                  <= 10000
-                    and     coalesce(proposal_history.prev_date_letters_proposed,   '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(proposal_history.prev_date_voapps_proposed,    '2000-01-01'::date) <= current_date() - 8
-                    and     coalesce(proposal_history.prev_date_texts_proposed,     '2000-01-01'::date) <= current_date()
+                    -- and     coalesce(proposal_history.prev_n_letters_proposed,      0)                  <= 10000
+                    -- and     coalesce(proposal_history.prev_n_voapps_proposed,       0)                  <= 11
+                    -- and     coalesce(proposal_history.prev_n_texts_proposed,        0)                  <= 10000
+                    -- and     coalesce(proposal_history.prev_date_letters_proposed,   '2000-01-01'::date) <= current_date() - 8
+                    -- and     coalesce(proposal_history.prev_date_voapps_proposed,    '2000-01-01'::date) <= current_date() - 8
+                    -- and     coalesce(proposal_history.prev_date_texts_proposed,     '2000-01-01'::date) <= current_date()
                     then    1
                     else    0
                     end     as pass_voapps_cooldown,
