@@ -125,7 +125,7 @@ select      debtor.debtor_idx,
                     then    0
                     when    debtor.status in ('PPA')
                     then    0
-                    when    dimdebtor.st in ('MA', 'ZZ')
+                    when    dimdebtor.st in ('MA', 'ZZ', 'BC')
                     then    0
                     when    client.is_fdcpa = 1
                     and     dimdebtor.st in ('DC')
@@ -146,7 +146,7 @@ select      debtor.debtor_idx,
                                                     then    1
                                                     else    0
                                                     end
-                                    when    dimdebtor.st = 'WA'
+                                    when    dimdebtor.st in ('WA', 'CA')
                                     then    case    when    debtor.pl_group in (
                                                                 'PROVIDENCE ST JOSEPH HEALTH - 3P',
                                                                 'PROVIDENCE ST JOSEPH HEALTH - 3P-2'
@@ -171,6 +171,7 @@ select      debtor.debtor_idx,
                                                                 'STATE OF MD - COMPTROLLER - 3P',
                                                                 'STATE OF MD - DBM CCU - 3P',
                                                                 'STATE OF MD - TOLLWAY - 3P',
+                                                                'COLUMBIA DENTAL - 3P',
                                                                 'COLUMBIA DOCTORS - 3P',
                                                                 'COLUMBIA DOCTORS - TPL',
                                                                 'COLUMBIA DOCTORS LEGAL',
@@ -360,7 +361,7 @@ select      debtor.debtor_idx,
                     then    0
                     when    debtor.status in ('PPA')
                     then    0
-                    when    dimdebtor.st in ('MA', 'ZZ')
+                    when    dimdebtor.st in ('MA', 'ZZ', 'BC')
                     then    0
                     when    client.is_fdcpa = 1
                     and     dimdebtor.st in ('DC')
@@ -381,7 +382,7 @@ select      debtor.debtor_idx,
                                                     then    1
                                                     else    0
                                                     end
-                                    when    dimdebtor.st = 'WA'
+                                    when    dimdebtor.st in ('WA', 'CA')
                                     then    case    when    debtor.pl_group in (
                                                                 'PROVIDENCE ST JOSEPH HEALTH - 3P',
                                                                 'PROVIDENCE ST JOSEPH HEALTH - 3P-2'
@@ -406,6 +407,7 @@ select      debtor.debtor_idx,
                                                                 'STATE OF MD - COMPTROLLER - 3P',
                                                                 'STATE OF MD - DBM CCU - 3P',
                                                                 'STATE OF MD - TOLLWAY - 3P',
+                                                                'COLUMBIA DENTAL - 3P',
                                                                 'COLUMBIA DOCTORS - 3P',
                                                                 'COLUMBIA DOCTORS - TPL',
                                                                 'COLUMBIA DOCTORS LEGAL',
