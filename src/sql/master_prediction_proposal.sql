@@ -519,8 +519,11 @@ with scores as
 (
     select      *,
 
-                row_number() over (partition by pl_group order by marginal_fee desc)    as rn,
-                rn / count(*) over (partition by pl_group)                              as percentile,
+                -- row_number() over (partition by pl_group order by marginal_fee desc)    as rn,
+                -- rn / count(*) over (partition by pl_group)                              as percentile,
+
+                count(case when is_proposed_contact = 1 and proposed_channel = 'Text Message' then 1 end) over (partition by pl_group order by marginal_fee desc)   as rn,
+                rn / count(case when is_proposed_contact = 1 and proposed_channel = 'Text Message' then 1 end) over (partition by pl_group)                         as percentile,
 
                 case    when    is_proposed_contact = 1
                         then    case    when    proposed_channel = 'Text Message'
@@ -549,7 +552,7 @@ with scores as
                                                                     'PROVIDENCE ST JOSEPH HEALTH - 3P-2',           --
                                                                     'PROVIDENCE ST JOSEPH HEALTH - 3P',             --
                                                                     'ST ELIZABETH HEALTHCARE - 3P',
-                                                                    'STATE OF KS - DOR - 3P',                       --
+                                                                    -- 'STATE OF KS - DOR - 3P',                       --
                                                                     'SWEDISH HOSPITAL - 3P',                        --
                                                                     'U OF CHICAGO MEDICAL - 3P',                    --
                                                                     'U OF CINCINNATI HEALTH SYSTEM - 3P',           --
@@ -573,7 +576,7 @@ with scores as
     from        calculate_filtered
 )
 select      *
-            exclude (rn, percentile)
+            -- exclude (rn, percentile)
 from        calculate_template
 ;
 
@@ -1105,8 +1108,11 @@ with scores as
 (
     select      *,
 
-                row_number() over (partition by pl_group order by marginal_fee desc)    as rn,
-                rn / count(*) over (partition by pl_group)                              as percentile,
+                -- row_number() over (partition by pl_group order by marginal_fee desc)    as rn,
+                -- rn / count(*) over (partition by pl_group)                              as percentile,
+
+                count(case when is_proposed_contact = 1 and proposed_channel = 'Text Message' then 1 end) over (partition by pl_group order by marginal_fee desc)   as rn,
+                rn / count(case when is_proposed_contact = 1 and proposed_channel = 'Text Message' then 1 end) over (partition by pl_group)                         as percentile,
 
                 case    when    is_proposed_contact = 1
                         then    case    when    proposed_channel = 'Text Message'
@@ -1135,7 +1141,7 @@ with scores as
                                                                     'PROVIDENCE ST JOSEPH HEALTH - 3P-2',           --
                                                                     'PROVIDENCE ST JOSEPH HEALTH - 3P',             --
                                                                     'ST ELIZABETH HEALTHCARE - 3P',
-                                                                    'STATE OF KS - DOR - 3P',                       --
+                                                                    -- 'STATE OF KS - DOR - 3P',                       --
                                                                     'SWEDISH HOSPITAL - 3P',                        --
                                                                     'U OF CHICAGO MEDICAL - 3P',                    --
                                                                     'U OF CINCINNATI HEALTH SYSTEM - 3P',           --
@@ -1159,6 +1165,6 @@ with scores as
     from        calculate_filtered
 )
 select      *
-            exclude (rn, percentile)
+            -- exclude (rn, percentile)
 from        calculate_template
 ;
