@@ -522,8 +522,8 @@ with scores as
                 -- row_number() over (partition by pl_group order by marginal_fee desc)    as rn,
                 -- rn / count(*) over (partition by pl_group)                              as percentile,
 
-                count(case when is_proposed_contact = 1 and proposed_channel = 'Text Message' then 1 end) over (partition by pl_group order by marginal_fee desc)   as rn,
-                rn / count(case when is_proposed_contact = 1 and proposed_channel = 'Text Message' then 1 end) over (partition by pl_group)                         as percentile,
+                count(case when is_proposed_contact = 1 and proposed_channel = 'Text Message' then 1 end) over (partition by pl_group order by marginal_fee desc)           as rn,
+                edwprodhh.pub_jchang.divide(rn, count(case when is_proposed_contact = 1 and proposed_channel = 'Text Message' then 1 end) over (partition by pl_group))     as percentile,
 
                 case    when    is_proposed_contact = 1
                         then    case    when    proposed_channel = 'Text Message'
@@ -576,7 +576,7 @@ with scores as
     from        calculate_filtered
 )
 select      *
-            -- exclude (rn, percentile)
+            exclude (rn, percentile)
 from        calculate_template
 ;
 
@@ -1111,8 +1111,8 @@ with scores as
                 -- row_number() over (partition by pl_group order by marginal_fee desc)    as rn,
                 -- rn / count(*) over (partition by pl_group)                              as percentile,
 
-                count(case when is_proposed_contact = 1 and proposed_channel = 'Text Message' then 1 end) over (partition by pl_group order by marginal_fee desc)   as rn,
-                rn / count(case when is_proposed_contact = 1 and proposed_channel = 'Text Message' then 1 end) over (partition by pl_group)                         as percentile,
+                count(case when is_proposed_contact = 1 and proposed_channel = 'Text Message' then 1 end) over (partition by pl_group order by marginal_fee desc)           as rn,
+                edwprodhh.pub_jchang.divide(rn, count(case when is_proposed_contact = 1 and proposed_channel = 'Text Message' then 1 end) over (partition by pl_group))     as percentile,
 
                 case    when    is_proposed_contact = 1
                         then    case    when    proposed_channel = 'Text Message'
@@ -1165,6 +1165,6 @@ with scores as
     from        calculate_filtered
 )
 select      *
-            -- exclude (rn, percentile)
+            exclude (rn, percentile)
 from        calculate_template
 ;
