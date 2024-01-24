@@ -146,7 +146,7 @@ select      debtor.debtor_idx,
                                                     then    1
                                                     else    0
                                                     end
-                                    when    dimdebtor.st in ('WA', 'CA')
+                                    when    dimdebtor.st in ('WA')
                                     then    case    when    debtor.pl_group in (
                                                                 'PROVIDENCE ST JOSEPH HEALTH - 3P',
                                                                 'PROVIDENCE ST JOSEPH HEALTH - 3P-2'
@@ -382,7 +382,7 @@ select      debtor.debtor_idx,
                                                     then    1
                                                     else    0
                                                     end
-                                    when    dimdebtor.st in ('WA', 'CA')
+                                    when    dimdebtor.st in ('WA')
                                     then    case    when    debtor.pl_group in (
                                                                 'PROVIDENCE ST JOSEPH HEALTH - 3P',
                                                                 'PROVIDENCE ST JOSEPH HEALTH - 3P-2'
