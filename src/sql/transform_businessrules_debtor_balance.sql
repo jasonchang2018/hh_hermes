@@ -22,16 +22,16 @@ select      debtor.debtor_idx,
                                         'PRISMA HEALTH UNIVERSITY - 3P', 'U OF CINCINNATI HEALTH SYSTEM - 3P',
                                         'PRISMA HEALTH - 3P', 'PROVIDENCE ST JOSEPH HEALTH - 3P', 'IU HEALTH - 3P'
                                     )
-                            then    case    when    debtor.balance_dimdebtor > 25
+                            then    case    when    debtor.balance_dimdebtor >= 5
                                             then    1
                                             else    0
                                             end
                             when    debtor.pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
-                            then    case    when    debtor.balance_dimdebtor > 25
+                            then    case    when    debtor.balance_dimdebtor >= 5
                                             then    1
                                             else    0
                                             end
-                            else    case    when    debtor.balance_dimdebtor > 25
+                            else    case    when    debtor.balance_dimdebtor >= 5
                                             then    1
                                             else    0
                                             end
@@ -53,16 +53,16 @@ select      debtor.debtor_idx,
                                         'PRISMA HEALTH UNIVERSITY - 3P', 'U OF CINCINNATI HEALTH SYSTEM - 3P',
                                         'PRISMA HEALTH - 3P', 'PROVIDENCE ST JOSEPH HEALTH - 3P', 'IU HEALTH - 3P'
                                     )
-                            then    case    when    balance_dimdebtor_packet_ > 25
+                            then    case    when    balance_dimdebtor_packet_ >= 5
                                             then    1
                                             else    0
                                             end
                             when    debtor.pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
-                            then    case    when    balance_dimdebtor_packet_ > 25
+                            then    case    when    balance_dimdebtor_packet_ >= 5
                                             then    1
                                             else    0
                                             end
-                            else    case    when    balance_dimdebtor_packet_ > 25
+                            else    case    when    balance_dimdebtor_packet_ >= 5
                                             then    1
                                             else    0
                                             end
@@ -138,16 +138,16 @@ select      debtor.debtor_idx,
                                         'PRISMA HEALTH UNIVERSITY - 3P', 'U OF CINCINNATI HEALTH SYSTEM - 3P',
                                         'PRISMA HEALTH - 3P', 'PROVIDENCE ST JOSEPH HEALTH - 3P', 'IU HEALTH - 3P'
                                     )
-                            then    case    when    debtor.balance_dimdebtor > 25
+                            then    case    when    debtor.balance_dimdebtor >= 5
                                             then    1
                                             else    0
                                             end
                             when    debtor.pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
-                            then    case    when    debtor.balance_dimdebtor > 25
+                            then    case    when    debtor.balance_dimdebtor >= 5
                                             then    1
                                             else    0
                                             end
-                            else    case    when    debtor.balance_dimdebtor > 25
+                            else    case    when    debtor.balance_dimdebtor >= 5
                                             then    1
                                             else    0
                                             end
@@ -169,16 +169,16 @@ select      debtor.debtor_idx,
                                         'PRISMA HEALTH UNIVERSITY - 3P', 'U OF CINCINNATI HEALTH SYSTEM - 3P',
                                         'PRISMA HEALTH - 3P', 'PROVIDENCE ST JOSEPH HEALTH - 3P', 'IU HEALTH - 3P'
                                     )
-                            then    case    when    balance_dimdebtor_packet_ > 25
+                            then    case    when    balance_dimdebtor_packet_ >= 5
                                             then    1
                                             else    0
                                             end
                             when    debtor.pl_group in ('ELIZABETH RIVER CROSSINGS - 3P')
-                            then    case    when    balance_dimdebtor_packet_ > 25
+                            then    case    when    balance_dimdebtor_packet_ >= 5
                                             then    1
                                             else    0
                                             end
-                            else    case    when    balance_dimdebtor_packet_ > 25
+                            else    case    when    balance_dimdebtor_packet_ >= 5
                                             then    1
                                             else    0
                                             end
