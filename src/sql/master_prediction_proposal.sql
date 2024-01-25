@@ -517,50 +517,68 @@ with scores as
 )
 , calculate_template as
 (
-    select      *,
+    select      calculate_filtered.*,
 
-                row_number() over (partition by pl_group order by marginal_fee desc)    as rn,
-                rn / count(*) over (partition by pl_group)                              as percentile,
+                calculate_filtered.marginal_fee + uniform(-0.0001::decimal(9,9), 0.0001::decimal(9,9), random()) as marginal_fee_jitter,
 
-                case    when    is_proposed_contact = 1
-                        then    case    when    proposed_channel = 'Text Message'
-                                        then    case    when    pl_group in (
-                                                                    'BAYLOR SCOTT WHITE HEALTHCARE - 3P',
-                                                                    'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P',
-                                                                    'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2',
-                                                                    'CHOP - 3P',
-                                                                    'CITY OF WASHINGTON DC - DMV - 3P',             --
-                                                                    'COLUMBIA DOCTORS - 3P',                        --
-                                                                    'COUNTY OF MCHENRY IL - 3P',                    --
-                                                                    'COUNTY OF WINNEBAGO IL - 3P',                  --
-                                                                    'FRANCISCAN HEALTH - 3P',                       --
-                                                                    'HEALTHPARTNERS - 3P',
-                                                                    'HEALTHPARTNERS - 3P-2',
-                                                                    'HEALTHPARTNERS WI - 3P',
-                                                                    'HEALTHPARTNERS WI - 3P-2',
-                                                                    'IU HEALTH - 3P',                               --
-                                                                    'IU SURGICAL CARE AFF - 3P',
-                                                                    'MOUNT SINAI - 3P',                             --
-                                                                    'NORTHSHORE UNIV HEALTH - 3P',                  --
-                                                                    'NORTHWESTERN MEDICINE - 3P',                   --
-                                                                    'NW COMM HOSP - 3P-2',                          --
-                                                                    'NW COMM HOSP - 3P',                            --
-                                                                    'PROMEDICA HS - 3P-2',
-                                                                    'PROVIDENCE ST JOSEPH HEALTH - 3P-2',           --
-                                                                    'PROVIDENCE ST JOSEPH HEALTH - 3P',             --
-                                                                    'ST ELIZABETH HEALTHCARE - 3P',
-                                                                    'STATE OF KS - DOR - 3P',                       --
-                                                                    'SWEDISH HOSPITAL - 3P',                        --
-                                                                    'U OF CHICAGO MEDICAL - 3P',                    --
-                                                                    'U OF CINCINNATI HEALTH SYSTEM - 3P',           --
-                                                                    'UNIVERSAL HEALTH SERVICES - 3P',               --
-                                                                    'WEILL CORNELL PHY - 3P'                        --
-                                                                )
-                                                        then    case    when    percentile >= 0.50
-                                                                        then    case    when    mod(rn, 2) = 1
-                                                                                        then    'SIF'
-                                                                                        else    'MAIN'
-                                                                                        end
+                count(case  when    calculate_filtered.is_proposed_contact  = 1
+                            and     calculate_filtered.proposed_channel     = 'Text Message'
+                            and     pool.pass_validation_requirement_offer  = 1
+                            then    1
+                            end     )
+                            over    (   partition by    calculate_filtered.pl_group
+                                        order by        marginal_fee_jitter desc
+                                    )   as rn,
+
+                edwprodhh.pub_jchang.divide(
+                    rn,
+                    count(case  when    calculate_filtered.is_proposed_contact  = 1
+                                and     calculate_filtered.proposed_channel     = 'Text Message'
+                                and     pool.pass_validation_requirement_offer  = 1
+                                then    1
+                                end     )
+                                over    (   partition by calculate_filtered.pl_group
+                                        )
+                )                       as percentile,
+
+                case    when    calculate_filtered.is_proposed_contact  = 1
+                        and     calculate_filtered.proposed_channel     = 'Text Message'
+                        and     pool.pass_validation_requirement_offer  = 1
+                        then    case    when    calculate_filtered.pl_group in (
+                                                    'BAYLOR SCOTT WHITE HEALTHCARE - 3P',
+                                                    'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P',
+                                                    'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2',
+                                                    'CHOP - 3P',
+                                                    'CITY OF WASHINGTON DC - DMV - 3P',             --
+                                                    'COLUMBIA DOCTORS - 3P',                        --
+                                                    'COUNTY OF MCHENRY IL - 3P',                    --
+                                                    'COUNTY OF WINNEBAGO IL - 3P',                  --
+                                                    'FRANCISCAN HEALTH - 3P',                       --
+                                                    'HEALTHPARTNERS - 3P',
+                                                    'HEALTHPARTNERS - 3P-2',
+                                                    'HEALTHPARTNERS WI - 3P',
+                                                    'HEALTHPARTNERS WI - 3P-2',
+                                                    'IU HEALTH - 3P',                               --
+                                                    'IU SURGICAL CARE AFF - 3P',
+                                                    'MOUNT SINAI - 3P',                             --
+                                                    'NORTHSHORE UNIV HEALTH - 3P',                  --
+                                                    'NORTHWESTERN MEDICINE - 3P',                   --
+                                                    'NW COMM HOSP - 3P-2',                          --
+                                                    'NW COMM HOSP - 3P',                            --
+                                                    'PROMEDICA HS - 3P-2',
+                                                    'PROVIDENCE ST JOSEPH HEALTH - 3P-2',           --
+                                                    'PROVIDENCE ST JOSEPH HEALTH - 3P',             --
+                                                    'ST ELIZABETH HEALTHCARE - 3P',
+                                                    -- 'STATE OF KS - DOR - 3P',                       --
+                                                    'SWEDISH HOSPITAL - 3P',                        --
+                                                    'U OF CHICAGO MEDICAL - 3P',                    --
+                                                    'U OF CINCINNATI HEALTH SYSTEM - 3P',           --
+                                                    'UNIVERSAL HEALTH SERVICES - 3P',               --
+                                                    'WEILL CORNELL PHY - 3P'                        --
+                                                )
+                                        then    case    when    percentile >= 0.50
+                                                        then    case    when    mod(rn, 2) = 1
+                                                                        then    'SIF'
                                                                         else    'MAIN'
                                                                         end
                                                         else    NULL
@@ -571,9 +589,12 @@ with scores as
                         end     as template
 
     from        calculate_filtered
+                left join
+                    edwprodhh.hermes.master_prediction_pool as pool
+                    on calculate_filtered.debtor_idx = pool.debtor_idx
 )
 select      *
-            exclude (rn, percentile)
+            exclude (rn, percentile, marginal_fee_jitter)
 from        calculate_template
 ;
 
@@ -1103,50 +1124,68 @@ with scores as
 )
 , calculate_template as
 (
-    select      *,
+    select      calculate_filtered.*,
 
-                row_number() over (partition by pl_group order by marginal_fee desc)    as rn,
-                rn / count(*) over (partition by pl_group)                              as percentile,
+                calculate_filtered.marginal_fee + uniform(-0.0001::decimal(9,9), 0.0001::decimal(9,9), random()) as marginal_fee_jitter,
 
-                case    when    is_proposed_contact = 1
-                        then    case    when    proposed_channel = 'Text Message'
-                                        then    case    when    pl_group in (
-                                                                    'BAYLOR SCOTT WHITE HEALTHCARE - 3P',
-                                                                    'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P',
-                                                                    'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2',
-                                                                    'CHOP - 3P',
-                                                                    'CITY OF WASHINGTON DC - DMV - 3P',             --
-                                                                    'COLUMBIA DOCTORS - 3P',                        --
-                                                                    'COUNTY OF MCHENRY IL - 3P',                    --
-                                                                    'COUNTY OF WINNEBAGO IL - 3P',                  --
-                                                                    'FRANCISCAN HEALTH - 3P',                       --
-                                                                    'HEALTHPARTNERS - 3P',
-                                                                    'HEALTHPARTNERS - 3P-2',
-                                                                    'HEALTHPARTNERS WI - 3P',
-                                                                    'HEALTHPARTNERS WI - 3P-2',
-                                                                    'IU HEALTH - 3P',                               --
-                                                                    'IU SURGICAL CARE AFF - 3P',
-                                                                    'MOUNT SINAI - 3P',                             --
-                                                                    'NORTHSHORE UNIV HEALTH - 3P',                  --
-                                                                    'NORTHWESTERN MEDICINE - 3P',                   --
-                                                                    'NW COMM HOSP - 3P-2',                          --
-                                                                    'NW COMM HOSP - 3P',                            --
-                                                                    'PROMEDICA HS - 3P-2',
-                                                                    'PROVIDENCE ST JOSEPH HEALTH - 3P-2',           --
-                                                                    'PROVIDENCE ST JOSEPH HEALTH - 3P',             --
-                                                                    'ST ELIZABETH HEALTHCARE - 3P',
-                                                                    'STATE OF KS - DOR - 3P',                       --
-                                                                    'SWEDISH HOSPITAL - 3P',                        --
-                                                                    'U OF CHICAGO MEDICAL - 3P',                    --
-                                                                    'U OF CINCINNATI HEALTH SYSTEM - 3P',           --
-                                                                    'UNIVERSAL HEALTH SERVICES - 3P',               --
-                                                                    'WEILL CORNELL PHY - 3P'                        --
-                                                                )
-                                                        then    case    when    percentile >= 0.50
-                                                                        then    case    when    mod(rn, 2) = 1
-                                                                                        then    'SIF'
-                                                                                        else    'MAIN'
-                                                                                        end
+                count(case  when    calculate_filtered.is_proposed_contact  = 1
+                            and     calculate_filtered.proposed_channel     = 'Text Message'
+                            and     pool.pass_validation_requirement_offer  = 1
+                            then    1
+                            end     )
+                            over    (   partition by    calculate_filtered.pl_group
+                                        order by        marginal_fee_jitter desc
+                                    )   as rn,
+
+                edwprodhh.pub_jchang.divide(
+                    rn,
+                    count(case  when    calculate_filtered.is_proposed_contact  = 1
+                                and     calculate_filtered.proposed_channel     = 'Text Message'
+                                and     pool.pass_validation_requirement_offer  = 1
+                                then    1
+                                end     )
+                                over    (   partition by calculate_filtered.pl_group
+                                        )
+                )                       as percentile,
+
+                case    when    calculate_filtered.is_proposed_contact  = 1
+                        and     calculate_filtered.proposed_channel     = 'Text Message'
+                        and     pool.pass_validation_requirement_offer  = 1
+                        then    case    when    calculate_filtered.pl_group in (
+                                                    'BAYLOR SCOTT WHITE HEALTHCARE - 3P',
+                                                    'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P',
+                                                    'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2',
+                                                    'CHOP - 3P',
+                                                    'CITY OF WASHINGTON DC - DMV - 3P',             --
+                                                    'COLUMBIA DOCTORS - 3P',                        --
+                                                    'COUNTY OF MCHENRY IL - 3P',                    --
+                                                    'COUNTY OF WINNEBAGO IL - 3P',                  --
+                                                    'FRANCISCAN HEALTH - 3P',                       --
+                                                    'HEALTHPARTNERS - 3P',
+                                                    'HEALTHPARTNERS - 3P-2',
+                                                    'HEALTHPARTNERS WI - 3P',
+                                                    'HEALTHPARTNERS WI - 3P-2',
+                                                    'IU HEALTH - 3P',                               --
+                                                    'IU SURGICAL CARE AFF - 3P',
+                                                    'MOUNT SINAI - 3P',                             --
+                                                    'NORTHSHORE UNIV HEALTH - 3P',                  --
+                                                    'NORTHWESTERN MEDICINE - 3P',                   --
+                                                    'NW COMM HOSP - 3P-2',                          --
+                                                    'NW COMM HOSP - 3P',                            --
+                                                    'PROMEDICA HS - 3P-2',
+                                                    'PROVIDENCE ST JOSEPH HEALTH - 3P-2',           --
+                                                    'PROVIDENCE ST JOSEPH HEALTH - 3P',             --
+                                                    'ST ELIZABETH HEALTHCARE - 3P',
+                                                    -- 'STATE OF KS - DOR - 3P',                       --
+                                                    'SWEDISH HOSPITAL - 3P',                        --
+                                                    'U OF CHICAGO MEDICAL - 3P',                    --
+                                                    'U OF CINCINNATI HEALTH SYSTEM - 3P',           --
+                                                    'UNIVERSAL HEALTH SERVICES - 3P',               --
+                                                    'WEILL CORNELL PHY - 3P'                        --
+                                                )
+                                        then    case    when    percentile >= 0.50
+                                                        then    case    when    mod(rn, 2) = 1
+                                                                        then    'SIF'
                                                                         else    'MAIN'
                                                                         end
                                                         else    NULL
@@ -1157,8 +1196,11 @@ with scores as
                         end     as template
 
     from        calculate_filtered
+                left join
+                    edwprodhh.hermes.master_prediction_pool as pool
+                    on calculate_filtered.debtor_idx = pool.debtor_idx
 )
 select      *
-            exclude (rn, percentile)
+            exclude (rn, percentile, marginal_fee_jitter)
 from        calculate_template
 ;

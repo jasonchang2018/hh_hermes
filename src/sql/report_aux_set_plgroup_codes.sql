@@ -3,27 +3,8 @@ with migration as
     select      pl_group
     from        edwprodhh.pub_jchang.master_client
     where       pl_group in (
-                    'CITY OF WASHINGTON DC - ABRA - 3P',
-                    'CITY OF WASHINGTON DC - BEGA - 3P',
-                    'CITY OF WASHINGTON DC - DHCD - 3P',
-                    'CITY OF WASHINGTON DC - DLCP - 3P',
-                    'CITY OF WASHINGTON DC - DMV - 3P',
-                    'CITY OF WASHINGTON DC - DMV AMNESTY - 3P',
-                    'CITY OF WASHINGTON DC - DOB - 3P',
-                    'CITY OF WASHINGTON DC - DOC - 3P',
-                    'CITY OF WASHINGTON DC - DOEE - 3P',
-                    'CITY OF WASHINGTON DC - MPD - 3P',
-                    'CITY OF WASHINGTON DC - OAG - 3P',
-                    'CITY OF WASHINGTON DC - OLG - 3P',
-                    'CITY OF WASHINGTON DC - OP - 3P',
-                    'CITY OF WASHINGTON DC - OSSE - 3P',
-                    'COUNTY OF LOS ANGELES CA - 3P',
-                    'STATE OF PA - TURNPIKE COMMISSION - 3P',
-                    'COC - BUILDINGS',
-                    'COC - PARKING',
-                    'COC - WATER',
-                    'COC - OTHER',
-                    'COC - TAX'
+                    'CITY OF PHILADELPHIA PA - PARKING - 3P',
+                    'CITY OF LA CA - FINANCE - 3P'
                 )
                 and is_fdcpa = 0
     order by    1
