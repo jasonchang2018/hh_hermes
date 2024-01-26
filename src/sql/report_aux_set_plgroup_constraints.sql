@@ -3,8 +3,8 @@ with migration as
     select      client_idx
     from        edwprodhh.pub_jchang.master_client
     where       pl_group in (
-                    'CITY OF PHILADELPHIA PA - PARKING - 3P',
-                    'CITY OF LA CA - FINANCE - 3P'
+                    'STATE OF OK - TAX COMMISSION - 3P',
+                    'STATE OF PA - TURNPIKE COMMISSION - 3P'
                 )
                 and is_fdcpa = 0
     order by    1
@@ -36,8 +36,8 @@ order by    2 desc
 --  Check Volumes.
 select      date_trunc('month', letters.print_date) as send_month,
             count(*) as n,
-            count(case when debtor.pl_group = 'CITY OF PHILADELPHIA PA - PARKING - 3P' then 1 end) as phillyparking,
-            count(case when debtor.pl_group = 'CITY OF LA CA - FINANCE - 3P' then 1 end) as la_finance
+            count(case when debtor.pl_group = 'STATE OF OK - TAX COMMISSION - 3P' then 1 end) as otc,
+            count(case when debtor.pl_group = 'STATE OF PA - TURNPIKE COMMISSION - 3P' then 1 end) as turnpike
 from        edwprodhh.pub_jchang.master_letters as letters
             inner join
                 edwprodhh.pub_jchang.master_debtor as debtor
