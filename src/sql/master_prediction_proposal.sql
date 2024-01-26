@@ -521,53 +521,37 @@ with scores as
 
                 calculate_filtered.marginal_fee + uniform(-0.0001::decimal(9,9), 0.0001::decimal(9,9), random()) as marginal_fee_jitter,
 
-                count(case  when    calculate_filtered.is_proposed_contact  = 1
-                            and     calculate_filtered.proposed_channel     = 'Text Message'
-                            and     pool.pass_validation_requirement_offer  = 1
-                            then    1
-                            end     )
-                            over    (   partition by    calculate_filtered.pl_group
-                                        order by        marginal_fee_jitter desc
-                                    )   as rn,
-
-                edwprodhh.pub_jchang.divide(
-                    rn,
-                    count(case  when    calculate_filtered.is_proposed_contact  = 1
-                                and     calculate_filtered.proposed_channel     = 'Text Message'
-                                and     pool.pass_validation_requirement_offer  = 1
-                                then    1
-                                end     )
-                                over    (   partition by calculate_filtered.pl_group
-                                        )
-                )                       as percentile,
 
                 case    when    calculate_filtered.is_proposed_contact  = 1
                         and     calculate_filtered.proposed_channel     = 'Text Message'
                         and     pool.pass_validation_requirement_offer  = 1
-                        then    case    when    calculate_filtered.pl_group in (
-                                                    'BAYLOR SCOTT WHITE HEALTHCARE - 3P',
-                                                    'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P',
-                                                    'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2',
-                                                    'CHOP - 3P',
+                        then    case    when    calculate_filtered.pl_group = 'CITY OF WASHINGTON DC - DMV - 3P'
+                                        then    case    when    pool.balance_dimdebtor_packet >= 350
+                                                        then    1
+                                                        else    0
+                                                        end
+                                        when    calculate_filtered.pl_group = 'MOUNT SINAI - 3P'
+                                        then    case    when    pool.batch_date < current_date() - 60
+                                                        then    1
+                                                        else    0
+                                                        end
+                                        when    calculate_filtered.pl_group = 'ST ELIZABETH HEALTHCARE - 3P'
+                                        then    case    when    pool.batch_date < '2024-01-01'
+                                                        then    1
+                                                        else    0
+                                                        end
+                                        when    calculate_filtered.pl_group in (
                                                     'COLUMBIA DOCTORS - 3P',                        --
                                                     'COUNTY OF MCHENRY IL - 3P',                    --
                                                     'COUNTY OF WINNEBAGO IL - 3P',                  --
                                                     'FRANCISCAN HEALTH - 3P',                       --
-                                                    'HEALTHPARTNERS - 3P',
-                                                    'HEALTHPARTNERS - 3P-2',
-                                                    'HEALTHPARTNERS WI - 3P',
-                                                    'HEALTHPARTNERS WI - 3P-2',
                                                     'IU HEALTH - 3P',                               --
-                                                    'IU SURGICAL CARE AFF - 3P',
-                                                    'MOUNT SINAI - 3P',                             --
                                                     'NORTHSHORE UNIV HEALTH - 3P',                  --
                                                     'NORTHWESTERN MEDICINE - 3P',                   --
                                                     'NW COMM HOSP - 3P-2',                          --
                                                     'NW COMM HOSP - 3P',                            --
-                                                    'PROMEDICA HS - 3P-2',
                                                     'PROVIDENCE ST JOSEPH HEALTH - 3P-2',           --
                                                     'PROVIDENCE ST JOSEPH HEALTH - 3P',             --
-                                                    'ST ELIZABETH HEALTHCARE - 3P',
                                                     -- 'STATE OF KS - DOR - 3P',                       --
                                                     'SWEDISH HOSPITAL - 3P',                        --
                                                     'U OF CHICAGO MEDICAL - 3P',                    --
@@ -575,25 +559,23 @@ with scores as
                                                     'UNIVERSAL HEALTH SERVICES - 3P',               --
                                                     'WEILL CORNELL PHY - 3P'                        --
                                                 )
-                                        then    case    when    percentile >= 0.50
-                                                        then    case    when    mod(rn, 2) = 1
-                                                                        then    'SIF'
-                                                                        else    'MAIN'
-                                                                        end
-                                                        else    NULL
-                                                        end
-                                        when    calculate_filtered.pl_group in (
-                                                    'CITY OF WASHINGTON DC - DMV - 3P'              --
-                                                )
-                                        then    case    when    pool.balance_dimdebtor_packet >= 350 --won't be perfect split because percentile and rn are not calculated with this criterion.
-                                                        then    case    when    percentile >= 0.50
-                                                                        then    case    when    mod(rn, 2) = 1
-                                                                                        then    'SIF'
-                                                                                        else    'MAIN'
-                                                                                        end
-                                                                        else    NULL
-                                                                        end
-                                                        else    NULL
+                                        then    1
+                                        else    0
+                                        end
+                        else    0
+                        end     as is_eligible_sif,
+
+
+
+                count(case when is_eligible_sif = 1 then 1 end) over (partition by calculate_filtered.pl_group order by marginal_fee_jitter desc)   as rn,
+
+                edwprodhh.pub_jchang.divide(rn, count(case when is_eligible_sif = 1 then 1 end) over (partition by calculate_filtered.pl_group))    as percentile,
+
+                case    when    is_eligible_sif = 1
+                        then    case    when    percentile >= 0.50
+                                        then    case    when    mod(rn, 2) = 1
+                                                        then    'SIF'
+                                                        else    'MAIN'
                                                         end
                                         else    NULL
                                         end
@@ -606,7 +588,7 @@ with scores as
                     on calculate_filtered.debtor_idx = pool.debtor_idx
 )
 select      *
-            exclude (rn, percentile, marginal_fee_jitter)
+            exclude (rn, percentile, marginal_fee_jitter, is_eligible_sif)
 from        calculate_template
 ;
 
@@ -1140,53 +1122,37 @@ with scores as
 
                 calculate_filtered.marginal_fee + uniform(-0.0001::decimal(9,9), 0.0001::decimal(9,9), random()) as marginal_fee_jitter,
 
-                count(case  when    calculate_filtered.is_proposed_contact  = 1
-                            and     calculate_filtered.proposed_channel     = 'Text Message'
-                            and     pool.pass_validation_requirement_offer  = 1
-                            then    1
-                            end     )
-                            over    (   partition by    calculate_filtered.pl_group
-                                        order by        marginal_fee_jitter desc
-                                    )   as rn,
-
-                edwprodhh.pub_jchang.divide(
-                    rn,
-                    count(case  when    calculate_filtered.is_proposed_contact  = 1
-                                and     calculate_filtered.proposed_channel     = 'Text Message'
-                                and     pool.pass_validation_requirement_offer  = 1
-                                then    1
-                                end     )
-                                over    (   partition by calculate_filtered.pl_group
-                                        )
-                )                       as percentile,
 
                 case    when    calculate_filtered.is_proposed_contact  = 1
                         and     calculate_filtered.proposed_channel     = 'Text Message'
                         and     pool.pass_validation_requirement_offer  = 1
-                        then    case    when    calculate_filtered.pl_group in (
-                                                    'BAYLOR SCOTT WHITE HEALTHCARE - 3P',
-                                                    'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P',
-                                                    'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2',
-                                                    'CHOP - 3P',
+                        then    case    when    calculate_filtered.pl_group = 'CITY OF WASHINGTON DC - DMV - 3P'
+                                        then    case    when    pool.balance_dimdebtor_packet >= 350
+                                                        then    1
+                                                        else    0
+                                                        end
+                                        when    calculate_filtered.pl_group = 'MOUNT SINAI - 3P'
+                                        then    case    when    pool.batch_date < current_date() - 60
+                                                        then    1
+                                                        else    0
+                                                        end
+                                        when    calculate_filtered.pl_group = 'ST ELIZABETH HEALTHCARE - 3P'
+                                        then    case    when    pool.batch_date < '2024-01-01'
+                                                        then    1
+                                                        else    0
+                                                        end
+                                        when    calculate_filtered.pl_group in (
                                                     'COLUMBIA DOCTORS - 3P',                        --
                                                     'COUNTY OF MCHENRY IL - 3P',                    --
                                                     'COUNTY OF WINNEBAGO IL - 3P',                  --
                                                     'FRANCISCAN HEALTH - 3P',                       --
-                                                    'HEALTHPARTNERS - 3P',
-                                                    'HEALTHPARTNERS - 3P-2',
-                                                    'HEALTHPARTNERS WI - 3P',
-                                                    'HEALTHPARTNERS WI - 3P-2',
                                                     'IU HEALTH - 3P',                               --
-                                                    'IU SURGICAL CARE AFF - 3P',
-                                                    'MOUNT SINAI - 3P',                             --
                                                     'NORTHSHORE UNIV HEALTH - 3P',                  --
                                                     'NORTHWESTERN MEDICINE - 3P',                   --
                                                     'NW COMM HOSP - 3P-2',                          --
                                                     'NW COMM HOSP - 3P',                            --
-                                                    'PROMEDICA HS - 3P-2',
                                                     'PROVIDENCE ST JOSEPH HEALTH - 3P-2',           --
                                                     'PROVIDENCE ST JOSEPH HEALTH - 3P',             --
-                                                    'ST ELIZABETH HEALTHCARE - 3P',
                                                     -- 'STATE OF KS - DOR - 3P',                       --
                                                     'SWEDISH HOSPITAL - 3P',                        --
                                                     'U OF CHICAGO MEDICAL - 3P',                    --
@@ -1194,25 +1160,23 @@ with scores as
                                                     'UNIVERSAL HEALTH SERVICES - 3P',               --
                                                     'WEILL CORNELL PHY - 3P'                        --
                                                 )
-                                        then    case    when    percentile >= 0.50
-                                                        then    case    when    mod(rn, 2) = 1
-                                                                        then    'SIF'
-                                                                        else    'MAIN'
-                                                                        end
-                                                        else    NULL
-                                                        end
-                                        when    calculate_filtered.pl_group in (
-                                                    'CITY OF WASHINGTON DC - DMV - 3P'              --
-                                                )
-                                        then    case    when    pool.balance_dimdebtor_packet >= 350 --won't be perfect split because percentile and rn are not calculated with this criterion.
-                                                        then    case    when    percentile >= 0.50
-                                                                        then    case    when    mod(rn, 2) = 1
-                                                                                        then    'SIF'
-                                                                                        else    'MAIN'
-                                                                                        end
-                                                                        else    NULL
-                                                                        end
-                                                        else    NULL
+                                        then    1
+                                        else    0
+                                        end
+                        else    0
+                        end     as is_eligible_sif,
+
+
+
+                count(case when is_eligible_sif = 1 then 1 end) over (partition by calculate_filtered.pl_group order by marginal_fee_jitter desc)   as rn,
+
+                edwprodhh.pub_jchang.divide(rn, count(case when is_eligible_sif = 1 then 1 end) over (partition by calculate_filtered.pl_group))    as percentile,
+
+                case    when    is_eligible_sif = 1
+                        then    case    when    percentile >= 0.50
+                                        then    case    when    mod(rn, 2) = 1
+                                                        then    'SIF'
+                                                        else    'MAIN'
                                                         end
                                         else    NULL
                                         end
@@ -1225,6 +1189,6 @@ with scores as
                     on calculate_filtered.debtor_idx = pool.debtor_idx
 )
 select      *
-            exclude (rn, percentile, marginal_fee_jitter)
+            exclude (rn, percentile, marginal_fee_jitter, is_eligible_sif)
 from        calculate_template
 ;
