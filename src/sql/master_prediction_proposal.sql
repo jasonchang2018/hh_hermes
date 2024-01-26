@@ -549,7 +549,6 @@ with scores as
                                                     'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P',
                                                     'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2',
                                                     'CHOP - 3P',
-                                                    'CITY OF WASHINGTON DC - DMV - 3P',             --
                                                     'COLUMBIA DOCTORS - 3P',                        --
                                                     'COUNTY OF MCHENRY IL - 3P',                    --
                                                     'COUNTY OF WINNEBAGO IL - 3P',                  --
@@ -580,6 +579,19 @@ with scores as
                                                         then    case    when    mod(rn, 2) = 1
                                                                         then    'SIF'
                                                                         else    'MAIN'
+                                                                        end
+                                                        else    NULL
+                                                        end
+                                        when    calculate_filtered.pl_group in (
+                                                    'CITY OF WASHINGTON DC - DMV - 3P'              --
+                                                )
+                                        then    case    when    pool.balance_dimdebtor_packet >= 350 --won't be perfect split because percentile and rn are not calculated with this criterion.
+                                                        then    case    when    percentile >= 0.50
+                                                                        then    case    when    mod(rn, 2) = 1
+                                                                                        then    'SIF'
+                                                                                        else    'MAIN'
+                                                                                        end
+                                                                        else    NULL
                                                                         end
                                                         else    NULL
                                                         end
@@ -1156,7 +1168,6 @@ with scores as
                                                     'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P',
                                                     'BAYLOR SCOTT WHITE HEALTHCARE EPIC - 3P-2',
                                                     'CHOP - 3P',
-                                                    'CITY OF WASHINGTON DC - DMV - 3P',             --
                                                     'COLUMBIA DOCTORS - 3P',                        --
                                                     'COUNTY OF MCHENRY IL - 3P',                    --
                                                     'COUNTY OF WINNEBAGO IL - 3P',                  --
@@ -1187,6 +1198,19 @@ with scores as
                                                         then    case    when    mod(rn, 2) = 1
                                                                         then    'SIF'
                                                                         else    'MAIN'
+                                                                        end
+                                                        else    NULL
+                                                        end
+                                        when    calculate_filtered.pl_group in (
+                                                    'CITY OF WASHINGTON DC - DMV - 3P'              --
+                                                )
+                                        then    case    when    pool.balance_dimdebtor_packet >= 350 --won't be perfect split because percentile and rn are not calculated with this criterion.
+                                                        then    case    when    percentile >= 0.50
+                                                                        then    case    when    mod(rn, 2) = 1
+                                                                                        then    'SIF'
+                                                                                        else    'MAIN'
+                                                                                        end
+                                                                        else    NULL
                                                                         end
                                                         else    NULL
                                                         end
