@@ -63,9 +63,9 @@ with fiscal_dialer_phones as
                         on  phones.debtor_idx   = text_stops.debtor_idx
                         and phones.phone_number = text_stops.phone_number
                         
-        where       case    when    client.is_fdcpa = 1
+        where       case    /*when    client.is_fdcpa = 1
                             and     phones.phone_number_source = 'OTHER'                    --Skips, which cannot be texted for FDCPA.
-                            then    FALSE
+                            then    FALSE*/
                             when    debtor.industry = 'HC'
                             and     datediff(day, debtor.batch_date, current_date()) > 365
                             and     phones.current_status not in ('CONSENT')                --Need consent for HC if debt_age older than 1 year
@@ -299,9 +299,9 @@ with fiscal_dialer_phones as
                         on  phones.debtor_idx   = text_stops.debtor_idx
                         and phones.phone_number = text_stops.phone_number
                         
-        where       case    when    client.is_fdcpa = 1
+        where       case    /*when    client.is_fdcpa = 1
                             and     phones.phone_number_source = 'OTHER'                    --Skips, which cannot be texted for FDCPA.
-                            then    FALSE
+                            then    FALSE*/
                             when    debtor.industry = 'HC'
                             and     datediff(day, debtor.batch_date, current_date()) > 365
                             and     phones.current_status not in ('CONSENT')                --Need consent for HC if debt_age older than 1 year
