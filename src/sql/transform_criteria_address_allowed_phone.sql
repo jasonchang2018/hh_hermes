@@ -35,9 +35,25 @@ with fiscal_dialer_phones as
                 listagg(distinct phone_number, ';') as valid_phone_number_voapps
     from        joined
     where       packet_idx not in (select packet_idx from joined where current_status = 'DNC')
+                -- and (
+                --     phone_number_source in ('CLIENT', 'DEBTOR')
+                --     or packet_idx not in (select packet_idx from joined where debtor_auth_date is null) --phone_packet.packet_cell in ('M','T')
+                -- )
                 and (
-                    phone_number_source in ('CLIENT', 'DEBTOR')
-                    or packet_idx not in (select packet_idx from joined where debtor_auth_date is null) --phone_packet.packet_cell in ('M','T')
+                    (
+                        phone_number_source in ('CLIENT', 'DEBTOR')
+                        or packet_idx not in (select packet_idx from joined where debtor_auth_date is null) --phone_packet.packet_cell in ('M','T')
+                    ) or
+                    (
+                        debtor_idx in (
+                            select      debtor_idx
+                            from        edwprodhh.pub_jchang.master_phone_number
+                            where       source_field in (
+                                            'PHONE',
+                                            'PAYER_PHONE'
+                                        )
+                        )
+                    )
                 )
     group by    1
 )
@@ -271,9 +287,25 @@ with fiscal_dialer_phones as
                 listagg(distinct phone_number, ';') as valid_phone_number_voapps
     from        joined
     where       packet_idx not in (select packet_idx from joined where current_status = 'DNC')
+                -- and (
+                --     phone_number_source in ('CLIENT', 'DEBTOR')
+                --     or packet_idx not in (select packet_idx from joined where debtor_auth_date is null) --phone_packet.packet_cell in ('M','T')
+                -- )
                 and (
-                    phone_number_source in ('CLIENT', 'DEBTOR')
-                    or packet_idx not in (select packet_idx from joined where debtor_auth_date is null) --phone_packet.packet_cell in ('M','T')
+                    (
+                        phone_number_source in ('CLIENT', 'DEBTOR')
+                        or packet_idx not in (select packet_idx from joined where debtor_auth_date is null) --phone_packet.packet_cell in ('M','T')
+                    ) or
+                    (
+                        debtor_idx in (
+                            select      debtor_idx
+                            from        edwprodhh.pub_jchang.master_phone_number
+                            where       source_field in (
+                                            'PHONE',
+                                            'PAYER_PHONE'
+                                        )
+                        )
+                    )
                 )
     group by    1
 )
