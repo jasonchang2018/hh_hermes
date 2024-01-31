@@ -3,8 +3,12 @@ with migration as
     select      client_idx
     from        edwprodhh.pub_jchang.master_client
     where       pl_group in (
-                    'STATE OF OK - TAX COMMISSION - 3P',
-                    'STATE OF PA - TURNPIKE COMMISSION - 3P'
+                    'STATE OF IL - DOR - 3P',
+                    'STATE OF IL - DOR - 3P-2',
+                    'STATE OF VA - DOT - 3P',
+                    'STATE OF VA - DOT - 3P-2',
+                    'STATE OF VA - DOT - ACCESS - 3P',
+                    'STATE OF VA - DOT - BK'
                 )
                 and is_fdcpa = 0
     order by    1
