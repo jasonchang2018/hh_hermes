@@ -1,5 +1,4 @@
-create or replace table
--- create or replace view
+create or replace view
     edwprodhh.hermes.report_tax_sif_results
 as
 with test_population as
