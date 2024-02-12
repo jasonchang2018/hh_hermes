@@ -48,7 +48,8 @@ with scores as
                         end     as is_priority_minimum,
 
                 pool.treatment_group,
-                case when pool.treatment_group is not null then uniform(0, 9, random()) else NULL end as stratum
+                case when pool.treatment_group is not null then uniform(0, 9, random()) else NULL end as stratum,
+                pool.batch_date
 
     from        scores_long
                 left join
@@ -69,8 +70,20 @@ with scores as
 
                 -- row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_profit desc)                                  as rank_profit,     -- 1 is best
                 -- row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_margin desc)                                  as rank_margin,     -- 1 is best
-                row_number() over (order by scores.is_priority_minimum desc, marginal_profit desc)                                  as rank_profit,     -- stratum introduces jitter and increases equitable allocation to experiment groups
-                row_number() over (order by scores.is_priority_minimum desc, marginal_margin desc)                                  as rank_margin,     -- stratum introduces jitter and increases equitable allocation to experiment groups
+                row_number() over (order by     scores.is_priority_minimum desc,
+                                                case    when    scores.pl_group in ('STATE OF IL - DOR - 3P', 'STATE OF IL - DOR - 3P-2')
+                                                        then    scores.batch_date
+                                                        else    current_date()
+                                                        end     desc,
+                                                marginal_profit desc
+                                                                                                                ) as rank_profit,     -- stratum introduces jitter and increases equitable allocation to experiment groups
+                row_number() over (order by     scores.is_priority_minimum desc,
+                                                case    when    scores.pl_group in ('STATE OF IL - DOR - 3P', 'STATE OF IL - DOR - 3P-2')
+                                                        then    scores.batch_date
+                                                        else    current_date()
+                                                        end     desc,
+                                                marginal_margin desc
+                                                                                                                ) as rank_margin,     -- stratum introduces jitter and increases equitable allocation to experiment groups
                 
                 (rank_profit    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Profit')) +
                 (rank_margin    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Margin'))
@@ -649,7 +662,8 @@ with scores as
                         end     as is_priority_minimum,
 
                 pool.treatment_group,
-                case when pool.treatment_group is not null then uniform(0, 9, random()) else NULL end as stratum
+                case when pool.treatment_group is not null then uniform(0, 9, random()) else NULL end as stratum,
+                pool.batch_date
 
     from        scores_long
                 left join
@@ -670,8 +684,20 @@ with scores as
 
                 -- row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_profit desc)                                  as rank_profit,     -- 1 is best
                 -- row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_margin desc)                                  as rank_margin,     -- 1 is best
-                row_number() over (order by scores.is_priority_minimum desc, marginal_profit desc)                                  as rank_profit,     -- stratum introduces jitter and increases equitable allocation to experiment groups
-                row_number() over (order by scores.is_priority_minimum desc, marginal_margin desc)                                  as rank_margin,     -- stratum introduces jitter and increases equitable allocation to experiment groups
+                row_number() over (order by     scores.is_priority_minimum desc,
+                                                case    when    scores.pl_group in ('STATE OF IL - DOR - 3P', 'STATE OF IL - DOR - 3P-2')
+                                                        then    scores.batch_date
+                                                        else    current_date()
+                                                        end     desc,
+                                                marginal_profit desc
+                                                                                                                ) as rank_profit,     -- stratum introduces jitter and increases equitable allocation to experiment groups
+                row_number() over (order by     scores.is_priority_minimum desc,
+                                                case    when    scores.pl_group in ('STATE OF IL - DOR - 3P', 'STATE OF IL - DOR - 3P-2')
+                                                        then    scores.batch_date
+                                                        else    current_date()
+                                                        end     desc,
+                                                marginal_margin desc
+                                                                                                                ) as rank_margin,     -- stratum introduces jitter and increases equitable allocation to experiment groups
                 
                 (rank_profit    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Profit')) +
                 (rank_margin    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Margin'))
