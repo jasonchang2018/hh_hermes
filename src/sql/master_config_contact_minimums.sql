@@ -35,6 +35,8 @@ values
     ('ALL',                                         'Dialer-Agent Call',    1,                      10,                         0,                          'ALL'),
     ('ALL',                                         'Dialer-Agent Call',    2,                      30,                         0,                          'ALL'),
     ('ALL',                                         'Dialer-Agent Call',    3,                      45,                         0,                          'ALL'),
+    ('STATE OF IL - DOR - 3P',                      'Letter',               1,                      10,                         0,                          'ALL'),
+    ('STATE OF IL - DOR - 3P-2',                    'Letter',               1,                      10,                         0,                          'ALL'),
 
     ----  INTERFERING TREATMENTS  ----
 

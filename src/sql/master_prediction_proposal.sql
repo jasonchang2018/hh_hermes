@@ -48,7 +48,8 @@ with scores as
                         end     as is_priority_minimum,
 
                 pool.treatment_group,
-                case when pool.treatment_group is not null then uniform(0, 9, random()) else NULL end as stratum
+                case when pool.treatment_group is not null then uniform(0, 9, random()) else NULL end as stratum,
+                pool.batch_date
 
     from        scores_long
                 left join
@@ -69,8 +70,47 @@ with scores as
 
                 -- row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_profit desc)                                  as rank_profit,     -- 1 is best
                 -- row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_margin desc)                                  as rank_margin,     -- 1 is best
-                row_number() over (order by scores.is_priority_minimum desc, marginal_profit desc)                                  as rank_profit,     -- stratum introduces jitter and increases equitable allocation to experiment groups
-                row_number() over (order by scores.is_priority_minimum desc, marginal_margin desc)                                  as rank_margin,     -- stratum introduces jitter and increases equitable allocation to experiment groups
+                row_number() over (order by     scores.is_priority_minimum desc,
+
+                                                --  Prioritize hitting SOI contractual requirement for Priority Minimums.
+                                                case    when    scores.is_priority_minimum = 1
+                                                        then    case    when    scores.pl_group in ('STATE OF IL - DOR - 3P', 'STATE OF IL - DOR - 3P-2')
+                                                                        then    1
+                                                                        else    0
+                                                                        end
+                                                        else    0
+                                                        end     desc,
+                                                case    when    scores.is_priority_minimum = 1
+                                                        then    case    when    scores.pl_group in ('STATE OF IL - DOR - 3P', 'STATE OF IL - DOR - 3P-2')
+                                                                        then    scores.batch_date
+                                                                        else    current_date()
+                                                                        end
+                                                        else    current_date()
+                                                        end     desc,
+
+                                                marginal_profit desc
+                                                                                                                ) as rank_profit,     -- stratum introduces jitter and increases equitable allocation to experiment groups
+                row_number() over (order by     scores.is_priority_minimum desc,
+
+                                                --  Prioritize hitting SOI contractual requirement for Priority Minimums.
+                                                case    when    scores.is_priority_minimum = 1
+                                                        then    case    when    scores.pl_group in ('STATE OF IL - DOR - 3P', 'STATE OF IL - DOR - 3P-2')
+                                                                        then    1
+                                                                        else    0
+                                                                        end
+                                                        else    0
+                                                        end     desc,
+                                                case    when    scores.is_priority_minimum = 1
+                                                        then    case    when    scores.pl_group in ('STATE OF IL - DOR - 3P', 'STATE OF IL - DOR - 3P-2')
+                                                                        then    scores.batch_date
+                                                                        else    current_date()
+                                                                        end
+                                                        else    current_date()
+                                                        end     desc,
+
+                                                marginal_margin desc
+                                                                                                                ) as rank_margin,     -- stratum introduces jitter and increases equitable allocation to experiment groups
+
                 
                 (rank_profit    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Profit')) +
                 (rank_margin    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Margin'))
@@ -317,14 +357,15 @@ with scores as
                         end                                                                                                                                                                     as is_below_cost_client,
                 
 
-                count(*) over (partition by proposed_channel, filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                as running_count_channel_client,
+                -- count(*) over (partition by proposed_channel, filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                as running_count_channel_client,
+                sum(marginal_cost) over (partition by proposed_channel, filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                as running_cost_channel_client,
 
-                case    when    proposed_channel = 'Letter'         then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_letters    then 1 else 0 end
-                        when    proposed_channel = 'Text Message'   then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_texts      then 1 else 0 end
-                        when    proposed_channel = 'VoApp'          then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_voapps     then 1 else 0 end
-                        when    proposed_channel = 'Email'          then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_emails     then 1 else 0 end
+                case    when    proposed_channel = 'Letter'         then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_letters    then 1 else 0 end
+                        when    proposed_channel = 'Text Message'   then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_texts      then 1 else 0 end
+                        when    proposed_channel = 'VoApp'          then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_voapps     then 1 else 0 end
+                        when    proposed_channel = 'Email'          then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_emails     then 1 else 0 end
                         else    0
-                        end                                                                                                                                                                     as has_not_reached_min_activity_channel_client
+                        end                                                                                                                                                                     as has_not_reached_min_cost_channel_client
 
     from        filter_running_cost_channels
                 left join
@@ -340,7 +381,7 @@ with scores as
                     sum(marginal_cost) over (
                         partition by    proposed_channel
                         order by        is_below_cost_client                            desc,
-                                        has_not_reached_min_activity_channel_client     desc,
+                                        has_not_reached_min_cost_channel_client         desc,
                                         rank_weighted                                   asc
                     )               as running_cost_channel_global,
 
@@ -649,7 +690,8 @@ with scores as
                         end     as is_priority_minimum,
 
                 pool.treatment_group,
-                case when pool.treatment_group is not null then uniform(0, 9, random()) else NULL end as stratum
+                case when pool.treatment_group is not null then uniform(0, 9, random()) else NULL end as stratum,
+                pool.batch_date
 
     from        scores_long
                 left join
@@ -670,8 +712,47 @@ with scores as
 
                 -- row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_profit desc)                                  as rank_profit,     -- 1 is best
                 -- row_number() over (order by scores.is_priority_minimum desc, case when scores.treatment_group is not null then 1 else 0 end desc, scores.stratum desc, marginal_margin desc)                                  as rank_margin,     -- 1 is best
-                row_number() over (order by scores.is_priority_minimum desc, marginal_profit desc)                                  as rank_profit,     -- stratum introduces jitter and increases equitable allocation to experiment groups
-                row_number() over (order by scores.is_priority_minimum desc, marginal_margin desc)                                  as rank_margin,     -- stratum introduces jitter and increases equitable allocation to experiment groups
+                row_number() over (order by     scores.is_priority_minimum desc,
+
+                                                --  Prioritize hitting SOI contractual requirement for Priority Minimums.
+                                                case    when    scores.is_priority_minimum = 1
+                                                        then    case    when    scores.pl_group in ('STATE OF IL - DOR - 3P', 'STATE OF IL - DOR - 3P-2')
+                                                                        then    1
+                                                                        else    0
+                                                                        end
+                                                        else    0
+                                                        end     desc,
+                                                case    when    scores.is_priority_minimum = 1
+                                                        then    case    when    scores.pl_group in ('STATE OF IL - DOR - 3P', 'STATE OF IL - DOR - 3P-2')
+                                                                        then    scores.batch_date
+                                                                        else    current_date()
+                                                                        end
+                                                        else    current_date()
+                                                        end     desc,
+
+                                                marginal_profit desc
+                                                                                                                ) as rank_profit,     -- stratum introduces jitter and increases equitable allocation to experiment groups
+                row_number() over (order by     scores.is_priority_minimum desc,
+
+                                                --  Prioritize hitting SOI contractual requirement for Priority Minimums.
+                                                case    when    scores.is_priority_minimum = 1
+                                                        then    case    when    scores.pl_group in ('STATE OF IL - DOR - 3P', 'STATE OF IL - DOR - 3P-2')
+                                                                        then    1
+                                                                        else    0
+                                                                        end
+                                                        else    0
+                                                        end     desc,
+                                                case    when    scores.is_priority_minimum = 1
+                                                        then    case    when    scores.pl_group in ('STATE OF IL - DOR - 3P', 'STATE OF IL - DOR - 3P-2')
+                                                                        then    scores.batch_date
+                                                                        else    current_date()
+                                                                        end
+                                                        else    current_date()
+                                                        end     desc,
+
+                                                marginal_margin desc
+                                                                                                                ) as rank_margin,     -- stratum introduces jitter and increases equitable allocation to experiment groups
+
                 
                 (rank_profit    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Profit')) +
                 (rank_margin    * (select weight from edwprodhh.hermes.master_config_objectives where metric_name = 'Margin'))
@@ -918,14 +999,15 @@ with scores as
                         end                                                                                                                                                                     as is_below_cost_client,
                 
 
-                count(*) over (partition by proposed_channel, filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                as running_count_channel_client,
+                -- count(*) over (partition by proposed_channel, filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                as running_count_channel_client,
+                sum(marginal_cost) over (partition by proposed_channel, filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                as running_cost_channel_client,
 
-                case    when    proposed_channel = 'Letter'         then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_letters    then 1 else 0 end
-                        when    proposed_channel = 'Text Message'   then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_texts      then 1 else 0 end
-                        when    proposed_channel = 'VoApp'          then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_voapps     then 1 else 0 end
-                        when    proposed_channel = 'Email'          then  case when running_count_channel_client <= constraints_plgroup.min_activity_running_emails     then 1 else 0 end
+                case    when    proposed_channel = 'Letter'         then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_letters    then 1 else 0 end
+                        when    proposed_channel = 'Text Message'   then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_texts      then 1 else 0 end
+                        when    proposed_channel = 'VoApp'          then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_voapps     then 1 else 0 end
+                        when    proposed_channel = 'Email'          then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_emails     then 1 else 0 end
                         else    0
-                        end                                                                                                                                                                     as has_not_reached_min_activity_channel_client
+                        end                                                                                                                                                                     as has_not_reached_min_cost_channel_client
 
     from        filter_running_cost_channels
                 left join
@@ -941,7 +1023,7 @@ with scores as
                     sum(marginal_cost) over (
                         partition by    proposed_channel
                         order by        is_below_cost_client                            desc,
-                                        has_not_reached_min_activity_channel_client     desc,
+                                        has_not_reached_min_cost_channel_client         desc,
                                         rank_weighted                                   asc
                     )               as running_cost_channel_global,
 

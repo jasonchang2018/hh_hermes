@@ -177,6 +177,13 @@ select      debtor.debtor_idx,
                                                     then    1
                                                     else    0
                                                     end
+                                    when    dimdebtor.st = 'CA'
+                                    then    case    when    debtor.pl_group in (
+                                                                'BROWARD HEALTH - 3P'
+                                                            )
+                                                    then    0
+                                                    else    1
+                                                    end
                                     when    dimdebtor.st = 'CT'
                                     then    case    when    debtor.pl_group in (
                                                                 'STATE OF VA - DOT - 3P',
@@ -428,6 +435,13 @@ select      debtor.debtor_idx,
                                                             )
                                                     then    1
                                                     else    0
+                                                    end
+                                    when    dimdebtor.st = 'CA'
+                                    then    case    when    debtor.pl_group in (
+                                                                'BROWARD HEALTH - 3P'
+                                                            )
+                                                    then    0
+                                                    else    1
                                                     end
                                     when    dimdebtor.st = 'CT'
                                     then    case    when    debtor.pl_group in (
