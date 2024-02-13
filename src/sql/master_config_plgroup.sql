@@ -33,7 +33,7 @@ create or replace table
     LETTER_CODE_CLIENT	                VARCHAR(16777216),          --25
     TEXT_CODE_CLIENT	                VARCHAR(16777216),          --26
     VOAPP_CODE_CLIENT	                VARCHAR(16777216),          --27
-    min_cost_JSON	                OBJECT                      --28
+    min_cost_JSON	                OBJECT                          --28
 )
 ;
 
@@ -160,7 +160,7 @@ values
     ('NORTHWESTERN MEDICINE - 3P',                              1,      /*1*/ 1,      1,      1,      1,                  30000,  10000,  10000,  10000,  0,                  4160,   3650,   190,    320,    0,                  -1,     -1,     -1,     -1,     -1,                 'HMHHP',        'TXTSMSH1',     'USUAL',                    NULL,   NULL,   NULL,   NULL),
     ('NW COMM HOSP - 3P',                                       1,      /*1*/ 1,      1,      1,      1,                  30000,  10000,  10000,  10000,  0,                  1120,   1010,   30,     80,     0,                  -1,     -1,     -1,     -1,     -1,                 'HMHHP',        'TXTSMSH1',     'USUAL',                    NULL,   NULL,   NULL,   NULL),
     ('NW COMM HOSP - 3P-2',                                     1,      /*1*/ 1,      1,      1,      1,                  30000,  10000,  10000,  10000,  0,                  360,    320,    10,     30,     0,                  -1,     -1,     -1,     -1,     -1,                 'HMHHP',        'TXTSMSH1',     'USUAL',                    NULL,   NULL,   NULL,   NULL),
-    ('OKLAHOMA TURNPIKE AUTHORITY - 3P',                        0,      /*1*/ 0,      0,      0,      0,                  30000,  10000,  10000,  10000,  0,                  0,      0,      0,      0,      0,                  -1,     -1,     -1,     -1,     -1,                 NULL,           NULL,           NULL,                       NULL,   NULL,   NULL,   NULL),
+    ('OKLAHOMA TURNPIKE AUTHORITY - 3P',                        1,      /*1*/ 1,      1,      0,      0,                  174,    150,    24,     0,      0,                  174,    150,    24,     0,      0,                  -1,     -1,     -1,     -1,     -1,                 NULL,           NULL,           NULL,                       NULL,   NULL,   NULL,   NULL),
     ('ONE GAS - 3P',                                            0,      /*1*/ 0,      0,      0,      1,                  30000,  10000,  10000,  10000,  0,                  0,      0,      0,      0,      0,                  -1,     -1,     -1,     -1,     -1,                 NULL,           NULL,           NULL,                       NULL,   NULL,   NULL,   NULL),
     ('PALOS HEALTH - 3P',                                       1,      /*1*/ 1,      1,      1,      1,                  30000,  10000,  10000,  10000,  0,                  30,     30,     0,      0,      0,                  -1,     -1,     -1,     -1,     -1,                 'HMHHP',        'TXTSMSH1',     'USUAL',                    NULL,   NULL,   NULL,   NULL),
     ('PRISMA HEALTH - 3P',                                      1,      /*1*/ 1,      1,      1,      1,                  30000,  10000,  10000,  10000,  0,                  6810,   6110,   230,    470,    0,                  -1,     -1,     -1,     -1,     -1,                 'HMHHP',        'TXTSMSH1',     'USUAL',                    NULL,   NULL,   NULL,   NULL),
