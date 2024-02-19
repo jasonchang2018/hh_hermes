@@ -606,16 +606,81 @@ with scores as
                         else    0
                         end     as is_eligible_sif,
 
+                
+                case    when    calculate_filtered.is_proposed_contact  = 1
+                        and     calculate_filtered.proposed_channel     = 'Text Message'
+                        and     pool.pass_validation_requirement_offer  = 1
+                        then    case    when    calculate_filtered.pl_group in (
+                                                    'CITY OF LA CA - FINANCE - 3P',
+                                                    'CITY OF PHILADELPHIA PA - MISC - 3P',
+                                                    'CITY OF PHILADELPHIA PA - PARKING - 3P',
+                                                    'CITY OF SEATTLE WA - MUNI COURT - 3P',
+                                                    'CITY OF SEATTLE WA - MUNI COURT - 3P-2',
+                                                    'COUNTY OF CHAMPAIGN IL - 3P',
+                                                    'COUNTY OF DEKALB IL - 3P',
+                                                    'COUNTY OF DUPAGE IL - 3P',
+                                                    'COUNTY OF DUVAL FL - 3P',
+                                                    'COUNTY OF KANE IL - 3P',
+                                                    'COUNTY OF KANKAKEE IL - 3P',
+                                                    'COUNTY OF KENDALL IL - 3P',
+                                                    'COUNTY OF LAKE IL - 3P',
+                                                    'COUNTY OF LASALLE IL - 3P',
+                                                    'COUNTY OF LEE IL - 3P',
+                                                    'COUNTY OF MADISON IL - 3P',
+                                                    'COUNTY OF MCHENRY IL - 3P',
+                                                    'COUNTY OF POLK FL - 3P',
+                                                    'COUNTY OF SANGAMON IL - 3P',
+                                                    'COUNTY OF SARASOTA FL - 3P',
+                                                    'COUNTY OF VENTURA CA - 3P',
+                                                    'COUNTY OF WINNEBAGO IL - 3P',
+                                                    'ELIZABETH RIVER CROSSINGS - 3P',
+                                                    'STATE OF IL - DOR - 3P',
+                                                    'STATE OF IL - DOR - 3P-2',
+                                                    'STATE OF KS - DOR - 3P',
+                                                    'STATE OF OK - TAX COMMISSION - 3P',
+                                                    'STATE OF PA - TURNPIKE COMMISSION - 3P',
+                                                    'CARLE HEALTHCARE - 3P',
+                                                    'CARLE HEALTHCARE - 3P-2',
+                                                    'FRANCISCAN HEALTH - 3P',
+                                                    'IU HEALTH - 3P',
+                                                    'MCLEOD HEALTH - 3P',
+                                                    'NORTHSHORE UNIV HEALTH - 3P',
+                                                    'NORTHWESTERN MEDICINE - 3P',
+                                                    'NW COMM HOSP - 3P',
+                                                    'NW COMM HOSP - 3P-2',
+                                                    'PALOS HEALTH - 3P',
+                                                    'PRISMA HEALTH - 3P',
+                                                    'PRISMA HEALTH - 3P-2',
+                                                    'PRISMA HEALTH UNIVERSITY - 3P',
+                                                    'PROVIDENCE ST JOSEPH HEALTH - 3P',
+                                                    'PROVIDENCE ST JOSEPH HEALTH - 3P-2',
+                                                    'SWEDISH HOSPITAL - 3P',
+                                                    'U OF CHICAGO MEDICAL - 3P'
+                                                )
+                                        then    1
+                                        else    0
+                                        end
+                        else    0
+                        end     as is_eligible_tax,
+
 
 
                 count(case when is_eligible_sif = 1 then 1 end) over (partition by calculate_filtered.pl_group order by marginal_fee_jitter desc)   as rn,
 
                 edwprodhh.pub_jchang.divide(rn, count(case when is_eligible_sif = 1 then 1 end) over (partition by calculate_filtered.pl_group))    as percentile,
 
-                case    when    is_eligible_sif = 1
-                        then    case    when    percentile >= 0.50
-                                        then    case    when    mod(rn, 2) = 1
-                                                        then    'SIF'
+                case    when    is_proposed_contact = 1
+                        then    case    when    calculate_filtered.proposed_channel = 'Text Message'
+                                        then    case    when    is_eligible_sif = 1
+                                                        then    case    when    percentile >= 0.50
+                                                                        then    case    when    mod(rn, 2) = 1
+                                                                                        then    'SIF-SIF'
+                                                                                        else    'SIF-TAX'
+                                                                                        end
+                                                                        else    'TAX'
+                                                                        end
+                                                        when    is_eligible_tax = 1
+                                                        then    'TAX'
                                                         else    'MAIN'
                                                         end
                                         else    NULL
@@ -1248,16 +1313,81 @@ with scores as
                         else    0
                         end     as is_eligible_sif,
 
+                
+                case    when    calculate_filtered.is_proposed_contact  = 1
+                        and     calculate_filtered.proposed_channel     = 'Text Message'
+                        and     pool.pass_validation_requirement_offer  = 1
+                        then    case    when    calculate_filtered.pl_group in (
+                                                    'CITY OF LA CA - FINANCE - 3P',
+                                                    'CITY OF PHILADELPHIA PA - MISC - 3P',
+                                                    'CITY OF PHILADELPHIA PA - PARKING - 3P',
+                                                    'CITY OF SEATTLE WA - MUNI COURT - 3P',
+                                                    'CITY OF SEATTLE WA - MUNI COURT - 3P-2',
+                                                    'COUNTY OF CHAMPAIGN IL - 3P',
+                                                    'COUNTY OF DEKALB IL - 3P',
+                                                    'COUNTY OF DUPAGE IL - 3P',
+                                                    'COUNTY OF DUVAL FL - 3P',
+                                                    'COUNTY OF KANE IL - 3P',
+                                                    'COUNTY OF KANKAKEE IL - 3P',
+                                                    'COUNTY OF KENDALL IL - 3P',
+                                                    'COUNTY OF LAKE IL - 3P',
+                                                    'COUNTY OF LASALLE IL - 3P',
+                                                    'COUNTY OF LEE IL - 3P',
+                                                    'COUNTY OF MADISON IL - 3P',
+                                                    'COUNTY OF MCHENRY IL - 3P',
+                                                    'COUNTY OF POLK FL - 3P',
+                                                    'COUNTY OF SANGAMON IL - 3P',
+                                                    'COUNTY OF SARASOTA FL - 3P',
+                                                    'COUNTY OF VENTURA CA - 3P',
+                                                    'COUNTY OF WINNEBAGO IL - 3P',
+                                                    'ELIZABETH RIVER CROSSINGS - 3P',
+                                                    'STATE OF IL - DOR - 3P',
+                                                    'STATE OF IL - DOR - 3P-2',
+                                                    'STATE OF KS - DOR - 3P',
+                                                    'STATE OF OK - TAX COMMISSION - 3P',
+                                                    'STATE OF PA - TURNPIKE COMMISSION - 3P',
+                                                    'CARLE HEALTHCARE - 3P',
+                                                    'CARLE HEALTHCARE - 3P-2',
+                                                    'FRANCISCAN HEALTH - 3P',
+                                                    'IU HEALTH - 3P',
+                                                    'MCLEOD HEALTH - 3P',
+                                                    'NORTHSHORE UNIV HEALTH - 3P',
+                                                    'NORTHWESTERN MEDICINE - 3P',
+                                                    'NW COMM HOSP - 3P',
+                                                    'NW COMM HOSP - 3P-2',
+                                                    'PALOS HEALTH - 3P',
+                                                    'PRISMA HEALTH - 3P',
+                                                    'PRISMA HEALTH - 3P-2',
+                                                    'PRISMA HEALTH UNIVERSITY - 3P',
+                                                    'PROVIDENCE ST JOSEPH HEALTH - 3P',
+                                                    'PROVIDENCE ST JOSEPH HEALTH - 3P-2',
+                                                    'SWEDISH HOSPITAL - 3P',
+                                                    'U OF CHICAGO MEDICAL - 3P'
+                                                )
+                                        then    1
+                                        else    0
+                                        end
+                        else    0
+                        end     as is_eligible_tax,
+
 
 
                 count(case when is_eligible_sif = 1 then 1 end) over (partition by calculate_filtered.pl_group order by marginal_fee_jitter desc)   as rn,
 
                 edwprodhh.pub_jchang.divide(rn, count(case when is_eligible_sif = 1 then 1 end) over (partition by calculate_filtered.pl_group))    as percentile,
 
-                case    when    is_eligible_sif = 1
-                        then    case    when    percentile >= 0.50
-                                        then    case    when    mod(rn, 2) = 1
-                                                        then    'SIF'
+                case    when    is_proposed_contact = 1
+                        then    case    when    calculate_filtered.proposed_channel = 'Text Message'
+                                        then    case    when    is_eligible_sif = 1
+                                                        then    case    when    percentile >= 0.50
+                                                                        then    case    when    mod(rn, 2) = 1
+                                                                                        then    'SIF-SIF'
+                                                                                        else    'SIF-TAX'
+                                                                                        end
+                                                                        else    'TAX'
+                                                                        end
+                                                        when    is_eligible_tax = 1
+                                                        then    'TAX'
                                                         else    'MAIN'
                                                         end
                                         else    NULL

@@ -7,7 +7,7 @@ with test_population as
                 pl_group,
                 proposed_channel,
                 template,
-                case when template is not null then 1 else 0 end as is_in_experiment,
+                case when template in ('SIF-SIF', 'SIF-TAX') then 1 else 0 end as is_in_experiment,
                 marginal_fee as score,
                 request_id,
                 execute_time
@@ -42,7 +42,7 @@ with test_population as
     select      execute_time::date as execute_time,
                 pl_group,
                 is_in_experiment,
-                template,
+                regexp_replace(test_population.template, '^SIF\\-', '') as template,
                 count(*) as n_proposed
     from        test_population
     group by    1,2,3,4
@@ -84,7 +84,7 @@ with test_population as
                 template.pl_group,
                 case    when    template.is_in_experiment = 0
                         then    'NOT_IN_EXP'
-                        else    case    when    template.template = 'MAIN'
+                        else    case    when    template.template = 'TAX'
                                         then    'REGULAR'
                                         when    template.template = 'SIF'
                                         then    'SIF'

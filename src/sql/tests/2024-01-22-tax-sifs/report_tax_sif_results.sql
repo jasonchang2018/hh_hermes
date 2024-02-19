@@ -14,7 +14,7 @@ with test_population as
     where       execute_time >= '2024-01-22 15:03:45.294 -0800'
                 and is_proposed_contact = 1
                 and proposed_channel = 'Text Message'
-                and template is not null
+                and template in ('SIF-SIF', 'SIF-TAX')
                 and pl_group in (
                     'CITY OF WASHINGTON DC - DMV - 3P',             --
                     'COLUMBIA DOCTORS - 3P',                        --
@@ -42,7 +42,7 @@ with test_population as
     select      debtor.debtor_idx,
                 debtor.packet_idx,
                 debtor.pl_group,
-                test_population.template,
+                regexp_replace(test_population.template, '^SIF\\-', '') as template,
                 test_population.request_id,
                 texts.emid_idx,
                 texts.debtor_idx,
