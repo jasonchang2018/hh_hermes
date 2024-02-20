@@ -27,42 +27,60 @@ with fiscal_dialer_phones as
                         edwprodhh.pub_jchang.master_debtor as debtor
                         on phones.debtor_idx = debtor.debtor_idx
                     inner join
+                        edwprodhh.pub_jchang.master_client as client
+                        on debtor.client_idx = client.client_idx
+                    inner join
                         fiscal_dialer_phones as fiscal
                         on  phones.debtor_idx   = fiscal.debtor_idx
                         and phones.phone_number = fiscal.phone_valid
+                        
+        where       case    when    client.is_fdcpa = 1
+                            then    case    when    phones.phone_number_source = 'OTHER'
+                                            then    FALSE
+                                            when    phones.phone_number_source = 'CLIENT'
+                                            then    case    when    phones.current_status in ('CONSENT')
+                                                            then    TRUE
+                                                            else    FALSE
+                                                            end
+                                            when    phones.phone_number_source = 'DEBTOR'
+                                            then    case    when    phones.current_status in ('CONSENT', 'AUTHORIZED')
+                                                            then    TRUE
+                                                            else    FALSE
+                                                            end
+                                            else    FALSE
+                                            end
+                            when    client.is_fdcpa = 0
+                            then    case    when    phones.phone_number_source = 'OTHER'
+                                            then    case    when    phones.current_status in ('CONSENT')
+                                                            then    TRUE
+                                                            else    FALSE
+                                                            end
+                                            when    phones.phone_number_source = 'CLIENT'
+                                            then    case    when    phones.current_status in ('CONSENT')
+                                                            then    TRUE
+                                                            else    FALSE
+                                                            end
+                                            when    phones.phone_number_source = 'DEBTOR'
+                                            then    case    when    phones.current_status in ('CONSENT', 'AUTHORIZED')
+                                                            then    TRUE
+                                                            else    FALSE
+                                                            end
+                                            else    FALSE
+                                            end
+                            else    FALSE
+                            end
     )
     select      debtor_idx,
                 listagg(distinct phone_number, ';') as valid_phone_number_voapps
     from        joined
     where       packet_idx not in (select packet_idx from joined where current_status = 'DNC')
-                -- and (
-                --     phone_number_source in ('CLIENT', 'DEBTOR')
-                --     or packet_idx not in (select packet_idx from joined where debtor_auth_date is null) --phone_packet.packet_cell in ('M','T')
-                -- )
-                and (
-                    (
-                        phone_number_source in ('CLIENT', 'DEBTOR')
-                        or packet_idx not in (select packet_idx from joined where debtor_auth_date is null) --phone_packet.packet_cell in ('M','T')
-                    ) or
-                    (
-                        debtor_idx in (
-                            select      debtor_idx
-                            from        edwprodhh.pub_jchang.master_phone_number
-                            where       source_field in (
-                                            'PHONE',
-                                            'PAYER_PHONE'
-                                        )
-                        )
-                    )
-                )
     group by    1
 )
 , textable_debtors as
 (
     with joined as
     (
-        select      phones.*,
-                    client.is_fdcpa
+        select      phones.*
         from        edwprodhh.pub_jchang.transform_directory_phone_number as phones
                     inner join
                         edwprodhh.pub_jchang.master_debtor as debtor
@@ -79,20 +97,26 @@ with fiscal_dialer_phones as
                         on  phones.debtor_idx   = text_stops.debtor_idx
                         and phones.phone_number = text_stops.phone_number
                         
-        where       case    /*when    client.is_fdcpa = 1
-                            and     phones.phone_number_source = 'OTHER'                    --Skips, which cannot be texted for FDCPA.
-                            then    FALSE*/
-                            when    debtor.industry = 'HC'
-                            and     datediff(day, debtor.batch_date, current_date()) > 365
-                            and     phones.current_status not in ('CONSENT')                --Need consent for HC if debt_age older than 1 year
-                            then    FALSE
-                            when    debtor.industry = 'GOV'
-                            and     datediff(day, debtor.batch_date, current_date()) > 730  --Need consent for GOV if debt_age older than 2 years
-                            and     phones.current_status not in ('CONSENT')
-                            then    FALSE
-                            else    TRUE
+        where       case    when    client.is_fdcpa = 1
+                            then    case    when    phones.phone_number_source = 'OTHER'
+                                            then    FALSE
+                                            when    phones.phone_number_source = 'CLIENT'
+                                            then    case    when    phones.current_status in ('CONSENT')
+                                                            then    TRUE
+                                                            else    FALSE
+                                                            end
+                                            when    phones.phone_number_source = 'DEBTOR'
+                                            then    case    when    phones.current_status in ('CONSENT', 'AUTHORIZED')
+                                                            then    TRUE
+                                                            else    FALSE
+                                                            end
+                                            else    FALSE
+                                            end
+                            when    client.is_fdcpa = 0
+                            then    TRUE
+                            else    FALSE
                             end
-                        and coalesce(text_stops.stop_text, 0) = 0
+                    and coalesce(text_stops.stop_text, 0) = 0
     )
     select      debtor_idx,
                 listagg(distinct phone_number, ';') as valid_phone_number_texts
@@ -314,42 +338,60 @@ with fiscal_dialer_phones as
                         edwprodhh.pub_jchang.master_debtor as debtor
                         on phones.debtor_idx = debtor.debtor_idx
                     inner join
+                        edwprodhh.pub_jchang.master_client as client
+                        on debtor.client_idx = client.client_idx
+                    inner join
                         fiscal_dialer_phones as fiscal
                         on  phones.debtor_idx   = fiscal.debtor_idx
                         and phones.phone_number = fiscal.phone_valid
+                        
+        where       case    when    client.is_fdcpa = 1
+                            then    case    when    phones.phone_number_source = 'OTHER'
+                                            then    FALSE
+                                            when    phones.phone_number_source = 'CLIENT'
+                                            then    case    when    phones.current_status in ('CONSENT')
+                                                            then    TRUE
+                                                            else    FALSE
+                                                            end
+                                            when    phones.phone_number_source = 'DEBTOR'
+                                            then    case    when    phones.current_status in ('CONSENT', 'AUTHORIZED')
+                                                            then    TRUE
+                                                            else    FALSE
+                                                            end
+                                            else    FALSE
+                                            end
+                            when    client.is_fdcpa = 0
+                            then    case    when    phones.phone_number_source = 'OTHER'
+                                            then    case    when    phones.current_status in ('CONSENT')
+                                                            then    TRUE
+                                                            else    FALSE
+                                                            end
+                                            when    phones.phone_number_source = 'CLIENT'
+                                            then    case    when    phones.current_status in ('CONSENT')
+                                                            then    TRUE
+                                                            else    FALSE
+                                                            end
+                                            when    phones.phone_number_source = 'DEBTOR'
+                                            then    case    when    phones.current_status in ('CONSENT', 'AUTHORIZED')
+                                                            then    TRUE
+                                                            else    FALSE
+                                                            end
+                                            else    FALSE
+                                            end
+                            else    FALSE
+                            end
     )
     select      debtor_idx,
                 listagg(distinct phone_number, ';') as valid_phone_number_voapps
     from        joined
     where       packet_idx not in (select packet_idx from joined where current_status = 'DNC')
-                -- and (
-                --     phone_number_source in ('CLIENT', 'DEBTOR')
-                --     or packet_idx not in (select packet_idx from joined where debtor_auth_date is null) --phone_packet.packet_cell in ('M','T')
-                -- )
-                and (
-                    (
-                        phone_number_source in ('CLIENT', 'DEBTOR')
-                        or packet_idx not in (select packet_idx from joined where debtor_auth_date is null) --phone_packet.packet_cell in ('M','T')
-                    ) or
-                    (
-                        debtor_idx in (
-                            select      debtor_idx
-                            from        edwprodhh.pub_jchang.master_phone_number
-                            where       source_field in (
-                                            'PHONE',
-                                            'PAYER_PHONE'
-                                        )
-                        )
-                    )
-                )
     group by    1
 )
 , textable_debtors as
 (
     with joined as
     (
-        select      phones.*,
-                    client.is_fdcpa
+        select      phones.*
         from        edwprodhh.pub_jchang.transform_directory_phone_number as phones
                     inner join
                         edwprodhh.pub_jchang.master_debtor as debtor
@@ -366,20 +408,26 @@ with fiscal_dialer_phones as
                         on  phones.debtor_idx   = text_stops.debtor_idx
                         and phones.phone_number = text_stops.phone_number
                         
-        where       case    /*when    client.is_fdcpa = 1
-                            and     phones.phone_number_source = 'OTHER'                    --Skips, which cannot be texted for FDCPA.
-                            then    FALSE*/
-                            when    debtor.industry = 'HC'
-                            and     datediff(day, debtor.batch_date, current_date()) > 365
-                            and     phones.current_status not in ('CONSENT')                --Need consent for HC if debt_age older than 1 year
-                            then    FALSE
-                            when    debtor.industry = 'GOV'
-                            and     datediff(day, debtor.batch_date, current_date()) > 730  --Need consent for GOV if debt_age older than 2 years
-                            and     phones.current_status not in ('CONSENT')
-                            then    FALSE
-                            else    TRUE
+        where       case    when    client.is_fdcpa = 1
+                            then    case    when    phones.phone_number_source = 'OTHER'
+                                            then    FALSE
+                                            when    phones.phone_number_source = 'CLIENT'
+                                            then    case    when    phones.current_status in ('CONSENT')
+                                                            then    TRUE
+                                                            else    FALSE
+                                                            end
+                                            when    phones.phone_number_source = 'DEBTOR'
+                                            then    case    when    phones.current_status in ('CONSENT', 'AUTHORIZED')
+                                                            then    TRUE
+                                                            else    FALSE
+                                                            end
+                                            else    FALSE
+                                            end
+                            when    client.is_fdcpa = 0
+                            then    TRUE
+                            else    FALSE
                             end
-                        and coalesce(text_stops.stop_text, 0) = 0
+                    and coalesce(text_stops.stop_text, 0) = 0
     )
     select      debtor_idx,
                 listagg(distinct phone_number, ';') as valid_phone_number_texts
