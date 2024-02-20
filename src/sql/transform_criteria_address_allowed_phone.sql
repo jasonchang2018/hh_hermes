@@ -136,73 +136,101 @@ select      debtor.debtor_idx,
                     else    0
                     end     as pass_phone_voapps,
 
-            case    --  Exclusions must come first
-                    when    debtor.payplan is not null
-                    then    0
-                    when    debtor.status in ('PPA')
-                    then    0
-                    when    dimdebtor.st in ('MA', 'ZZ', 'BC')
-                    then    0
-                    when    client.is_fdcpa = 1
-                    and     dimdebtor.st in ('DC')
-                    then    0
-                    when    client.ash_cli = 1
-                    and     dimdebtor.st in ('CA', 'NJ', 'TX')
-                    then    0
-
-                    --  Inclusions next
-                    when    textable_debtors.debtor_idx is not null
-                    -- and     debtor.phone_number is not null
-                    and     not regexp_like(coalesce(dimfiscal_co_a.commercial, ''), '^COM.*')
-                    then    case    when    dimdebtor.st = 'NV'
-                                    then    case    when    debtor.pl_group in (
-                                                                'UNIVERSAL HEALTH SERVICES - 3P',
-                                                                'UNIVERSAL HEALTH SERVICES - PHYS - 3P'
-                                                            )
-                                                    then    1
-                                                    else    0
-                                                    end
-                                    when    dimdebtor.st in ('WA')
-                                    then    case    when    debtor.pl_group in (
-                                                                'PROVIDENCE ST JOSEPH HEALTH - 3P',
-                                                                'PROVIDENCE ST JOSEPH HEALTH - 3P-2'
-                                                            )
-                                                    then    1
-                                                    else    0
-                                                    end
-                                    when    dimdebtor.st = 'CO'
-                                    then    case    when    debtor.pl_group in (
-                                                                'STATE OF CO - JUDICIAL DEPT - 3P'
-                                                            )
-                                                    then    1
-                                                    else    0
-                                                    end
-                                    when    dimdebtor.st = 'CA'
-                                    then    case    when    debtor.pl_group in (
-                                                                'BROWARD HEALTH - 3P'
-                                                            )
+            case    when    textable_debtors.debtor_idx is not null
+                    then    case
+                                    --  Exclusions must come first
+                                    when    debtor.payplan is not null
+                                    then    0
+                                    when    debtor.logon in ('CO', 'DC', 'CHI')
+                                    then    case    when    dimdebtor.st in ('MA', 'BC', 'ZZ')
                                                     then    0
+                                                    when    debtor.status in ('LEG', 'LPF', 'PPA', 'PPC')
+                                                    then    0
+                                                    when    regexp_like(coalesce(dimfiscal_co_a.commercial, ''), '^COM.*')
+                                                    then    0
+                                                    when    client.is_fdcpa = 1
+                                                    then    case    when    dimdebtor.st in ('CA', 'CO', 'DC')
+                                                                    then    0
+                                                                    else    1
+                                                                    end
+                                                    when    client.ash_cli = 1
+                                                    then    case    when    dimdebtor.st in ('CA', 'NJ', 'TX')
+                                                                    then    0
+                                                                    else    1
+                                                                    end
+                                                    when    dimdebtor.st = 'CO'
+                                                    then    case    when    debtor.pl_group = 'STATE OF CO - JUDICIAL DEPT - 3P'
+                                                                    then    1
+                                                                    else    0
+                                                                    end
+                                                    when    dimdebtor.st = 'CT'
+                                                    then    case    when    debtor.pl_group in (
+                                                                                'STATE OF VA - DOT - 3P',
+                                                                                'STATE OF VA - DOT - 3P-2',
+                                                                                'STATE OF VA - DOT - ACCESS - 3P',
+                                                                                'STATE OF VA - DOT - BK',
+                                                                                'STATE OF VA - DOT - CC',
+                                                                                'STATE OF MD - COMPTROLLER - 3P',
+                                                                                'STATE OF MD - DBM CCU - 3P',
+                                                                                'STATE OF MD - TOLLWAY - 3P'
+                                                                            )
+                                                                    then    1
+                                                                    else    0
+                                                                    end
                                                     else    1
                                                     end
-                                    when    dimdebtor.st = 'CT'
-                                    then    case    when    debtor.pl_group in (
-                                                                'STATE OF VA - DOT - 3P',
-                                                                'STATE OF VA - DOT - 3P-2',
-                                                                'STATE OF VA - DOT - ACCESS - 3P',
-                                                                'STATE OF VA - DOT - BK',
-                                                                'STATE OF VA - DOT - CC',
-                                                                'STATE OF MD - COMPTROLLER - 3P',
-                                                                'STATE OF MD - DBM CCU - 3P',
-                                                                'STATE OF MD - TOLLWAY - 3P',
-                                                                'COLUMBIA DENTAL - 3P',
-                                                                'COLUMBIA DOCTORS - 3P',
-                                                                'COLUMBIA DOCTORS - TPL',
-                                                                'COLUMBIA DOCTORS LEGAL',
-                                                                'MOUNT SINAI - 3P',
-                                                                'WEILL CORNELL PHY - 3P'
+                                    when    debtor.logon = 'HH'
+                                    then    case    when    dimdebtor.st in ('CO', 'DC', 'BC', 'ZZ')
+                                                    then    0
+                                                    when    debtor.status in ('CAN', 'DEB', 'DEC', 'DIS', 'HLD', 'PPA', 'RCN', 'SIF',
+                                                                'L02', 'L04', 'L16', 'L19', 'LAE', 'LBK', 'LCN', 'LDI', 'LEG', 'LFD', 'LFW',
+                                                                'LGF', 'LJE', 'LLC', 'LNA', 'LNJ', 'LPF', 'LPG', 'LPR', 'LSF', 'LSP', 'LST'
                                                             )
-                                                    then    1
-                                                    else    0
+                                                    then    0
+                                                    when    dimdebtor.st = 'CT'
+                                                    then    case    when    debtor.pl_group in (
+                                                                                'COLUMBIA DOCTORS - 3P',
+                                                                                'MOUNT SINAI - 3P',
+                                                                                'WEILL CORNELL PHY - 3P'
+                                                                            )
+                                                                    then    1
+                                                                    else    0
+                                                                    end
+                                                    when    dimdebtor.st = 'NY'
+                                                    then    case    when    debtor.pl_group in (
+                                                                                'COLUMBIA DENTAL - 3P',
+                                                                                'COLUMBIA DOCTORS - 3P',
+                                                                                'MOUNT SINAI - 3P',
+                                                                                'WEILL CORNELL PHY - 3P'
+                                                                            )
+                                                                    then    1
+                                                                    else    0
+                                                                    end
+                                                    when    dimdebtor.st = 'NV'
+                                                    then    case    when    debtor.pl_group in (
+                                                                                -- 'UNIVERSAL HEALTH SERVICES - PHYS - 3P',
+                                                                                'UNIVERSAL HEALTH SERVICES - 3P'
+                                                                            )
+                                                                    then    1
+                                                                    else    0
+                                                                    end
+                                                    when    dimdebtor.st = 'WA'
+                                                    then    case    when    debtor.pl_group in (
+                                                                                'PROVIDENCE ST JOSEPH HEALTH - 3P',
+                                                                                'PROVIDENCE ST JOSEPH HEALTH - 3P-2'
+                                                                            )
+                                                                    then    1
+                                                                    else    0
+                                                                    end
+                                                    when    dimdebtor.st = 'CA'
+                                                    then    case    when    debtor.pl_group in (
+                                                                                'BROWARD HEALTH - 3P',
+                                                                                'U OF CINCINNATI HEALTH SYSTEM - 3P'
+                                                                            )
+                                                                    then    0
+                                                                    else    1
+                                                                    end
+                                                    else    1
                                                     end
                                     else    1
                                     end
@@ -395,73 +423,101 @@ select      debtor.debtor_idx,
                     else    0
                     end     as pass_phone_voapps,
 
-            case    --  Exclusions must come first
-                    when    debtor.payplan is not null
-                    then    0
-                    when    debtor.status in ('PPA')
-                    then    0
-                    when    dimdebtor.st in ('MA', 'ZZ', 'BC')
-                    then    0
-                    when    client.is_fdcpa = 1
-                    and     dimdebtor.st in ('DC')
-                    then    0
-                    when    client.ash_cli = 1
-                    and     dimdebtor.st in ('CA', 'NJ', 'TX')
-                    then    0
-
-                    --  Inclusions next
-                    when    textable_debtors.debtor_idx is not null
-                    -- and     debtor.phone_number is not null
-                    and     not regexp_like(coalesce(dimfiscal_co_a.commercial, ''), '^COM.*')
-                    then    case    when    dimdebtor.st = 'NV'
-                                    then    case    when    debtor.pl_group in (
-                                                                'UNIVERSAL HEALTH SERVICES - 3P',
-                                                                'UNIVERSAL HEALTH SERVICES - PHYS - 3P'
-                                                            )
-                                                    then    1
-                                                    else    0
-                                                    end
-                                    when    dimdebtor.st in ('WA')
-                                    then    case    when    debtor.pl_group in (
-                                                                'PROVIDENCE ST JOSEPH HEALTH - 3P',
-                                                                'PROVIDENCE ST JOSEPH HEALTH - 3P-2'
-                                                            )
-                                                    then    1
-                                                    else    0
-                                                    end
-                                    when    dimdebtor.st = 'CO'
-                                    then    case    when    debtor.pl_group in (
-                                                                'STATE OF CO - JUDICIAL DEPT - 3P'
-                                                            )
-                                                    then    1
-                                                    else    0
-                                                    end
-                                    when    dimdebtor.st = 'CA'
-                                    then    case    when    debtor.pl_group in (
-                                                                'BROWARD HEALTH - 3P'
-                                                            )
+            case    when    textable_debtors.debtor_idx is not null
+                    then    case
+                                    --  Exclusions must come first
+                                    when    debtor.payplan is not null
+                                    then    0
+                                    when    debtor.logon in ('CO', 'DC', 'CHI')
+                                    then    case    when    dimdebtor.st in ('MA', 'BC', 'ZZ')
                                                     then    0
+                                                    when    debtor.status in ('LEG', 'LPF', 'PPA', 'PPC')
+                                                    then    0
+                                                    when    regexp_like(coalesce(dimfiscal_co_a.commercial, ''), '^COM.*')
+                                                    then    0
+                                                    when    client.is_fdcpa = 1
+                                                    then    case    when    dimdebtor.st in ('CA', 'CO', 'DC')
+                                                                    then    0
+                                                                    else    1
+                                                                    end
+                                                    when    client.ash_cli = 1
+                                                    then    case    when    dimdebtor.st in ('CA', 'NJ', 'TX')
+                                                                    then    0
+                                                                    else    1
+                                                                    end
+                                                    when    dimdebtor.st = 'CO'
+                                                    then    case    when    debtor.pl_group = 'STATE OF CO - JUDICIAL DEPT - 3P'
+                                                                    then    1
+                                                                    else    0
+                                                                    end
+                                                    when    dimdebtor.st = 'CT'
+                                                    then    case    when    debtor.pl_group in (
+                                                                                'STATE OF VA - DOT - 3P',
+                                                                                'STATE OF VA - DOT - 3P-2',
+                                                                                'STATE OF VA - DOT - ACCESS - 3P',
+                                                                                'STATE OF VA - DOT - BK',
+                                                                                'STATE OF VA - DOT - CC',
+                                                                                'STATE OF MD - COMPTROLLER - 3P',
+                                                                                'STATE OF MD - DBM CCU - 3P',
+                                                                                'STATE OF MD - TOLLWAY - 3P'
+                                                                            )
+                                                                    then    1
+                                                                    else    0
+                                                                    end
                                                     else    1
                                                     end
-                                    when    dimdebtor.st = 'CT'
-                                    then    case    when    debtor.pl_group in (
-                                                                'STATE OF VA - DOT - 3P',
-                                                                'STATE OF VA - DOT - 3P-2',
-                                                                'STATE OF VA - DOT - ACCESS - 3P',
-                                                                'STATE OF VA - DOT - BK',
-                                                                'STATE OF VA - DOT - CC',
-                                                                'STATE OF MD - COMPTROLLER - 3P',
-                                                                'STATE OF MD - DBM CCU - 3P',
-                                                                'STATE OF MD - TOLLWAY - 3P',
-                                                                'COLUMBIA DENTAL - 3P',
-                                                                'COLUMBIA DOCTORS - 3P',
-                                                                'COLUMBIA DOCTORS - TPL',
-                                                                'COLUMBIA DOCTORS LEGAL',
-                                                                'MOUNT SINAI - 3P',
-                                                                'WEILL CORNELL PHY - 3P'
+                                    when    debtor.logon = 'HH'
+                                    then    case    when    dimdebtor.st in ('CO', 'DC', 'BC', 'ZZ')
+                                                    then    0
+                                                    when    debtor.status in ('CAN', 'DEB', 'DEC', 'DIS', 'HLD', 'PPA', 'RCN', 'SIF',
+                                                                'L02', 'L04', 'L16', 'L19', 'LAE', 'LBK', 'LCN', 'LDI', 'LEG', 'LFD', 'LFW',
+                                                                'LGF', 'LJE', 'LLC', 'LNA', 'LNJ', 'LPF', 'LPG', 'LPR', 'LSF', 'LSP', 'LST'
                                                             )
-                                                    then    1
-                                                    else    0
+                                                    then    0
+                                                    when    dimdebtor.st = 'CT'
+                                                    then    case    when    debtor.pl_group in (
+                                                                                'COLUMBIA DOCTORS - 3P',
+                                                                                'MOUNT SINAI - 3P',
+                                                                                'WEILL CORNELL PHY - 3P'
+                                                                            )
+                                                                    then    1
+                                                                    else    0
+                                                                    end
+                                                    when    dimdebtor.st = 'NY'
+                                                    then    case    when    debtor.pl_group in (
+                                                                                'COLUMBIA DENTAL - 3P',
+                                                                                'COLUMBIA DOCTORS - 3P',
+                                                                                'MOUNT SINAI - 3P',
+                                                                                'WEILL CORNELL PHY - 3P'
+                                                                            )
+                                                                    then    1
+                                                                    else    0
+                                                                    end
+                                                    when    dimdebtor.st = 'NV'
+                                                    then    case    when    debtor.pl_group in (
+                                                                                -- 'UNIVERSAL HEALTH SERVICES - PHYS - 3P',
+                                                                                'UNIVERSAL HEALTH SERVICES - 3P'
+                                                                            )
+                                                                    then    1
+                                                                    else    0
+                                                                    end
+                                                    when    dimdebtor.st = 'WA'
+                                                    then    case    when    debtor.pl_group in (
+                                                                                'PROVIDENCE ST JOSEPH HEALTH - 3P',
+                                                                                'PROVIDENCE ST JOSEPH HEALTH - 3P-2'
+                                                                            )
+                                                                    then    1
+                                                                    else    0
+                                                                    end
+                                                    when    dimdebtor.st = 'CA'
+                                                    then    case    when    debtor.pl_group in (
+                                                                                'BROWARD HEALTH - 3P',
+                                                                                'U OF CINCINNATI HEALTH SYSTEM - 3P'
+                                                                            )
+                                                                    then    0
+                                                                    else    1
+                                                                    end
+                                                    else    1
                                                     end
                                     else    1
                                     end
