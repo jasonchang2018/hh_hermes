@@ -675,9 +675,15 @@ with scores as
                                                         then    case    when    percentile >= 0.50
                                                                         then    case    when    mod(rn, 2) = 1
                                                                                         then    'SIF-SIF'
-                                                                                        else    'SIF-TAX'
+                                                                                        else    case    when    is_eligible_tax = 1
+                                                                                                        then    'SIF-TAX'
+                                                                                                        else    'MAIN'
+                                                                                                        end
                                                                                         end
-                                                                        else    'TAX'
+                                                                        else    case    when    is_eligible_tax = 1
+                                                                                        then    'TAX'
+                                                                                        else    'MAIN'
+                                                                                        end
                                                                         end
                                                         when    is_eligible_tax = 1
                                                         then    'TAX'
@@ -1382,9 +1388,15 @@ with scores as
                                                         then    case    when    percentile >= 0.50
                                                                         then    case    when    mod(rn, 2) = 1
                                                                                         then    'SIF-SIF'
-                                                                                        else    'SIF-TAX'
+                                                                                        else    case    when    is_eligible_tax = 1
+                                                                                                        then    'SIF-TAX'
+                                                                                                        else    'MAIN'
+                                                                                                        end
                                                                                         end
-                                                                        else    'TAX'
+                                                                        else    case    when    is_eligible_tax = 1
+                                                                                        then    'TAX'
+                                                                                        else    'MAIN'
+                                                                                        end
                                                                         end
                                                         when    is_eligible_tax = 1
                                                         then    'TAX'
