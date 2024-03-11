@@ -85,6 +85,47 @@ order by    1
 ;
 
 
+--  CHECK AGAINST HISTORY
+select      date_trunc('week', contacts.contact_time)::date as week_,
+            count(case when contacts.contact_type in ('Letter')                                                                         then 1 end) as n_letters,
+            count(case when contacts.contact_type in ('Letter')         and coalesce(letters.collection_type, '') not in ('Validation') then 1 end) as n_letters_dunning,
+            count(case when contacts.contact_type in ('Text Message')                                                                   then 1 end) as n_texts,
+            count(case when contacts.contact_type in ('VoApp')                                                                          then 1 end) as n_voapps
+from        edwprodhh.pub_jchang.transform_contacts as contacts
+            inner join
+                edwprodhh.pub_jchang.master_debtor as debtor
+                on contacts.debtor_idx = debtor.debtor_idx
+                -- and debtor.pl_group = 'FRANCISCAN HEALTH - 3P'
+                and debtor.pl_group = 'IU HEALTH - 3P'
+            left join
+                edwprodhh.pub_jchang.master_letters as letters
+                on contacts.contact_id = letters.letter_id
+where       contacts.contact_time >= '2023-08-07'
+            and contacts.contact_time < date_trunc('week', current_date())
+group by    1
+order by    1 desc
+;
+
+
+select      date_trunc('week', letters.print_date)::date                                                as week_,
+            count(*)                                                                                    as n_letters,
+            count(case when letters.collection_type in ('Validation')                       then 1 end) as n_val,
+            count(case when letters.collection_type in ('Dun', 'Dunning')                   then 1 end) as n_dun,
+            count(case when letters.collection_type not in ('Validation', 'Dun', 'Dunning') then 1 end) as n_else
+from        edwprodhh.pub_jchang.master_letters as letters
+            inner join
+                edwprodhh.pub_jchang.master_debtor as debtor
+                on letters.debtor_idx = debtor.debtor_idx
+                -- and debtor.pl_group = 'FRANCISCAN HEALTH - 3P'
+                and debtor.pl_group = 'IU HEALTH - 3P'
+where       letters.print_date >= '2023-08-07'
+            and letters.print_date < date_trunc('week', current_date())
+group by    1
+order by    1 desc
+;
+
+
+
 
 --  CHECK EXECUTION
 with execution as
