@@ -163,13 +163,13 @@ create table
     DEBTOR_IDX                      VARCHAR(50),
     CLIENT_IDX                      VARCHAR(16),
     PL_GROUP                        VARCHAR(16777216),
+    SCORE_DEBTOR                    FLOAT,
     SCORE_LETTERS                   FLOAT,
     SCORE_TEXTS                     FLOAT,
     SCORE_VOAPPS                    FLOAT,
     SCORE_EMAILS                    FLOAT,
     SCORE_DIALER_AGENT              FLOAT,
     SCORE_DIALER_AGENTLESS          FLOAT,
-    SCORE_DEBTOR                    FLOAT,
     execute_time                    TIMESTAMP_LTZ(9)
 )
 ;
