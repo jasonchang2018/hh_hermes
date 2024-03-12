@@ -494,6 +494,7 @@ with scores as
 )
 , calculate_upload_date as
 (
+<<<<<<< HEAD
     --  SCORE AND PROPOSE WEEKLY, SPACE OUT (FOR NOW, JUST TEXTS) VIA THROTTLED UPLOADS DAILY
     with percentiles as
     (
@@ -528,12 +529,15 @@ with scores as
                         when    proposed_channel in ('VoApp', 'Email')
                         then    date_trunc('week', current_date() - 2) + 7
                         else    date_trunc('week', current_date() - 2) + 7
+=======
+    select      *,
+                case    when    extract(dow from current_date()) in (1,2,3,4)
+                        then    current_date() + 1
+                        when    extract(dow from current_date()) in (5,6,0)
+                        then    dateadd(week, 1, date_trunc('week', current_date()))
+>>>>>>> c09246d (Update upload date calculation for M-F daily schedule update.)
                         end     as upload_date
-
     from        filter_cost_global
-                inner join
-                    percentiles
-                    on filter_cost_global.debtor_idx = percentiles.debtor_idx
 )
 --  <--  FILTER ON SET PARAMETERS
 
