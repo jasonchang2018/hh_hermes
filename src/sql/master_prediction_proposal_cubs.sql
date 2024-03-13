@@ -18,7 +18,6 @@ with proposal as
     from        edwprodhh.hermes.master_prediction_proposal_log
     where       is_proposed_contact = 1
                 and upload_date = current_date()
-    qualify     execute_time = max(execute_time) over ()
 )
 select      debtor.logon,               --needs to be separated
             debtor.debtornumber,
