@@ -331,7 +331,7 @@ create table
 create or replace task
     edwprodhh.pub_jchang.hermes_root
     warehouse = analysis_wh
-    schedule = 'USING CRON 30 12 * * SAT America/Chicago'
+    schedule = 'USING CRON 0 1 * * MON-FRI America/Chicago'
 as
 select      1 as val
 ;
