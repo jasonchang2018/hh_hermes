@@ -20,6 +20,7 @@ values
     ('CITY OF WASHINGTON DC - ABRA - 3P',           'Text Message',         2,                      10,                         0,                          'ALL'),
     ('CITY OF WASHINGTON DC - BEGA - 3P',           'Text Message',         2,                      10,                         0,                          'ALL'),
     ('CITY OF WASHINGTON DC - CCU - 3P',            'Text Message',         2,                      10,                         0,                          'ALL'),
+    ('CITY OF WASHINGTON DC - DGS - 3P',            'Text Message',         2,                      10,                         0,                          'ALL'),
     ('CITY OF WASHINGTON DC - DHCD - 3P',           'Text Message',         2,                      10,                         0,                          'ALL'),
     ('CITY OF WASHINGTON DC - DLCP - 3P',           'Text Message',         2,                      10,                         0,                          'ALL'),
     ('CITY OF WASHINGTON DC - DMV - 3P',            'Text Message',         2,                      10,                         0,                          'ALL'),
