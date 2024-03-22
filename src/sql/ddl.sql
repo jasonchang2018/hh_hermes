@@ -181,6 +181,8 @@ create table
     DEBTOR_IDX                      VARCHAR(50),
     CLIENT_IDX                      VARCHAR(16),
     PL_GROUP                        VARCHAR(16777216),
+    ARTIFICIAL_GROUP	            VARCHAR(16777216),
+    HERMES_GROUP	                VARCHAR(16777216),
     PROPOSED_CHANNEL                VARCHAR(16777216),
     IS_PRIORITY_MINIMUM	            NUMBER(1,0),
     MARGINAL_FEE                    FLOAT,
