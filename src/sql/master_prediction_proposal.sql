@@ -49,18 +49,29 @@ with scores as
 
                 pool.treatment_group,
                 case when pool.treatment_group is not null then uniform(0, 9, random()) else NULL end as stratum,
-                pool.batch_date
+                pool.batch_date,
+                constraints_artificial.artificial_group,
+                coalesce(constraints_artificial.artificial_group, scores_long.pl_group) as hermes_group
 
     from        scores_long
                 left join
                     edwprodhh.hermes.master_prediction_pool as pool
                     on  scores_long.debtor_idx = pool.debtor_idx
+
+                left join
+                    edwprodhh.hermes.transform_config_artificialgroup_associations as associations
+                    on scores_long.client_idx = associations.client_idx
+                left join
+                    edwprodhh.hermes.master_config_artificialgroup as constraints_artificial
+                    on associations.artificial_group = constraints_artificial.artificial_group
 )
 , calculate_marginal_wide as
 (
     select      scores.debtor_idx,
                 scores.client_idx,
                 scores.pl_group,
+                scores.artificial_group,
+                scores.hermes_group,
                 scores.proposed_channel,
                 scores.is_priority_minimum,
                 scores.score_value                                                                                                  as marginal_fee,
@@ -229,18 +240,26 @@ with scores as
                         select      calculate_packet_rankings.*,
 
                                     --  RUNNING COST
-                                    sum(case when proposed_channel = 'Letter'           then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_letters,
-                                    sum(case when proposed_channel = 'Text Message'     then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_texts,
-                                    sum(case when proposed_channel = 'VoApp'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_voapps,
-                                    sum(case when proposed_channel = 'Email'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_emails,
+                                    sum(case when proposed_channel = 'Letter'           then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_letters,
+                                    sum(case when proposed_channel = 'Text Message'     then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_texts,
+                                    sum(case when proposed_channel = 'VoApp'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_voapps,
+                                    sum(case when proposed_channel = 'Email'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_emails,
 
                                     --  ELIGIBILITY FLAGS = F(RUNNING COST, RUNNING MARGIN)
-                                    running_cost_letters        <= constraints_plgroup.max_cost_running_letters     as is_eligible_cost_letters,
-                                    running_cost_texts          <= constraints_plgroup.max_cost_running_texts       as is_eligible_cost_texts,
-                                    running_cost_voapps         <= constraints_plgroup.max_cost_running_voapps      as is_eligible_cost_voapps,
-                                    running_cost_emails         <= constraints_plgroup.max_cost_running_emails      as is_eligible_cost_emails
+                                    running_cost_letters        <= coalesce(constraints_artificial.max_cost_running_letters,    constraints_plgroup.max_cost_running_letters)   as is_eligible_cost_letters,
+                                    running_cost_texts          <= coalesce(constraints_artificial.max_cost_running_texts,      constraints_plgroup.max_cost_running_texts)     as is_eligible_cost_texts,
+                                    running_cost_voapps         <= coalesce(constraints_artificial.max_cost_running_voapps,     constraints_plgroup.max_cost_running_voapps)    as is_eligible_cost_voapps,
+                                    running_cost_emails         <= coalesce(constraints_artificial.max_cost_running_emails,     constraints_plgroup.max_cost_running_emails)    as is_eligible_cost_emails
 
                         from        calculate_packet_rankings
+
+                                    left join
+                                        edwprodhh.hermes.transform_config_artificialgroup_associations as associations
+                                        on calculate_packet_rankings.client_idx = associations.client_idx
+                                    left join
+                                        edwprodhh.hermes.master_config_artificialgroup as constraints_artificial
+                                        on associations.artificial_group = constraints_artificial.artificial_group
+
                                     left join
                                         edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                                         on calculate_packet_rankings.pl_group = constraints_plgroup.pl_group
@@ -261,18 +280,26 @@ with scores as
                         select      calculate_packet_rankings.*,
 
                                     --  RUNNING COST
-                                    sum(case when proposed_channel = 'Letter'           then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_letters,
-                                    sum(case when proposed_channel = 'Text Message'     then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_texts,
-                                    sum(case when proposed_channel = 'VoApp'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_voapps,
-                                    sum(case when proposed_channel = 'Email'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_emails,
+                                    sum(case when proposed_channel = 'Letter'           then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_letters,
+                                    sum(case when proposed_channel = 'Text Message'     then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_texts,
+                                    sum(case when proposed_channel = 'VoApp'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_voapps,
+                                    sum(case when proposed_channel = 'Email'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_emails,
 
                                     --  ELIGIBILITY FLAGS = F(RUNNING COST, RUNNING MARGIN)
-                                    running_cost_letters        <= (constraints_plgroup.max_cost_running_letters     - (select max(running_cost_letters)     from iteration_1))     as is_eligible_cost_letters,
-                                    running_cost_texts          <= (constraints_plgroup.max_cost_running_texts       - (select max(running_cost_texts)       from iteration_1))     as is_eligible_cost_texts,
-                                    running_cost_voapps         <= (constraints_plgroup.max_cost_running_voapps      - (select max(running_cost_voapps)      from iteration_1))     as is_eligible_cost_voapps,
-                                    running_cost_emails         <= (constraints_plgroup.max_cost_running_emails      - (select max(running_cost_emails)      from iteration_1))     as is_eligible_cost_emails
+                                    running_cost_letters        <= (coalesce(constraints_artificial.max_cost_running_letters,   constraints_plgroup.max_cost_running_letters)   - (select max(running_cost_letters)     from iteration_1))     as is_eligible_cost_letters,
+                                    running_cost_texts          <= (coalesce(constraints_artificial.max_cost_running_texts,     constraints_plgroup.max_cost_running_texts)     - (select max(running_cost_texts)       from iteration_1))     as is_eligible_cost_texts,
+                                    running_cost_voapps         <= (coalesce(constraints_artificial.max_cost_running_voapps,    constraints_plgroup.max_cost_running_voapps)    - (select max(running_cost_voapps)      from iteration_1))     as is_eligible_cost_voapps,
+                                    running_cost_emails         <= (coalesce(constraints_artificial.max_cost_running_emails,    constraints_plgroup.max_cost_running_emails)    - (select max(running_cost_emails)      from iteration_1))     as is_eligible_cost_emails
 
                         from        calculate_packet_rankings
+
+                                    left join
+                                        edwprodhh.hermes.transform_config_artificialgroup_associations as associations
+                                        on calculate_packet_rankings.client_idx = associations.client_idx
+                                    left join
+                                        edwprodhh.hermes.master_config_artificialgroup as constraints_artificial
+                                        on associations.artificial_group = constraints_artificial.artificial_group
+
                                     left join
                                         edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                                         on calculate_packet_rankings.pl_group = constraints_plgroup.pl_group
@@ -294,18 +321,26 @@ with scores as
                         select      calculate_packet_rankings.*,
 
                                     --  RUNNING COST
-                                    sum(case when proposed_channel = 'Letter'           then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_letters,
-                                    sum(case when proposed_channel = 'Text Message'     then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_texts,
-                                    sum(case when proposed_channel = 'VoApp'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_voapps,
-                                    sum(case when proposed_channel = 'Email'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_emails,
+                                    sum(case when proposed_channel = 'Letter'           then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_letters,
+                                    sum(case when proposed_channel = 'Text Message'     then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_texts,
+                                    sum(case when proposed_channel = 'VoApp'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_voapps,
+                                    sum(case when proposed_channel = 'Email'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_emails,
 
                                     --  ELIGIBILITY FLAGS = F(RUNNING COST, RUNNING MARGIN)
-                                    running_cost_letters        <= (constraints_plgroup.max_cost_running_letters     - (select max(running_cost_letters)     from iteration_1)  - (select max(running_cost_letters)     from iteration_2))  as is_eligible_cost_letters,
-                                    running_cost_texts          <= (constraints_plgroup.max_cost_running_texts       - (select max(running_cost_texts)       from iteration_1)  - (select max(running_cost_texts)       from iteration_2))  as is_eligible_cost_texts,
-                                    running_cost_voapps         <= (constraints_plgroup.max_cost_running_voapps      - (select max(running_cost_voapps)      from iteration_1)  - (select max(running_cost_voapps)      from iteration_2))  as is_eligible_cost_voapps,
-                                    running_cost_emails         <= (constraints_plgroup.max_cost_running_emails      - (select max(running_cost_emails)      from iteration_1)  - (select max(running_cost_emails)      from iteration_2))  as is_eligible_cost_emails
+                                    running_cost_letters        <= (coalesce(constraints_artificial.max_cost_running_letters,   constraints_plgroup.max_cost_running_letters)   - (select max(running_cost_letters)     from iteration_1)  - (select max(running_cost_letters)     from iteration_2))  as is_eligible_cost_letters,
+                                    running_cost_texts          <= (coalesce(constraints_artificial.max_cost_running_texts,     constraints_plgroup.max_cost_running_texts)     - (select max(running_cost_texts)       from iteration_1)  - (select max(running_cost_texts)       from iteration_2))  as is_eligible_cost_texts,
+                                    running_cost_voapps         <= (coalesce(constraints_artificial.max_cost_running_voapps,    constraints_plgroup.max_cost_running_voapps)    - (select max(running_cost_voapps)      from iteration_1)  - (select max(running_cost_voapps)      from iteration_2))  as is_eligible_cost_voapps,
+                                    running_cost_emails         <= (coalesce(constraints_artificial.max_cost_running_emails,    constraints_plgroup.max_cost_running_emails)    - (select max(running_cost_emails)      from iteration_1)  - (select max(running_cost_emails)      from iteration_2))  as is_eligible_cost_emails
 
                         from        calculate_packet_rankings
+
+                                    left join
+                                        edwprodhh.hermes.transform_config_artificialgroup_associations as associations
+                                        on calculate_packet_rankings.client_idx = associations.client_idx
+                                    left join
+                                        edwprodhh.hermes.master_config_artificialgroup as constraints_artificial
+                                        on associations.artificial_group = constraints_artificial.artificial_group
+
                                     left join
                                         edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                                         on calculate_packet_rankings.pl_group = constraints_plgroup.pl_group
@@ -335,6 +370,8 @@ with scores as
     select      debtor_idx,
                 client_idx,
                 pl_group,
+                artificial_group,
+                hermes_group,
                 proposed_channel,
                 is_priority_minimum,
                 marginal_fee,
@@ -350,24 +387,32 @@ with scores as
 (
     select      filter_running_cost_channels.*,
 
-                sum(marginal_cost) over (partition by filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                         as running_cost_client,
-                case    when    running_cost_client <= constraints_plgroup.max_cost_running_client
+                sum(marginal_cost) over (partition by filter_running_cost_channels.hermes_group order by rank_weighted asc)                                                                         as running_cost_client,
+                case    when    running_cost_client <= coalesce(constraints_artificial.max_cost_running_client, constraints_plgroup.max_cost_running_client)
                         then    1
                         else    0
                         end                                                                                                                                                                     as is_below_cost_client,
                 
 
-                -- count(*) over (partition by proposed_channel, filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                as running_count_channel_client,
-                sum(marginal_cost) over (partition by proposed_channel, filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                as running_cost_channel_client,
+                -- count(*) over (partition by proposed_channel, filter_running_cost_channels.hermes_group order by rank_weighted asc)                                                                as running_count_channel_client,
+                sum(marginal_cost) over (partition by proposed_channel, filter_running_cost_channels.hermes_group order by rank_weighted asc)                                                                as running_cost_channel_client,
 
-                case    when    proposed_channel = 'Letter'         then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_letters    then 1 else 0 end
-                        when    proposed_channel = 'Text Message'   then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_texts      then 1 else 0 end
-                        when    proposed_channel = 'VoApp'          then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_voapps     then 1 else 0 end
-                        when    proposed_channel = 'Email'          then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_emails     then 1 else 0 end
+                case    when    proposed_channel = 'Letter'         then  case when running_cost_channel_client <= coalesce(constraints_artificial.min_cost_running_letters,    constraints_plgroup.min_cost_running_letters)   then 1 else 0 end
+                        when    proposed_channel = 'Text Message'   then  case when running_cost_channel_client <= coalesce(constraints_artificial.min_cost_running_texts,      constraints_plgroup.min_cost_running_texts)     then 1 else 0 end
+                        when    proposed_channel = 'VoApp'          then  case when running_cost_channel_client <= coalesce(constraints_artificial.min_cost_running_voapps,     constraints_plgroup.min_cost_running_voapps)    then 1 else 0 end
+                        when    proposed_channel = 'Email'          then  case when running_cost_channel_client <= coalesce(constraints_artificial.min_cost_running_emails,     constraints_plgroup.min_cost_running_emails)    then 1 else 0 end
                         else    0
                         end                                                                                                                                                                     as has_not_reached_min_cost_channel_client
 
     from        filter_running_cost_channels
+
+                left join
+                    edwprodhh.hermes.transform_config_artificialgroup_associations as associations
+                    on filter_running_cost_channels.client_idx = associations.client_idx
+                left join
+                    edwprodhh.hermes.master_config_artificialgroup as constraints_artificial
+                    on associations.artificial_group = constraints_artificial.artificial_group
+
                 left join
                     edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                     on filter_running_cost_channels.pl_group = constraints_plgroup.pl_group
@@ -397,6 +442,8 @@ with scores as
     select      debtor_idx,
                 client_idx,
                 pl_group,
+                artificial_group,
+                hermes_group,
                 proposed_channel,
                 is_priority_minimum,
                 marginal_fee,
@@ -429,6 +476,8 @@ with scores as
     select      debtor_idx,
                 client_idx,
                 pl_group,
+                artificial_group,
+                hermes_group,
                 proposed_channel,
                 is_priority_minimum,
                 marginal_fee,
@@ -450,8 +499,8 @@ with scores as
     (
         select      debtor_idx,
                     edwprodhh.pub_jchang.divide(
-                        row_number() over (partition by proposed_channel, pl_group order by rank_weighted asc),
-                        count(*) over (partition by proposed_channel, pl_group)
+                        row_number() over (partition by proposed_channel, hermes_group order by rank_weighted asc),
+                        count(*) over (partition by proposed_channel, hermes_group)
                     )   as ntile
         from        filter_cost_global
     )
@@ -522,6 +571,8 @@ with scores as
 
                 coalesce(pool.client_idx,           fast_track.client_idx)          as client_idx,
                 coalesce(pool.pl_group,             fast_track.pl_group)            as pl_group,
+                pool.artificial_group,
+                pool.hermes_group,
                 coalesce(pool.proposed_channel,     fast_track.proposed_channel)    as proposed_channel,
                 pool.is_priority_minimum,
                 pool.marginal_fee,
@@ -762,18 +813,29 @@ with scores as
 
                 pool.treatment_group,
                 case when pool.treatment_group is not null then uniform(0, 9, random()) else NULL end as stratum,
-                pool.batch_date
+                pool.batch_date,
+                constraints_artificial.artificial_group,
+                coalesce(constraints_artificial.artificial_group, scores_long.pl_group) as hermes_group
 
     from        scores_long
                 left join
                     edwprodhh.hermes.master_prediction_pool as pool
                     on  scores_long.debtor_idx = pool.debtor_idx
+
+                left join
+                    edwprodhh.hermes.transform_config_artificialgroup_associations as associations
+                    on scores_long.client_idx = associations.client_idx
+                left join
+                    edwprodhh.hermes.master_config_artificialgroup as constraints_artificial
+                    on associations.artificial_group = constraints_artificial.artificial_group
 )
 , calculate_marginal_wide as
 (
     select      scores.debtor_idx,
                 scores.client_idx,
                 scores.pl_group,
+                scores.artificial_group,
+                scores.hermes_group,
                 scores.proposed_channel,
                 scores.is_priority_minimum,
                 scores.score_value                                                                                                  as marginal_fee,
@@ -942,18 +1004,26 @@ with scores as
                         select      calculate_packet_rankings.*,
 
                                     --  RUNNING COST
-                                    sum(case when proposed_channel = 'Letter'           then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_letters,
-                                    sum(case when proposed_channel = 'Text Message'     then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_texts,
-                                    sum(case when proposed_channel = 'VoApp'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_voapps,
-                                    sum(case when proposed_channel = 'Email'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_emails,
+                                    sum(case when proposed_channel = 'Letter'           then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_letters,
+                                    sum(case when proposed_channel = 'Text Message'     then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_texts,
+                                    sum(case when proposed_channel = 'VoApp'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_voapps,
+                                    sum(case when proposed_channel = 'Email'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_emails,
 
                                     --  ELIGIBILITY FLAGS = F(RUNNING COST, RUNNING MARGIN)
-                                    running_cost_letters        <= constraints_plgroup.max_cost_running_letters     as is_eligible_cost_letters,
-                                    running_cost_texts          <= constraints_plgroup.max_cost_running_texts       as is_eligible_cost_texts,
-                                    running_cost_voapps         <= constraints_plgroup.max_cost_running_voapps      as is_eligible_cost_voapps,
-                                    running_cost_emails         <= constraints_plgroup.max_cost_running_emails      as is_eligible_cost_emails
+                                    running_cost_letters        <= coalesce(constraints_artificial.max_cost_running_letters,    constraints_plgroup.max_cost_running_letters)   as is_eligible_cost_letters,
+                                    running_cost_texts          <= coalesce(constraints_artificial.max_cost_running_texts,      constraints_plgroup.max_cost_running_texts)     as is_eligible_cost_texts,
+                                    running_cost_voapps         <= coalesce(constraints_artificial.max_cost_running_voapps,     constraints_plgroup.max_cost_running_voapps)    as is_eligible_cost_voapps,
+                                    running_cost_emails         <= coalesce(constraints_artificial.max_cost_running_emails,     constraints_plgroup.max_cost_running_emails)    as is_eligible_cost_emails
 
                         from        calculate_packet_rankings
+
+                                    left join
+                                        edwprodhh.hermes.transform_config_artificialgroup_associations as associations
+                                        on calculate_packet_rankings.client_idx = associations.client_idx
+                                    left join
+                                        edwprodhh.hermes.master_config_artificialgroup as constraints_artificial
+                                        on associations.artificial_group = constraints_artificial.artificial_group
+
                                     left join
                                         edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                                         on calculate_packet_rankings.pl_group = constraints_plgroup.pl_group
@@ -974,18 +1044,26 @@ with scores as
                         select      calculate_packet_rankings.*,
 
                                     --  RUNNING COST
-                                    sum(case when proposed_channel = 'Letter'           then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_letters,
-                                    sum(case when proposed_channel = 'Text Message'     then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_texts,
-                                    sum(case when proposed_channel = 'VoApp'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_voapps,
-                                    sum(case when proposed_channel = 'Email'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_emails,
+                                    sum(case when proposed_channel = 'Letter'           then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_letters,
+                                    sum(case when proposed_channel = 'Text Message'     then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_texts,
+                                    sum(case when proposed_channel = 'VoApp'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_voapps,
+                                    sum(case when proposed_channel = 'Email'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_emails,
 
                                     --  ELIGIBILITY FLAGS = F(RUNNING COST, RUNNING MARGIN)
-                                    running_cost_letters        <= (constraints_plgroup.max_cost_running_letters     - (select max(running_cost_letters)     from iteration_1))     as is_eligible_cost_letters,
-                                    running_cost_texts          <= (constraints_plgroup.max_cost_running_texts       - (select max(running_cost_texts)       from iteration_1))     as is_eligible_cost_texts,
-                                    running_cost_voapps         <= (constraints_plgroup.max_cost_running_voapps      - (select max(running_cost_voapps)      from iteration_1))     as is_eligible_cost_voapps,
-                                    running_cost_emails         <= (constraints_plgroup.max_cost_running_emails      - (select max(running_cost_emails)      from iteration_1))     as is_eligible_cost_emails
+                                    running_cost_letters        <= (coalesce(constraints_artificial.max_cost_running_letters,   constraints_plgroup.max_cost_running_letters)   - (select max(running_cost_letters)     from iteration_1))     as is_eligible_cost_letters,
+                                    running_cost_texts          <= (coalesce(constraints_artificial.max_cost_running_texts,     constraints_plgroup.max_cost_running_texts)     - (select max(running_cost_texts)       from iteration_1))     as is_eligible_cost_texts,
+                                    running_cost_voapps         <= (coalesce(constraints_artificial.max_cost_running_voapps,    constraints_plgroup.max_cost_running_voapps)    - (select max(running_cost_voapps)      from iteration_1))     as is_eligible_cost_voapps,
+                                    running_cost_emails         <= (coalesce(constraints_artificial.max_cost_running_emails,    constraints_plgroup.max_cost_running_emails)    - (select max(running_cost_emails)      from iteration_1))     as is_eligible_cost_emails
 
                         from        calculate_packet_rankings
+
+                                    left join
+                                        edwprodhh.hermes.transform_config_artificialgroup_associations as associations
+                                        on calculate_packet_rankings.client_idx = associations.client_idx
+                                    left join
+                                        edwprodhh.hermes.master_config_artificialgroup as constraints_artificial
+                                        on associations.artificial_group = constraints_artificial.artificial_group
+
                                     left join
                                         edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                                         on calculate_packet_rankings.pl_group = constraints_plgroup.pl_group
@@ -1007,18 +1085,26 @@ with scores as
                         select      calculate_packet_rankings.*,
 
                                     --  RUNNING COST
-                                    sum(case when proposed_channel = 'Letter'           then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_letters,
-                                    sum(case when proposed_channel = 'Text Message'     then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_texts,
-                                    sum(case when proposed_channel = 'VoApp'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_voapps,
-                                    sum(case when proposed_channel = 'Email'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.pl_group order by rank_weighted asc)    as running_cost_emails,
+                                    sum(case when proposed_channel = 'Letter'           then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_letters,
+                                    sum(case when proposed_channel = 'Text Message'     then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_texts,
+                                    sum(case when proposed_channel = 'VoApp'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_voapps,
+                                    sum(case when proposed_channel = 'Email'            then marginal_cost          else 0 end) over (partition by calculate_packet_rankings.hermes_group order by rank_weighted asc)    as running_cost_emails,
 
                                     --  ELIGIBILITY FLAGS = F(RUNNING COST, RUNNING MARGIN)
-                                    running_cost_letters        <= (constraints_plgroup.max_cost_running_letters     - (select max(running_cost_letters)     from iteration_1)  - (select max(running_cost_letters)     from iteration_2))  as is_eligible_cost_letters,
-                                    running_cost_texts          <= (constraints_plgroup.max_cost_running_texts       - (select max(running_cost_texts)       from iteration_1)  - (select max(running_cost_texts)       from iteration_2))  as is_eligible_cost_texts,
-                                    running_cost_voapps         <= (constraints_plgroup.max_cost_running_voapps      - (select max(running_cost_voapps)      from iteration_1)  - (select max(running_cost_voapps)      from iteration_2))  as is_eligible_cost_voapps,
-                                    running_cost_emails         <= (constraints_plgroup.max_cost_running_emails      - (select max(running_cost_emails)      from iteration_1)  - (select max(running_cost_emails)      from iteration_2))  as is_eligible_cost_emails
+                                    running_cost_letters        <= (coalesce(constraints_artificial.max_cost_running_letters,   constraints_plgroup.max_cost_running_letters)   - (select max(running_cost_letters)     from iteration_1)  - (select max(running_cost_letters)     from iteration_2))  as is_eligible_cost_letters,
+                                    running_cost_texts          <= (coalesce(constraints_artificial.max_cost_running_texts,     constraints_plgroup.max_cost_running_texts)     - (select max(running_cost_texts)       from iteration_1)  - (select max(running_cost_texts)       from iteration_2))  as is_eligible_cost_texts,
+                                    running_cost_voapps         <= (coalesce(constraints_artificial.max_cost_running_voapps,    constraints_plgroup.max_cost_running_voapps)    - (select max(running_cost_voapps)      from iteration_1)  - (select max(running_cost_voapps)      from iteration_2))  as is_eligible_cost_voapps,
+                                    running_cost_emails         <= (coalesce(constraints_artificial.max_cost_running_emails,    constraints_plgroup.max_cost_running_emails)    - (select max(running_cost_emails)      from iteration_1)  - (select max(running_cost_emails)      from iteration_2))  as is_eligible_cost_emails
 
                         from        calculate_packet_rankings
+
+                                    left join
+                                        edwprodhh.hermes.transform_config_artificialgroup_associations as associations
+                                        on calculate_packet_rankings.client_idx = associations.client_idx
+                                    left join
+                                        edwprodhh.hermes.master_config_artificialgroup as constraints_artificial
+                                        on associations.artificial_group = constraints_artificial.artificial_group
+
                                     left join
                                         edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                                         on calculate_packet_rankings.pl_group = constraints_plgroup.pl_group
@@ -1048,6 +1134,8 @@ with scores as
     select      debtor_idx,
                 client_idx,
                 pl_group,
+                artificial_group,
+                hermes_group,
                 proposed_channel,
                 is_priority_minimum,
                 marginal_fee,
@@ -1063,24 +1151,32 @@ with scores as
 (
     select      filter_running_cost_channels.*,
 
-                sum(marginal_cost) over (partition by filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                         as running_cost_client,
-                case    when    running_cost_client <= constraints_plgroup.max_cost_running_client
+                sum(marginal_cost) over (partition by filter_running_cost_channels.hermes_group order by rank_weighted asc)                                                                         as running_cost_client,
+                case    when    running_cost_client <= coalesce(constraints_artificial.max_cost_running_client, constraints_plgroup.max_cost_running_client)
                         then    1
                         else    0
                         end                                                                                                                                                                     as is_below_cost_client,
                 
 
-                -- count(*) over (partition by proposed_channel, filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                as running_count_channel_client,
-                sum(marginal_cost) over (partition by proposed_channel, filter_running_cost_channels.pl_group order by rank_weighted asc)                                                                as running_cost_channel_client,
+                -- count(*) over (partition by proposed_channel, filter_running_cost_channels.hermes_group order by rank_weighted asc)                                                                as running_count_channel_client,
+                sum(marginal_cost) over (partition by proposed_channel, filter_running_cost_channels.hermes_group order by rank_weighted asc)                                                                as running_cost_channel_client,
 
-                case    when    proposed_channel = 'Letter'         then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_letters    then 1 else 0 end
-                        when    proposed_channel = 'Text Message'   then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_texts      then 1 else 0 end
-                        when    proposed_channel = 'VoApp'          then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_voapps     then 1 else 0 end
-                        when    proposed_channel = 'Email'          then  case when running_cost_channel_client <= constraints_plgroup.min_cost_running_emails     then 1 else 0 end
+                case    when    proposed_channel = 'Letter'         then  case when running_cost_channel_client <= coalesce(constraints_artificial.min_cost_running_letters,    constraints_plgroup.min_cost_running_letters)   then 1 else 0 end
+                        when    proposed_channel = 'Text Message'   then  case when running_cost_channel_client <= coalesce(constraints_artificial.min_cost_running_texts,      constraints_plgroup.min_cost_running_texts)     then 1 else 0 end
+                        when    proposed_channel = 'VoApp'          then  case when running_cost_channel_client <= coalesce(constraints_artificial.min_cost_running_voapps,     constraints_plgroup.min_cost_running_voapps)    then 1 else 0 end
+                        when    proposed_channel = 'Email'          then  case when running_cost_channel_client <= coalesce(constraints_artificial.min_cost_running_emails,     constraints_plgroup.min_cost_running_emails)    then 1 else 0 end
                         else    0
                         end                                                                                                                                                                     as has_not_reached_min_cost_channel_client
 
     from        filter_running_cost_channels
+
+                left join
+                    edwprodhh.hermes.transform_config_artificialgroup_associations as associations
+                    on filter_running_cost_channels.client_idx = associations.client_idx
+                left join
+                    edwprodhh.hermes.master_config_artificialgroup as constraints_artificial
+                    on associations.artificial_group = constraints_artificial.artificial_group
+
                 left join
                     edwprodhh.hermes.master_config_plgroup as constraints_plgroup
                     on filter_running_cost_channels.pl_group = constraints_plgroup.pl_group
@@ -1110,6 +1206,8 @@ with scores as
     select      debtor_idx,
                 client_idx,
                 pl_group,
+                artificial_group,
+                hermes_group,
                 proposed_channel,
                 is_priority_minimum,
                 marginal_fee,
@@ -1142,6 +1240,8 @@ with scores as
     select      debtor_idx,
                 client_idx,
                 pl_group,
+                artificial_group,
+                hermes_group,
                 proposed_channel,
                 is_priority_minimum,
                 marginal_fee,
@@ -1163,8 +1263,8 @@ with scores as
     (
         select      debtor_idx,
                     edwprodhh.pub_jchang.divide(
-                        row_number() over (partition by proposed_channel, pl_group order by rank_weighted asc),
-                        count(*) over (partition by proposed_channel, pl_group)
+                        row_number() over (partition by proposed_channel, hermes_group order by rank_weighted asc),
+                        count(*) over (partition by proposed_channel, hermes_group)
                     )   as ntile
         from        filter_cost_global
     )
@@ -1235,6 +1335,8 @@ with scores as
 
                 coalesce(pool.client_idx,           fast_track.client_idx)          as client_idx,
                 coalesce(pool.pl_group,             fast_track.pl_group)            as pl_group,
+                pool.artificial_group,
+                pool.hermes_group,
                 coalesce(pool.proposed_channel,     fast_track.proposed_channel)    as proposed_channel,
                 pool.is_priority_minimum,
                 pool.marginal_fee,
