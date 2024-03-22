@@ -25,7 +25,7 @@ values
 create or replace table
     edwprodhh.hermes.master_config_artificialgroup
 (
-    PL_GROUP                            VARCHAR(16777216),          --1
+    ARTIFICIAL_GROUP                    VARCHAR(16777216),          --1
     IS_CLIENT_ACTIVE_HERMES_CONTACTS    NUMBER(1,0),                --2
     IS_CLIENT_ALLOWED_LETTERS           NUMBER(1,0),                --3
     IS_CLIENT_ALLOWED_TEXTS             NUMBER(1,0),                --4
