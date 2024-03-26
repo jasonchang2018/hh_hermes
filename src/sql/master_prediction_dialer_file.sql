@@ -219,7 +219,7 @@ create or replace task
     edwprodhh.pub_jchang.replace_master_prediction_dialer_file
     warehouse = analysis_wh
     after   edwprodhh.pub_jchang.replace_master_prediction_phone_selection,
-            edwprodhh.pub_jchang.insert_master_prediction_scores_dialeragent
+            edwprodhh.pub_jchang.replace_master_prediction_scores
 as
 create or replace table
     edwprodhh.hermes.master_prediction_dialer_file
