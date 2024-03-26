@@ -494,48 +494,11 @@ with scores as
 )
 , calculate_upload_date as
 (
-<<<<<<< HEAD
-    --  SCORE AND PROPOSE WEEKLY, SPACE OUT (FOR NOW, JUST TEXTS) VIA THROTTLED UPLOADS DAILY
-    with percentiles as
-    (
-        select      debtor_idx,
-                    edwprodhh.pub_jchang.divide(
-                        row_number() over (partition by proposed_channel, hermes_group order by rank_weighted asc),
-                        count(*) over (partition by proposed_channel, hermes_group)
-                    )   as ntile
-        from        filter_cost_global
-    )
-    --  ASSUMES RUN ON FRIDAY EVENING -> UPLOAD MONDAY THRU NEXT FRIDAY
-    --  HOWEVER, UNSURE WHETHER CURRENT_DATE() WILL BE FRIDAY OR SATURDAY, SO CAUTIOUSLY TRUNCATE TO WEEK FOR CALCULATION
-    select      filter_cost_global.*,
-                case    when    proposed_channel in  ('Text Message', 'Letter')
-                        then    case    when    percentiles.ntile >= 0
-                                        and     percentiles.ntile <= 0.20
-                                        then    date_trunc('week', current_date() - 2) + 7
-                                        when    percentiles.ntile >  0.20
-                                        and     percentiles.ntile <= 0.40
-                                        then    date_trunc('week', current_date() - 2) + 8
-                                        when    percentiles.ntile >  0.40
-                                        and     percentiles.ntile <= 0.60
-                                        then    date_trunc('week', current_date() - 2) + 9
-                                        when    percentiles.ntile >  0.60
-                                        and     percentiles.ntile <= 0.80
-                                        then    date_trunc('week', current_date() - 2) + 10
-                                        when    percentiles.ntile >  0.80
-                                        and     percentiles.ntile <= 1.00
-                                        then    date_trunc('week', current_date() - 2) + 11
-                                        else    date_trunc('week', current_date() - 2) + 11
-                                        end
-                        when    proposed_channel in ('VoApp', 'Email')
-                        then    date_trunc('week', current_date() - 2) + 7
-                        else    date_trunc('week', current_date() - 2) + 7
-=======
     select      *,
                 case    when    extract(dow from current_date()) in (1,2,3,4)
                         then    current_date() + 1
                         when    extract(dow from current_date()) in (5,6,0)
                         then    dateadd(week, 1, date_trunc('week', current_date()))
->>>>>>> c09246d (Update upload date calculation for M-F daily schedule update.)
                         end     as upload_date
     from        filter_cost_global
 )
@@ -1262,46 +1225,13 @@ with scores as
 )
 , calculate_upload_date as
 (
-    --  SCORE AND PROPOSE WEEKLY, SPACE OUT (FOR NOW, JUST TEXTS) VIA THROTTLED UPLOADS DAILY
-    with percentiles as
-    (
-        select      debtor_idx,
-                    edwprodhh.pub_jchang.divide(
-                        row_number() over (partition by proposed_channel, hermes_group order by rank_weighted asc),
-                        count(*) over (partition by proposed_channel, hermes_group)
-                    )   as ntile
-        from        filter_cost_global
-    )
-    --  ASSUMES RUN ON FRIDAY EVENING -> UPLOAD MONDAY THRU NEXT FRIDAY
-    --  HOWEVER, UNSURE WHETHER CURRENT_DATE() WILL BE FRIDAY OR SATURDAY, SO CAUTIOUSLY TRUNCATE TO WEEK FOR CALCULATION
-    select      filter_cost_global.*,
-                case    when    proposed_channel in  ('Text Message', 'Letter')
-                        then    case    when    percentiles.ntile >= 0
-                                        and     percentiles.ntile <= 0.20
-                                        then    date_trunc('week', current_date() - 2) + 7
-                                        when    percentiles.ntile >  0.20
-                                        and     percentiles.ntile <= 0.40
-                                        then    date_trunc('week', current_date() - 2) + 8
-                                        when    percentiles.ntile >  0.40
-                                        and     percentiles.ntile <= 0.60
-                                        then    date_trunc('week', current_date() - 2) + 9
-                                        when    percentiles.ntile >  0.60
-                                        and     percentiles.ntile <= 0.80
-                                        then    date_trunc('week', current_date() - 2) + 10
-                                        when    percentiles.ntile >  0.80
-                                        and     percentiles.ntile <= 1.00
-                                        then    date_trunc('week', current_date() - 2) + 11
-                                        else    date_trunc('week', current_date() - 2) + 11
-                                        end
-                        when    proposed_channel in ('VoApp', 'Email')
-                        then    date_trunc('week', current_date() - 2) + 7
-                        else    date_trunc('week', current_date() - 2) + 7
+    select      *,
+                case    when    extract(dow from current_date()) in (1,2,3,4)
+                        then    current_date() + 1
+                        when    extract(dow from current_date()) in (5,6,0)
+                        then    dateadd(week, 1, date_trunc('week', current_date()))
                         end     as upload_date
-
     from        filter_cost_global
-                inner join
-                    percentiles
-                    on filter_cost_global.debtor_idx = percentiles.debtor_idx
 )
 --  <--  FILTER ON SET PARAMETERS
 
