@@ -163,13 +163,13 @@ create table
     DEBTOR_IDX                      VARCHAR(50),
     CLIENT_IDX                      VARCHAR(16),
     PL_GROUP                        VARCHAR(16777216),
+    SCORE_DEBTOR                    FLOAT,
     SCORE_LETTERS                   FLOAT,
     SCORE_TEXTS                     FLOAT,
     SCORE_VOAPPS                    FLOAT,
     SCORE_EMAILS                    FLOAT,
     SCORE_DIALER_AGENT              FLOAT,
     SCORE_DIALER_AGENTLESS          FLOAT,
-    SCORE_DEBTOR                    FLOAT,
     execute_time                    TIMESTAMP_LTZ(9)
 )
 ;
@@ -331,7 +331,7 @@ create table
 create or replace task
     edwprodhh.pub_jchang.hermes_root
     warehouse = analysis_wh
-    schedule = 'USING CRON 30 12 * * SAT America/Chicago'
+    schedule = 'USING CRON 0 1 * * MON-FRI America/Chicago'
 as
 select      1 as val
 ;

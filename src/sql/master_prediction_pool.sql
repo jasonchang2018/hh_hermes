@@ -275,7 +275,8 @@ create or replace task
                 edwprodhh.pub_jchang.replace_transform_criteria_debtor_client_active,
                 edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_phone,
                 edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_mail,
-                edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_email
+                edwprodhh.pub_jchang.replace_transform_criteria_address_allowed_email,
+                edwprodhh.pub_jchang.replace_master_config_treatment_router
 as
 create or replace table
     edwprodhh.hermes.master_prediction_pool
