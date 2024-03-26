@@ -48,7 +48,7 @@ from        with_percentiles
 create or replace task
     edwprodhh.pub_jchang.replace_master_prediction_scores_transformation
     warehouse = analysis_wh
-    after edwprodhh.pub_jchang.insert_master_prediction_scores_debtor
+    after edwprodhh.pub_jchang.replace_master_prediction_scores
 as
 create or replace table
     edwprodhh.hermes.master_prediction_scores_transformation
